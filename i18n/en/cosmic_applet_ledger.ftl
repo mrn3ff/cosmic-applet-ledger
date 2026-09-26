@@ -1,5 +1,5 @@
 ## Header
-app-title = YapCap
+app-title = Ledger
 refresh-now = Refresh now
 about-tooltip = Open About
 manage-providers-tooltip = Manage providers
@@ -152,14 +152,14 @@ about-links = Links
 about-repository = Repository
 about-support = Support
 about-developer = Developer
-about-developer-name = TopiCsarno
+about-developer-name = netw0rkn1nja
 about-license = License
 about-license-name = MPL-2.0-only
 
 ## Update status
 update-checking = Checking for updates...
 update-available-title = New version available
-update-available-detail = YapCap { $version } is ready to download.
+update-available-detail = Ledger { $version } is ready to download.
 update-dot-tooltip = Update available
 update-failed = Update check failed: { $reason }
 update-open-release = View release { $version } ↗

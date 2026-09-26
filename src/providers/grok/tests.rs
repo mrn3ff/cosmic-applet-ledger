@@ -1604,7 +1604,7 @@ async fn oauth_callback_exchanges_code_and_sends_success_page() {
 
     let response_text = client_task.await.unwrap();
     assert!(response_text.contains("HTTP/1.1 200 OK"));
-    assert!(response_text.contains("YapCap: Grok sign-in complete"));
+    assert!(response_text.contains("Ledger: Grok sign-in complete"));
     assert_eq!(tokens.access_token, "token-abc");
     assert_eq!(tokens.refresh_token, "ref-xyz");
 
@@ -1816,7 +1816,7 @@ async fn run_login_inner_executes_oauth_loopback_flow() {
 
     assert_eq!(callback_resp.status(), reqwest::StatusCode::OK);
     let body = callback_resp.text().await.unwrap();
-    assert!(body.contains("YapCap: Grok sign-in complete"));
+    assert!(body.contains("Ledger: Grok sign-in complete"));
 
     let success = login_task
         .await

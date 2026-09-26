@@ -1,6 +1,6 @@
 # UI Definitions
 
-These definitions describe the standalone `yapcap-ui-prototype.html` exploration. Its provider list, sample usage, and simulated interactions are illustrative. Production behavior lives in `src/app/popup_view.rs` and `src/app/popup_view/`; see the root `README.md` for supported providers and account workflows.
+These definitions describe the standalone `ledger-ui-prototype.html` exploration. Its provider list, sample usage, and simulated interactions are illustrative. Production behavior lives in `src/app/popup_view.rs` and `src/app/popup_view/`; see the root `README.md` for supported providers and account workflows.
 
 ## Overview
 

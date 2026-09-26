@@ -895,6 +895,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "cosmic-applet-ledger"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "chrono",
+ "dirs",
+ "i18n-embed",
+ "i18n-embed-fl",
+ "libc",
+ "libcosmic",
+ "notify",
+ "reqwest",
+ "rusqlite",
+ "rust-embed",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "cosmic-client-toolkit"
 version = "0.2.0"
 source = "git+https://github.com/pop-os/cosmic-protocols?rev=32283d7#32283d76a8d0342da74c4cc022a533c52dcf378f"
@@ -7097,32 +7123,6 @@ name = "yansi"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfe53a6657fd280eaa890a3bc59152892ffa3e30101319d168b781ed6529b049"
-
-[[package]]
-name = "yapcap"
-version = "0.6.0"
-dependencies = [
- "base64",
- "chrono",
- "dirs",
- "i18n-embed",
- "i18n-embed-fl",
- "libc",
- "libcosmic",
- "notify",
- "reqwest",
- "rusqlite",
- "rust-embed",
- "serde",
- "serde_json",
- "sha2",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
-]
 
 [[package]]
 name = "yazi"

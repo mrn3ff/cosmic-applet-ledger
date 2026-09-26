@@ -1,14 +1,13 @@
 [Desktop Entry]
-Name=YapCap
-Comment=Provider usage panel applet for COSMIC
-Comment[pl]=Aplet zużycia u dostawców na panel COSMIC
+Name=Ledger
+Comment=AI usage and credit monitor for COSMIC
 Type=Application
-Icon=io.github.TopiCsarno.YapCap
-Exec=yapcap
+Icon=io.github.mrn3ff.cosmic-applet-ledger
+Exec=cosmic-applet-ledger
 Terminal=false
 StartupNotify=true
 Categories=System;Monitor;X-COSMIC;
-Keywords=COSMIC;Usage;Quota;Applet;
+Keywords=COSMIC;Usage;Quota;Applet;AI;Ledger;
 NoDisplay=true
 X-CosmicApplet=true
 X-CosmicHoverPopup=Auto

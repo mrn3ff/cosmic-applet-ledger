@@ -1,38 +1,38 @@
 [package]
-name = "yapcap"
-version = "0.6.0"
+name = "cosmic-applet-ledger"
+version = "0.1.0"
 edition = "2024"
 license = "MPL-2.0"
-description = "COSMIC panel applet for Codex, Claude Code, Cursor, Antigravity, Gemini, Minimax, GitHub Copilot, Z.AI Coding Plan, Kimi for Coding, OpenCode Go, and Grok usage"
-repository = "https://github.com/TopiCsarno/yapcap"
+description = "COSMIC panel applet tracking AI usage and credits"
+repository = "https://github.com/mrn3ff/cosmic-applet-ledger"
 
 [package.metadata.deb]
-name = "yapcap"
-maintainer = "Topi Csarno <TopiCsarno@users.noreply.github.com>"
+name = "ledger"
+maintainer = "netw0rkn1nja <mrn3ff@users.noreply.github.com>"
 depends = "$auto, libxkbcommon0, libwayland-client0, libfontconfig1"
 section = "utils"
 priority = "optional"
 assets = [
-    ["target/release/yapcap", "usr/bin/", "755"],
-    ["resources/app.desktop", "usr/share/applications/io.github.TopiCsarno.YapCap.desktop", "644"],
-    ["resources/app.metainfo.xml", "usr/share/metainfo/io.github.TopiCsarno.YapCap.metainfo.xml", "644"],
-    ["resources/icon.svg", "usr/share/icons/hicolor/scalable/apps/io.github.TopiCsarno.YapCap.svg", "644"],
-    ["README.md", "usr/share/doc/yapcap/README.md", "644"],
+    ["target/release/cosmic-applet-ledger", "usr/bin/", "755"],
+    ["resources/app.desktop", "usr/share/applications/io.github.mrn3ff.cosmic-applet-ledger.desktop", "644"],
+    ["resources/app.metainfo.xml", "usr/share/metainfo/io.github.mrn3ff.cosmic-applet-ledger.metainfo.xml", "644"],
+    ["resources/icon.svg", "usr/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg", "644"],
+    ["README.md", "usr/share/doc/cosmic-applet-ledger/README.md", "644"],
 ]
 extended-description = """
-YapCap is a native COSMIC panel applet that surfaces local usage limits for \
-Codex, Claude Code, Cursor, Antigravity, Gemini, Minimax, GitHub Copilot, Z.AI Coding Plan, Kimi for Coding, OpenCode Go, and Grok from accounts added in YapCap.
+Ledger is a native COSMIC panel applet that tracks AI usage, quotas, and \
+prepaid credits across coding agents and API providers.
 """
 
 [package.metadata.generate-rpm]
 summary = "COSMIC panel applet for AI coding usage tracking"
 license = "MPL-2.0"
 assets = [
-    { source = "target/release/yapcap", dest = "/usr/bin/yapcap", mode = "755" },
-    { source = "resources/app.desktop", dest = "/usr/share/applications/io.github.TopiCsarno.YapCap.desktop", mode = "644" },
-    { source = "resources/app.metainfo.xml", dest = "/usr/share/metainfo/io.github.TopiCsarno.YapCap.metainfo.xml", mode = "644" },
-    { source = "resources/icon.svg", dest = "/usr/share/icons/hicolor/scalable/apps/io.github.TopiCsarno.YapCap.svg", mode = "644" },
-    { source = "README.md", dest = "/usr/share/doc/yapcap/README.md", mode = "644", doc = true },
+    { source = "target/release/cosmic-applet-ledger", dest = "/usr/bin/cosmic-applet-ledger", mode = "755" },
+    { source = "resources/app.desktop", dest = "/usr/share/applications/io.github.mrn3ff.cosmic-applet-ledger.desktop", mode = "644" },
+    { source = "resources/app.metainfo.xml", dest = "/usr/share/metainfo/io.github.mrn3ff.cosmic-applet-ledger.metainfo.xml", mode = "644" },
+    { source = "resources/icon.svg", dest = "/usr/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg", mode = "644" },
+    { source = "README.md", dest = "/usr/share/doc/cosmic-applet-ledger/README.md", mode = "644", doc = true },
 ]
 
 [dependencies]

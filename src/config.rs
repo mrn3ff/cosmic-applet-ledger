@@ -11,7 +11,7 @@ use std::path::PathBuf;
 
 mod watch_update;
 
-pub const APP_ID: &str = "io.github.TopiCsarno.YapCap";
+pub const APP_ID: &str = "io.github.mrn3ff.cosmic-applet-ledger";
 
 #[derive(Debug, Clone, CosmicConfigEntry, Serialize, Deserialize, Eq, PartialEq)]
 #[version = 600]
@@ -736,8 +736,8 @@ pub fn managed_grok_account_dir(account_id: &str) -> PathBuf {
 pub fn paths() -> AppPaths {
     let cache_root = cache_root_dir();
     let state_root = state_parent_dir();
-    let cache_dir = cache_root.join("yapcap");
-    let state_dir = state_root.join("yapcap");
+    let cache_dir = cache_root.join("cosmic-applet-ledger");
+    let state_dir = state_root.join("cosmic-applet-ledger");
     let codex_accounts_dir = state_dir.join("codex-accounts");
     let claude_accounts_dir = state_dir.join("claude-accounts");
     let cursor_accounts_dir = state_dir.join("cursor-accounts");

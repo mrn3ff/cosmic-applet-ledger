@@ -1,146 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.TopiCsarno.YapCap</id>
+  <id>io.github.mrn3ff.cosmic-applet-ledger</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MPL-2.0</project_license>
   <project_group>COSMIC</project_group>
-  <developer id="io.github.topicsarno">
-    <name>Tamás Csarnó</name>
+  <developer id="io.github.mrn3ff">
+    <name>netw0rkn1nja</name>
   </developer>
-  <developer_name>Tamás Csarnó</developer_name>
-  <name>YapCap</name>
-  <summary>COSMIC panel applet for AI coding usage tracking</summary>
-  <summary xml:lang="pl">Aplet dla panelu COSMIC do śledzenia zużycia AI do kodowania</summary>
+  <developer_name>netw0rkn1nja</developer_name>
+  <name>Ledger</name>
+  <summary>COSMIC panel applet tracking AI usage and credits</summary>
   <description>
-    <p>YapCap is a native COSMIC panel applet that tracks your AI coding quota for Codex, Claude Code, Cursor, Antigravity, Gemini, Minimax, GitHub Copilot, Z.AI Coding Plan, Kimi for Coding, OpenCode Go, and Grok right from the panel. Add accounts once and YapCap fetches usage directly from provider APIs. No telemetry, no cloud sync, no separate service account required.</p>
-    <p xml:lang="pl">YapCap jest natywnym apletem dla panelu COSMIC który śledzi zużycie AI do kodowania przy pomocy Codex, Claude Code, Cursor, Antigravity, Gemini, Minimax, GitHub Copilot, Z.AI Coding Plan, Kimi for Coding, OpenCode Go i Grok prosto z panelu. Dodaj konta raz i YapCap sprawdza zużycie bezpośrednio przez API usługodawcy. Bez telemetrii, bez synchronizacji z chmurą, bez wymagania osobnych kont do obsługi.</p>
-    <p>Use the popup to compare multiple accounts, see which CLI account is active, switch panel styles, and follow your COSMIC light, dark, and accent color settings.</p>
-    <p xml:lang="pl">Użyj wyskakującego okna by porównać wiele kont, zobaczyć które konto jest aktywne w CLI, zmień styl paneli i dostosowuje się do twoich preferencji wyglądu z Ustawień COSMIC.</p>
+    <p>Ledger is a native COSMIC panel applet that tracks your AI coding quota and prepaid credits across Claude Code, Codex, OpenRouter, OpenCode Go, and more directly from your panel. Add accounts once and Ledger fetches usage directly from provider APIs. No telemetry, no cloud sync, and no third-party accounts required.</p>
     <p>Main features:</p>
-    <p xml:lang="pl">Główne funkcje:</p>
     <ul>
       <li>Codex usage tracking and credits</li>
-      <li xml:lang="pl">Śledzenie zużycia i kredytu z Codexie</li>
-      <li>Claude usage tracking and extra usage meter</li>
-      <li xml:lang="pl">Śledzenie zużycia Claude i licznik dodatkowego użycia</li>
-      <li>Cursor usage tracking: Total, Auto + Composer, and API</li>
-      <li xml:lang="pl">Śledzenie zużycia Cursora: Całkowite, Automatyczne + Kompozytor oraz API</li>
-      <li>Antigravity usage tracking: grouped Gemini and Claude/GPT model quotas</li>
-      <li xml:lang="pl">Śledzenie zużycia Antigravity: zgrupowane limity modeli Gemini i Claude/GPT</li>
-      <li>Gemini usage tracking: Pro, Flash and Lite quotas</li>
-      <li xml:lang="pl">Śledzenie zużycia Gemini: limity Pro, Flash i Lite</li>
-      <li>Minimax and Kimi for Coding API-key usage tracking</li>
-      <li xml:lang="pl">Śledzenie zużycia Minimax i Kimi for Coding klucze API</li>
-      <li>Z.AI Coding Plan API-key usage tracking with five-hour, weekly, and optional MCP windows</li>
-      <li xml:lang="pl">Śledzenie zużycia Z.AI Coding Plan przy użyciu klucza API, z limitami pięciogodzinnymi, tygodniowymi i opcjonalnymi limitami MCP</li>
-      <li>OpenCode Go API-key usage tracking with 5 Hour, Weekly, and Monthly windows</li>
-      <li xml:lang="pl">Śledzenie zużycia OpenCode Go klucza API z oknami 5-godzinnymi, Tygodniowymi i Miesięcznymi</li>
-      <li>GitHub Copilot usage tracking: Free and paid quota shapes</li>
-      <li xml:lang="pl">Śledzenie zużycia GitHub Copilot: Darmowe i płatne kształtowanie limitów </li>
-      <li>Grok subscription usage tracking with browser sign-in, explicit CLI credential import, and available prepaid credits</li>
-      <li xml:lang="pl">Śledzenie zużycia subskrypcji Grok z logowaniem przez przeglądarkę, importem danych uwierzytelniających z CLI na żądanie i saldem przedpłaconych kredytów</li>
-      <li>Optional one-time API-key prefill for Minimax, Z.AI Coding Plan, Kimi for Coding, and OpenCode Go from OpenCode's local auth file</li>
-      <li xml:lang="pl">Opcjonalne jednorazowe wstępne wypełnienie klucza API dla Minimax, Z.AI Coding Plan, Kimi for Coding i OpenCode Go z lokalnego pliku uwierzytelnienia OpenCode'a</li>
+      <li>Claude Code usage tracking and extra usage meter</li>
+      <li>OpenRouter credits and usage tracking</li>
+      <li>Cursor, Copilot, Gemini, Grok, and OpenCode Go support</li>
       <li>Multiple accounts per provider</li>
-      <li xml:lang="pl">Wiele kont dla każdego usługodawcy</li>
-      <li>Active account badge</li>
-      <li xml:lang="pl">Plakietki z aktywnym kontem</li>
-      <li>COSMIC theme integration</li>
-      <li xml:lang="pl">Integracja z motywami COSMIC</li>
+      <li>Clean, flat monochrome design inspired by Omarchy</li>
+      <li>Native Pop!_OS COSMIC theme integration</li>
     </ul>
   </description>
-  <screenshots>
-    <screenshot type="default">
-      <caption>YapCap panel applet with multi-account Codex quota details</caption>
-      <caption xml:lang="pl">Aplet na panel YapCap i szczegóły limitów wielu kont na Codexie</caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-hero.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Codex usage, reset times, and credit balance</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-codex.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Claude Code usage with extra usage tracking</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-claude.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Cursor usage across Total, Auto + Composer, and API quotas</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-cursor.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Antigravity usage with grouped Gemini and Claude/GPT model quotas</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-antigravity.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Gemini usage across Pro, Flash, and Lite quota bars</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-gemini.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>GitHub Copilot usage for chat and completions</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-copilot.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Minimax API key usage tracking</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-minimax.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Kimi for Coding weekly and rate-limit usage</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-kimi.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>OpenCode Go usage across 5-hour, weekly, and monthly quotas</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-zoom-opencode-go.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>YapCap general settings</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-settings.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>YapCap provider account settings</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-accounts.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Dark theme with orange accent</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-theme-dark-orange.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Dark theme with blue accent</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-theme-dark-blue.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Light theme with blue accent</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-theme-light-blue.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>Light theme with red accent</caption>
-      <caption xml:lang="pl"></caption>
-      <image>https://github.com/TopiCsarno/yapcap/raw/9f40647fd60db17bfb52dd9ef58019787453c000/resources/screenshots/screenshot-theme-light-red.png</image>
-    </screenshot>
-  </screenshots>
-  <icon type="remote" width="64" height="64" scale="1">
-    https://github.com/TopiCsarno/yapcap/raw/main/resources/icon.svg
-  </icon>
-  <url type="homepage">https://github.com/TopiCsarno/yapcap</url>
-  <url type="bugtracker">https://github.com/TopiCsarno/yapcap/issues</url>
-  <url type="vcs-browser">https://github.com/TopiCsarno/yapcap</url>
-  <launchable type="desktop-id">io.github.TopiCsarno.YapCap.desktop</launchable>
+  <url type="homepage">https://github.com/mrn3ff/cosmic-applet-ledger</url>
+  <url type="bugtracker">https://github.com/mrn3ff/cosmic-applet-ledger/issues</url>
+  <url type="vcs-browser">https://github.com/mrn3ff/cosmic-applet-ledger</url>
+  <launchable type="desktop-id">io.github.mrn3ff.cosmic-applet-ledger.desktop</launchable>
   <provides>
     <id>com.system76.CosmicApplet</id>
-    <binary>yapcap</binary>
+    <binary>cosmic-applet-ledger</binary>
   </provides>
   <requires>
     <display_length compare="ge">360</display_length>
@@ -152,72 +41,28 @@
   </supports>
   <categories>
     <category>Utility</category>
+    <category>System</category>
+    <category>Monitor</category>
   </categories>
   <keywords>
     <keyword>COSMIC</keyword>
     <keyword>Usage</keyword>
     <keyword>Quota</keyword>
     <keyword>AI</keyword>
+    <keyword>Ledger</keyword>
+    <keyword>Credits</keyword>
     <keyword>Codex</keyword>
     <keyword>Claude</keyword>
-    <keyword>Cursor</keyword>
-    <keyword>Antigravity</keyword>
-    <keyword>Gemini</keyword>
-    <keyword>Copilot</keyword>
-    <keyword>Kimi</keyword>
-    <keyword>Minimax</keyword>
-    <keyword>OpenCode Go</keyword>
-    <keyword>Z.AI Coding Plan</keyword>
-    <keyword>Grok</keyword>
+    <keyword>OpenRouter</keyword>
     <keyword>Panel</keyword>
     <keyword>Applet</keyword>
-    <keyword xml:lang="pl">COSMIC</keyword>
-    <keyword xml:lang="pl">Zużycie</keyword>
-    <keyword xml:lang="pl">Użycie</keyword>
-    <keyword xml:lang="pl">AI</keyword>
-    <keyword xml:lang="pl">Limity</keyword>
-    <keyword xml:lang="pl">AI</keyword>
-    <keyword xml:lang="pl">Codex</keyword>
-    <keyword xml:lang="pl">Claude</keyword>
-    <keyword xml:lang="pl">Cursor</keyword>
-    <keyword xml:lang="pl">Antigravity</keyword>
-    <keyword xml:lang="pl">Gemini</keyword>
-    <keyword xml:lang="pl">Copilot</keyword>
-    <keyword xml:lang="pl">Kimi</keyword>
-    <keyword xml:lang="pl">Minimax</keyword>
-    <keyword xml:lang="pl">OpenCode</keyword>
-    <keyword xml:lang="pl">Z.AI Coding Plan</keyword>
-    <keyword xml:lang="pl">Grok</keyword>
-    <keyword xml:lang="pl">Panel</keyword>
-    <keyword xml:lang="pl">Aplet</keyword>
   </keywords>
   <releases>
-    <release type="stable" version="0.6.0" date="2026-09-03">
+    <release type="stable" version="0.1.0" date="2026-09-26">
       <description>
-        <p>Adds Google Antigravity as a provider with Google OAuth login and grouped usage windows.</p>
-        <p>Adds Kimi for Coding with API-key accounts, weekly and rate-limit usage windows, and optional one-time OpenCode key prefill.</p>
-        <p>Adds automatic provider detection at startup with live re-detection, tri-state provider enablement, and a popup empty-state that suggests detected providers.</p>
-        <p>Improves the popup with adaptive provider navigation, dedicated provider management, and streamlined login flows.</p>
+        <p>Initial release of Ledger for the COSMIC desktop.</p>
       </description>
     </release>
-    <release type="stable" version="0.5.2" date="2026-07-13">
-      <description>
-        <p>Fixes automatic refresh scheduling and in-progress state synchronization across multiple panel instances.</p>
-        <p>Improves multi-process lifecycle, refresh ownership, and support diagnostics.</p>
-      </description>
-    </release>
-    <release type="stable" version="0.5.1" date="2026-06-16">
-      <description>
-        <p>Fixes the Claude OAuth token endpoint.</p>
-        <p>Adds shared runtime state for multi-process panel sync, owner-only refresh execution, refresh request coordination, selected-provider sync, and expanded diagnostics.</p>
-      </description>
-    </release>
-    <release type="stable" version="0.5.0" date="2026-05-19">
-      <description>
-        <p>Adds GitHub Copilot as a fifth provider with browser device-flow login, Free and paid usage parsing, multi-account support, re-auth handling, and mixed one-bar/two-bar panel rendering.</p>
-      </description>
-    </release>
-    <release type="stable" version="0.4.0" date="2026-05-12" />
   </releases>
   <content_rating type="oars-1.1" />
 </component>

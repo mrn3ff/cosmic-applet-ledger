@@ -19,10 +19,10 @@ use crate::account_storage::{
 use crate::config::{Config, ManagedGrokAccountConfig, paths};
 use crate::model::ProviderId;
 
-const SUCCESS_PAGE_BODY: &str = "<!doctype html><html><head><meta charset=\"utf-8\"><title>YapCap: Grok sign-in complete</title></head>\
+const SUCCESS_PAGE_BODY: &str = "<!doctype html><html><head><meta charset=\"utf-8\"><title>Ledger: Grok sign-in complete</title></head>\
      <body style=\"font-family: sans-serif; padding: 32px;\">\
-     <h1>YapCap: Grok sign-in complete</h1>\
-     <p>You can close this tab and return to YapCap.</p>\
+     <h1>Ledger: Grok sign-in complete</h1>\
+     <p>You can close this tab and return to Ledger.</p>\
      </body></html>";
 
 #[derive(Debug, Clone)]

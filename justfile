@@ -1,6 +1,6 @@
-name := 'yapcap'
-name-debug := 'yapcap-debug'
-appid := 'io.github.TopiCsarno.YapCap'
+name := 'cosmic-applet-ledger'
+name-debug := 'cosmic-applet-ledger-debug'
+appid := 'io.github.mrn3ff.cosmic-applet-ledger'
 flatpak-manifest := 'packaging/' + appid + '.json'
 
 rootdir := ''
@@ -13,7 +13,7 @@ appdata-dst := base-dir / 'share' / 'appdata' / appid + '.metainfo.xml'
 bin-dst := base-dir / 'bin' / name
 bin-debug-dst := base-dir / 'bin' / name-debug
 desktop-dst := base-dir / 'share' / 'applications' / appid + '.desktop'
-desktop-debug-dst := base-dir / 'share' / 'applications' / 'yapcap-debug.desktop'
+desktop-debug-dst := base-dir / 'share' / 'applications' / 'cosmic-applet-ledger-debug.desktop'
 icon-dst := base-dir / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps' / appid + '.svg'
 
 # Default recipe which runs `just build-release`
@@ -23,26 +23,26 @@ default: build-release
 clean:
     cargo clean
 
-# Clears the app cache at ~/.cache/yapcap
+# Clears the app cache at ~/.cache/cosmic-applet-ledger
 clear-cache:
-    rm -rf ~/.cache/yapcap
+    rm -rf ~/.cache/cosmic-applet-ledger
 
-# Clears Cursor session dirs (cookie_header, managed profile Cookies DB) under ~/.local/state/yapcap/cursor-accounts
+# Clears Cursor session dirs (cookie_header, managed profile Cookies DB) under ~/.local/state/cosmic-applet-ledger/cursor-accounts
 
-# Clears cookie/session dirs, snapshot cache, and full managed state (codex/claude/cursor/logs under ~/.local/state/yapcap)
+# Clears cookie/session dirs, snapshot cache, and full managed state (codex/claude/cursor/logs under ~/.local/state/cosmic-applet-ledger)
 clear-all-data: clear-config clear-cache clear-accounts
 
 # Clears COSMIC config at $XDG_CONFIG_HOME/cosmic/<appid> (default ~/.config/...)
 clear-config:
     rm -rf "${XDG_CONFIG_HOME:-$HOME/.config}/cosmic/{{ appid }}"
 
-# Clears managed account state at ~/.local/state/yapcap
+# Clears managed account state at ~/.local/state/cosmic-applet-ledger
 clear-accounts:
-    rm -rf ~/.local/state/yapcap
+    rm -rf ~/.local/state/cosmic-applet-ledger
 
-# Clears native logs at ~/.local/state/yapcap/logs
+# Clears native logs at ~/.local/state/cosmic-applet-ledger/logs
 clear-logs:
-    rm -rf ~/.local/state/yapcap/logs
+    rm -rf ~/.local/state/cosmic-applet-ledger/logs
 
 # Removes vendored dependencies
 clean-vendor:
@@ -74,22 +74,22 @@ run *args:
 
 # Run the debug build with synthetic demo data
 run-demo *args:
-    env YAPCAP_DEMO=1 RUST_BACKTRACE=full cargo run {{args}}
+    env LEDGER_DEMO=1 RUST_BACKTRACE=full cargo run {{args}}
 
 # Run the debug build with synthetic demo data and an available update
 run-demo-update *args:
-    env YAPCAP_DEMO=1 YAPCAP_DEBUG_UPDATE_AVAILABLE=1 RUST_BACKTRACE=full cargo run {{args}}
+    env LEDGER_DEMO=1 LEDGER_DEBUG_UPDATE_AVAILABLE=1 RUST_BACKTRACE=full cargo run {{args}}
 
 run-demo-update-debug *args:
-    env YAPCAP_DEMO=1 YAPCAP_DEBUG_UPDATE_AVAILABLE=1 RUST_LOG='warn,yapcap::app=info,yapcap::app::popup_diagnostics=debug' RUST_BACKTRACE=full cargo run {{args}}
+    env LEDGER_DEMO=1 LEDGER_DEBUG_UPDATE_AVAILABLE=1 RUST_LOG='warn,ledger::app=info,ledger::app::popup_diagnostics=debug' RUST_BACKTRACE=full cargo run {{args}}
 
 # Runs with empty HOME/XDG dirs so provider discovery finds nothing
 run-empty-discovery *args:
-    rm -rf /tmp/yapcap-empty-home /tmp/yapcap-empty-config /tmp/yapcap-empty-state
-    mkdir -p /tmp/yapcap-empty-home /tmp/yapcap-empty-config /tmp/yapcap-empty-state
-    env RUST_BACKTRACE=full HOME=/tmp/yapcap-empty-home XDG_CONFIG_HOME=/tmp/yapcap-empty-config XDG_STATE_HOME=/tmp/yapcap-empty-state CARGO_HOME="${CARGO_HOME:-{{home_directory() / '.cargo'}}}" RUSTUP_HOME="${RUSTUP_HOME:-{{home_directory() / '.rustup'}}}" cargo run --release {{args}}
+    rm -rf /tmp/ledger-empty-home /tmp/ledger-empty-config /tmp/ledger-empty-state
+    mkdir -p /tmp/ledger-empty-home /tmp/ledger-empty-config /tmp/ledger-empty-state
+    env RUST_BACKTRACE=full HOME=/tmp/ledger-empty-home XDG_CONFIG_HOME=/tmp/ledger-empty-config XDG_STATE_HOME=/tmp/ledger-empty-state CARGO_HOME="${CARGO_HOME:-{{home_directory() / '.cargo'}}}" RUSTUP_HOME="${RUSTUP_HOME:-{{home_directory() / '.rustup'}}}" cargo run --release {{args}}
 
-# Adds YapCap to the COSMIC top panel
+# Adds Ledger to the COSMIC top panel
 add-to-panel:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -100,22 +100,22 @@ add-to-panel:
     fi
     if [[ -f "$panel_config" ]]; then
         if [[ "$(tr -d '[:space:]' < "$panel_config")" == "None" ]]; then
-            printf 'Some(([], ["io.github.TopiCsarno.YapCap"]))\n' > "$panel_config"
+            printf 'Some(([], ["{{ appid }}"]))\n' > "$panel_config"
         else
             sed -i -z \
-                -e 's/"io\.github\.TopiCsarno\.YapCap"[[:space:]]*,\?//g' \
-                -e 's/\(Some(([^]]*],[[:space:]]*\[[[:space:]]*\)/\1"io.github.TopiCsarno.YapCap", /' \
+                -e 's/"{{ appid }}"[[:space:]]*,\?//g' \
+                -e 's/\(Some(([^]]],[[:space:]]\[[[:space:]]*\)/\1"{{ appid }}", /' \
                 "$panel_config"
         fi
     fi
 
-# Removes YapCap from the COSMIC top panel
+# Removes Ledger from the COSMIC top panel
 remove-from-panel:
     #!/usr/bin/env bash
     set -euo pipefail
     panel_config="${XDG_CONFIG_HOME:-$HOME/.config}/cosmic/com.system76.CosmicPanel.Panel/v1/plugins_wings"
     if [[ -f "$panel_config" ]]; then
-        sed -i -z -e 's/"io\.github\.TopiCsarno\.YapCap"[[:space:]]*,\?//g' "$panel_config"
+        sed -i -z -e 's/"{{ appid }}"[[:space:]]*,\?//g' "$panel_config"
     fi
 
 # Installs files
@@ -125,7 +125,7 @@ install: build-release add-to-panel
     install -Dm0644 resources/app.metainfo.xml {{appdata-dst}}
     install -Dm0644 resources/icon.svg {{icon-dst}}
 
-# Installs debug build as `yapcap-debug` and a separate desktop entry (YAPCAP_DEMO) for screenshots
+# Installs debug build as `cosmic-applet-ledger-debug` and a separate desktop entry (LEDGER_DEMO) for screenshots
 install-demo: build-debug add-to-panel
     install -Dm0755 {{ cargo-target-dir / 'debug' / name }} {{bin-debug-dst}}
     install -Dm0644 resources/app-debug.desktop {{desktop-debug-dst}}
@@ -143,10 +143,10 @@ flatpak-build:
     #!/usr/bin/env bash
     set -euo pipefail
     branch="$(git symbolic-ref --quiet --short HEAD)"
-    source_dir="$(mktemp -d --tmpdir yapcap-source.XXXXXX)"
-    manifest="$(mktemp --tmpdir yapcap-flatpak.XXXXXX.json)"
-    changed="$(mktemp --tmpdir yapcap-changed.XXXXXX)"
-    deleted="$(mktemp --tmpdir yapcap-deleted.XXXXXX)"
+    source_dir="$(mktemp -d --tmpdir cosmic-applet-ledger-source.XXXXXX)"
+    manifest="$(mktemp --tmpdir cosmic-applet-ledger-flatpak.XXXXXX.json)"
+    changed="$(mktemp --tmpdir cosmic-applet-ledger-changed.XXXXXX)"
+    deleted="$(mktemp --tmpdir cosmic-applet-ledger-deleted.XXXXXX)"
     trap 'rm -rf "$source_dir" "$manifest" "$changed" "$deleted"' EXIT
     git archive "$branch" | tar -x -C "$source_dir"
     git diff --name-only -z --diff-filter=ACMRTUXB HEAD -- > "$changed"
@@ -176,10 +176,10 @@ flatpak-build-clean:
     #!/usr/bin/env bash
     set -euo pipefail
     branch="$(git symbolic-ref --quiet --short HEAD)"
-    source_dir="$(mktemp -d --tmpdir yapcap-source.XXXXXX)"
-    manifest="$(mktemp --tmpdir yapcap-flatpak.XXXXXX.json)"
-    changed="$(mktemp --tmpdir yapcap-changed.XXXXXX)"
-    deleted="$(mktemp --tmpdir yapcap-deleted.XXXXXX)"
+    source_dir="$(mktemp -d --tmpdir cosmic-applet-ledger-source.XXXXXX)"
+    manifest="$(mktemp --tmpdir cosmic-applet-ledger-flatpak.XXXXXX.json)"
+    changed="$(mktemp --tmpdir cosmic-applet-ledger-changed.XXXXXX)"
+    deleted="$(mktemp --tmpdir cosmic-applet-ledger-deleted.XXXXXX)"
     trap 'rm -rf "$source_dir" "$manifest" "$changed" "$deleted"' EXIT
     git archive "$branch" | tar -x -C "$source_dir"
     git diff --name-only -z --diff-filter=ACMRTUXB HEAD -- > "$changed"

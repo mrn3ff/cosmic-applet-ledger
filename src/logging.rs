@@ -18,7 +18,7 @@ pub fn init(default_level: &str) -> Result<WorkerGuard, LoggingError> {
         source,
     })?;
     prune_old_logs(&paths.log_dir);
-    let file_appender = tracing_appender::rolling::daily(&paths.log_dir, "yapcap.log");
+    let file_appender = tracing_appender::rolling::daily(&paths.log_dir, "ledger.log");
     let (file_writer, guard) = tracing_appender::non_blocking(file_appender);
     let env_filter =
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(default_level));
@@ -56,7 +56,7 @@ fn should_prune_log_file(path: &Path, cutoff: NaiveDate) -> bool {
 
 fn log_file_date(path: &Path) -> Option<NaiveDate> {
     let file_name = path.file_name()?.to_str()?;
-    let date = file_name.strip_prefix("yapcap.log.")?;
+    let date = file_name.strip_prefix("ledger.log.")?;
     NaiveDate::parse_from_str(date, "%Y-%m-%d").ok()
 }
 
@@ -86,11 +86,11 @@ mod tests {
     fn dated_logs_older_than_retention_are_pruned() {
         let cutoff = NaiveDate::from_ymd_opt(2026, 6, 9).unwrap();
         assert!(should_prune_log_file(
-            &PathBuf::from("yapcap.log.2026-06-08"),
+            &PathBuf::from("ledger.log.2026-06-08"),
             cutoff
         ));
         assert!(!should_prune_log_file(
-            &PathBuf::from("yapcap.log.2026-06-09"),
+            &PathBuf::from("ledger.log.2026-06-09"),
             cutoff
         ));
         assert!(!should_prune_log_file(
@@ -104,8 +104,8 @@ mod tests {
         let dir = test_log_dir();
         fs::create_dir_all(&dir).unwrap();
 
-        let old = dir.join("yapcap.log.2000-01-01");
-        let invalid = dir.join("yapcap.log.old");
+        let old = dir.join("ledger.log.2000-01-01");
+        let invalid = dir.join("ledger.log.old");
         let other = dir.join("other.log.2000-01-01");
         fs::write(&old, "").unwrap();
         fs::write(&invalid, "").unwrap();

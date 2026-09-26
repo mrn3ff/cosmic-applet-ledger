@@ -22,7 +22,7 @@ use tokio::net::{TcpListener, TcpStream};
 const SUCCESS_PAGE_BODY: &str = "<!doctype html><html><head><meta charset=\"utf-8\"><title>Gemini sign-in</title></head>\
      <body style=\"font-family: sans-serif; padding: 32px;\">\
      <h1>Signed in to Gemini</h1>\
-     <p>You can close this tab and return to YapCap.</p>\
+     <p>You can close this tab and return to Ledger.</p>\
      </body></html>";
 
 #[derive(Debug, Clone)]

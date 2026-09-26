@@ -30,9 +30,9 @@ fn main() -> cosmic::iced::Result {
     i18n::init(&requested_languages);
 
     let default_level = if cfg!(debug_assertions) {
-        "warn,cosmic::theme=off,yapcap=debug"
+        "warn,cosmic::theme=off,cosmic_applet_ledger=debug"
     } else {
-        "warn,cosmic::theme=off,yapcap=info"
+        "warn,cosmic::theme=off,cosmic_applet_ledger=info"
     };
     let _log_guard = logging::init(default_level).ok();
 

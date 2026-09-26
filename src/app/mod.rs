@@ -147,7 +147,7 @@ impl Drop for AppModel {
             process_id = %self.process_info.id,
             panel_output = ?self.process_info.panel_output,
             owner_status = self.owner_status(),
-            "YapCap stopped"
+            "Ledger stopped"
         );
     }
 }
@@ -342,7 +342,7 @@ impl cosmic::Application for AppModel {
                 .count(),
             account_count = app.state.provider_accounts.len(),
             refresh_interval_seconds = app.config.refresh_interval_seconds,
-            "YapCap started"
+            "Ledger started"
         );
 
         let refresh_task = app.automatic_refresh_task();

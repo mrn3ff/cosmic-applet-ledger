@@ -5,9 +5,9 @@ use super::super::{
     component_surface_color, container, fl, widget,
 };
 
-const REPOSITORY_URL: &str = "https://github.com/TopiCsarno/yapcap";
-const SUPPORT_URL: &str = "https://github.com/TopiCsarno/yapcap/issues";
-const DEVELOPER_URL: &str = "https://github.com/TopiCsarno";
+const REPOSITORY_URL: &str = "https://github.com/mrn3ff/cosmic-applet-ledger";
+const SUPPORT_URL: &str = "https://github.com/mrn3ff/cosmic-applet-ledger/issues";
+const DEVELOPER_URL: &str = "https://github.com/mrn3ff";
 const LICENSE_URL: &str = "https://www.mozilla.org/en-US/MPL/2.0/";
 
 pub(super) fn about_view(update_status: &UpdateStatus) -> Element<'static, Message> {

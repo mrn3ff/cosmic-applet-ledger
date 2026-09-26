@@ -119,7 +119,7 @@ pub async fn exchange_code(
     ];
     let response = client
         .post(token_url)
-        .header("User-Agent", "yapcap")
+        .header("User-Agent", "cosmic-applet-ledger")
         .form(&params)
         .send()
         .await
@@ -155,7 +155,7 @@ pub async fn refresh_token(
     ];
     let response = client
         .post(token_url)
-        .header("User-Agent", "yapcap")
+        .header("User-Agent", "cosmic-applet-ledger")
         .form(&params)
         .send()
         .await
