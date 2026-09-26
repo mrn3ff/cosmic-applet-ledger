@@ -81,7 +81,7 @@ fn empty_account_button_style(
         }))
     };
     style.background = background;
-    style.border_radius = cosmic.corner_radii.radius_xl.into();
+    style.border_radius = 2.0.into();
     style.border_width = 1.0;
     style.border_color = if enabled {
         component.border.into()

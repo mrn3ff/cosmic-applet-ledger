@@ -228,6 +228,8 @@ fn normalize(
             plan: usage.membership_type,
             display_name: identity.and_then(|value| value.name),
         },
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     })
 }
 

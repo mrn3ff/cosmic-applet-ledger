@@ -74,7 +74,27 @@ pub fn provider_icon_handle(provider: ProviderId, variant: ProviderIconVariant) 
 }
 
 pub fn app_icon_handle() -> Handle {
-    icon::from_svg_bytes(include_bytes!("../../resources/icon.svg"))
+    if cosmic::theme::is_dark() {
+        icon::from_svg_bytes(include_bytes!(
+            "../../resources/ledger-icon/svg/ledger-app-dark.svg"
+        ))
+    } else {
+        icon::from_svg_bytes(include_bytes!(
+            "../../resources/ledger-icon/svg/ledger-app-light.svg"
+        ))
+    }
+}
+
+pub fn app_symbolic_icon_handle() -> Handle {
+    if cosmic::theme::is_dark() {
+        icon::from_svg_bytes(include_bytes!(
+            "../../resources/ledger-icon/svg/ledger-mark-white.svg"
+        ))
+    } else {
+        icon::from_svg_bytes(include_bytes!(
+            "../../resources/ledger-icon/svg/ledger-mark-black.svg"
+        ))
+    }
 }
 
 pub fn provider_icon_variant() -> ProviderIconVariant {

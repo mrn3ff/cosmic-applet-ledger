@@ -170,6 +170,8 @@ pub fn parse(body: &str, updated_at: DateTime<Utc>) -> Result<UsageSnapshot, Kim
             plan,
             display_name: None,
         },
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     })
 }
 

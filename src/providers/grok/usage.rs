@@ -91,6 +91,8 @@ pub fn parse_billing_snapshot(
         provider_cost,
         extra_usage,
         identity,
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     })
 }
 

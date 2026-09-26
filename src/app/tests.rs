@@ -895,6 +895,8 @@ fn account_pager_selects_the_next_account() {
         provider_cost: None,
         extra_usage: None,
         identity: ProviderIdentity::default(),
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     });
     let _ = app.page_provider_account(super::PagerDirection::Next);
 
@@ -1012,6 +1014,8 @@ fn selected_provider_bar_layout_uses_first_panel_window() {
         provider_cost: None,
         extra_usage: None,
         identity: ProviderIdentity::default(),
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     });
 
     state
@@ -1048,6 +1052,8 @@ fn applet_bar_layout_preserves_single_bar_shape() {
         provider_cost: None,
         extra_usage: None,
         identity: ProviderIdentity::default(),
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     };
 
     let layout = applet_bar_layout(
@@ -1100,6 +1106,8 @@ fn state_with_account_percents(percents: &[f32]) -> AppState {
             provider_cost: None,
             extra_usage: None,
             identity: ProviderIdentity::default(),
+            tokens_by_day: Vec::new(),
+            tokens_by_model: Vec::new(),
         });
         state.upsert_account(account);
     }

@@ -1,4 +1,4 @@
-use super::provider_assets::app_icon_handle;
+use super::provider_assets::{app_icon_handle, app_symbolic_icon_handle};
 use super::{
     APPLET_BAR_WIDTH_HEIGHT_MULTIPLIER, APPLET_ICON_GAP, APPLET_PERCENT_CELL_HORIZONTAL_PAD,
     APPLET_PERCENT_GLYPH_WIDTH, Alignment, AppModel, AppState, Config, CosmicButton,
@@ -139,7 +139,7 @@ pub(super) fn panel_fallback_active(state: &AppState) -> bool {
 pub(super) fn applet_fallback_indicator<'a>(core: &cosmic::Core) -> Element<'a, Message> {
     let icon_px = applet_fallback_icon_px(core);
     let icon_size = f32::from(icon_px);
-    widget::icon::icon(app_icon_handle())
+    widget::icon::icon(app_symbolic_icon_handle())
         .size(icon_px)
         .width(Length::Fixed(icon_size))
         .height(Length::Fixed(icon_size))

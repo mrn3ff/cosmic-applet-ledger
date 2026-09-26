@@ -6,50 +6,73 @@ use super::super::{
 };
 
 const REPOSITORY_URL: &str = "https://github.com/mrn3ff/cosmic-applet-ledger";
-const SUPPORT_URL: &str = "https://github.com/mrn3ff/cosmic-applet-ledger/issues";
-const DEVELOPER_URL: &str = "https://github.com/mrn3ff";
-const LICENSE_URL: &str = "https://www.mozilla.org/en-US/MPL/2.0/";
 
 pub(super) fn about_view(update_status: &UpdateStatus) -> Element<'static, Message> {
     let version = env!("CARGO_PKG_VERSION");
     let mut content = cosmic::iced::widget::column![about_identity(version)]
-        .spacing(16)
+        .spacing(12)
         .width(Length::Fill);
+
     if let Some(update) = update_section(update_status) {
         content = content.push(update);
     }
-    content
-        .push(link_section(
-            fl!("about-links"),
-            [
-                (fl!("about-repository"), REPOSITORY_URL),
-                (fl!("about-support"), SUPPORT_URL),
-            ],
-        ))
-        .push(link_section(
-            fl!("about-developer"),
-            [(fl!("about-developer-name"), DEVELOPER_URL)],
-        ))
-        .push(link_section(
-            fl!("about-license"),
-            [(fl!("about-license-name"), LICENSE_URL)],
-        ))
-        .into()
+
+    content.into()
 }
 
 fn about_identity(version: &str) -> Element<'static, Message> {
-    cosmic::iced::widget::column![
-        widget::icon::icon(app_icon_handle()).size(64),
-        widget::text(fl!("app-title")).size(24),
-        widget::text(fl!("about-developer-name")).size(13),
-        version_badge(version.to_string()),
+    let identity_col = cosmic::iced::widget::column![
+        widget::icon::icon(app_icon_handle()).size(48),
+        widget::text(fl!("app-title")).size(20),
+        container(widget::text(format!("v{version}")).size(12))
+            .style(|_| widget::container::Style {
+                text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                ..Default::default()
+            }),
     ]
-    .spacing(3)
+    .spacing(6)
     .align_x(Alignment::Center)
-    .width(Length::Fill)
-    .into()
+    .width(Length::Fill);
+
+    let app_btn = widget::button::custom(identity_col)
+        .padding([8, 0])
+        .width(Length::Fill)
+        .class(cosmic::theme::Button::Custom {
+            active: Box::new(|_focused, _theme| widget::button::Style {
+                background: None,
+                border_radius: 0.0.into(),
+                border_width: 0.0,
+                border_color: Color::TRANSPARENT,
+                text_color: Some(Color::WHITE),
+                icon_color: Some(Color::WHITE),
+                ..Default::default()
+            }),
+            disabled: Box::new(|_| widget::button::Style::new()),
+            hovered: Box::new(|_focused, _theme| widget::button::Style {
+                background: None,
+                border_radius: 0.0.into(),
+                border_width: 0.0,
+                border_color: Color::TRANSPARENT,
+                text_color: Some(Color::WHITE),
+                icon_color: Some(Color::WHITE),
+                ..Default::default()
+            }),
+            pressed: Box::new(|_focused, _theme| widget::button::Style {
+                background: None,
+                border_radius: 0.0.into(),
+                border_width: 0.0,
+                border_color: Color::TRANSPARENT,
+                text_color: Some(Color::WHITE),
+                icon_color: Some(Color::WHITE),
+                ..Default::default()
+            }),
+        })
+        .on_press(Message::OpenUrl(REPOSITORY_URL.to_string()));
+
+    app_btn.into()
 }
 
+#[allow(dead_code)]
 fn version_badge(version: String) -> Element<'static, Message> {
     container(widget::text(version).size(12))
         .padding([3, 8])
@@ -130,12 +153,13 @@ fn update_available_button_style(
         color,
         if hovered { 0.36 } else { 0.28 },
     )));
-    style.border_radius = cosmic.corner_radii.radius_s.into();
+    style.border_radius = 2.0.into();
     style.border_width = 1.0;
     style.border_color = apply_alpha(color, 0.75);
     style
 }
 
+#[allow(dead_code)]
 fn link_section<const N: usize>(
     title: String,
     links: [(String, &str); N],
@@ -158,6 +182,7 @@ fn link_section<const N: usize>(
         .into()
 }
 
+#[allow(dead_code)]
 fn link_button(label: String, url: &str) -> Element<'static, Message> {
     widget::button::custom(
         cosmic::iced::widget::row![
@@ -175,6 +200,7 @@ fn link_button(label: String, url: &str) -> Element<'static, Message> {
     .into()
 }
 
+#[allow(dead_code)]
 fn link_divider() -> Element<'static, Message> {
     container(cosmic::iced::widget::Space::new().height(Length::Fixed(1.0)))
         .width(Length::Fill)
@@ -189,6 +215,7 @@ fn link_divider() -> Element<'static, Message> {
         .into()
 }
 
+#[allow(dead_code)]
 fn link_group_style(theme: &cosmic::Theme) -> cosmic::widget::container::Style {
     let mut style = component_container_style(theme);
     style.border.width = 0.0;
@@ -198,6 +225,7 @@ fn link_group_style(theme: &cosmic::Theme) -> cosmic::widget::container::Style {
     style
 }
 
+#[allow(dead_code)]
 fn link_button_class() -> cosmic::theme::Button {
     cosmic::theme::Button::Custom {
         active: Box::new(|_focused, theme| link_button_style(theme, false)),
@@ -207,12 +235,13 @@ fn link_button_class() -> cosmic::theme::Button {
     }
 }
 
+#[allow(dead_code)]
 fn link_button_style(theme: &cosmic::Theme, hovered: bool) -> cosmic::widget::button::Style {
-    let cosmic = theme.cosmic();
+    let _cosmic = theme.cosmic();
     let mut style = cosmic::widget::button::Style::new();
     style.background = hovered.then(|| Background::Color(component_hover_color(theme)));
     style.text_color = Some(component_on_color(theme));
     style.icon_color = Some(component_on_color(theme));
-    style.border_radius = cosmic.corner_radii.radius_s.into();
+    style.border_radius = 2.0.into();
     style
 }

@@ -442,12 +442,11 @@ fn segmented_option_interaction_style(
 
     style.background =
         background.map(|background| Background::Color(apply_alpha(background, opacity)));
-    let radius = cosmic.corner_radii.radius_s;
     style.border_radius = cosmic::iced::border::Radius {
-        top_left: if first { radius[0] } else { 0.0 },
-        top_right: if last { radius[1] } else { 0.0 },
-        bottom_right: if last { radius[2] } else { 0.0 },
-        bottom_left: if first { radius[3] } else { 0.0 },
+        top_left: if first { 2.0 } else { 0.0 },
+        top_right: if last { 2.0 } else { 0.0 },
+        bottom_right: if last { 2.0 } else { 0.0 },
+        bottom_left: if first { 2.0 } else { 0.0 },
     };
     style.border_width = 0.0;
     style.border_color = apply_alpha(component_divider_color(theme), opacity);

@@ -135,6 +135,8 @@ fn prepared_account_facts_keep_claude_label_and_status_policy() {
             email: Some("snapshot@example.com".to_string()),
             ..crate::model::ProviderIdentity::default()
         },
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     });
     state.upsert_account(account);
 

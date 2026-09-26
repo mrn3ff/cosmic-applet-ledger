@@ -101,6 +101,8 @@ pub fn parse(body: &str, updated_at: DateTime<Utc>) -> Result<UsageSnapshot, Cop
             )),
             display_name: response.login,
         },
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     })
 }
 

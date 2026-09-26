@@ -359,6 +359,8 @@ fn normalize_oauth(payload: CodexUsageResponse) -> Result<UsageSnapshot, CodexEr
             plan: payload.plan_type,
             display_name: None,
         },
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     })
 }
 

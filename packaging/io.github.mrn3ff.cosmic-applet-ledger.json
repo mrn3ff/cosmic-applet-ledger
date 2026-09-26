@@ -37,7 +37,8 @@
         "install -Dm0755 target/release/cosmic-applet-ledger /app/bin/cosmic-applet-ledger",
         "install -Dm0644 resources/app.desktop /app/share/applications/io.github.mrn3ff.cosmic-applet-ledger.desktop",
         "install -Dm0644 resources/app.metainfo.xml /app/share/metainfo/io.github.mrn3ff.cosmic-applet-ledger.metainfo.xml",
-        "install -Dm0644 resources/icon.svg /app/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg"
+        "install -Dm0644 resources/ledger-icon/linux/hicolor/scalable/apps/ledger.svg /app/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg",
+        "install -Dm0644 resources/ledger-icon/linux/hicolor/symbolic/apps/ledger-symbolic.svg /app/share/icons/hicolor/symbolic/apps/io.github.mrn3ff.cosmic-applet-ledger-symbolic.svg"
       ],
       "sources": [
         {

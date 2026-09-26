@@ -102,6 +102,20 @@ pub struct ProviderIdentity {
     pub display_name: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct DayTokenUsage {
+    pub date: String,
+    pub day_label: String,
+    pub token_count: u64,
+    pub is_today: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct ModelTokenUsage {
+    pub model_name: String,
+    pub token_count: u64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct UsageSnapshot {
     pub provider: ProviderId,
@@ -115,6 +129,10 @@ pub struct UsageSnapshot {
     #[serde(default)]
     pub extra_usage: Option<ExtraUsageState>,
     pub identity: ProviderIdentity,
+    #[serde(default)]
+    pub tokens_by_day: Vec<DayTokenUsage>,
+    #[serde(default)]
+    pub tokens_by_model: Vec<ModelTokenUsage>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

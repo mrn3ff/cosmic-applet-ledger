@@ -214,6 +214,8 @@ pub fn parse(body: &str, updated_at: chrono::DateTime<Utc>) -> Result<UsageSnaps
             plan: Some("Minimax.io".to_string()),
             display_name: None,
         },
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     })
 }
 

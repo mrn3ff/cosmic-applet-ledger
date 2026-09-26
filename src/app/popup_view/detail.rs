@@ -18,7 +18,7 @@ use crate::model::{
 };
 use crate::usage_display;
 use cosmic::Element;
-use cosmic::iced::widget::{column, container, progress_bar, row};
+use cosmic::iced::widget::{column, container, row};
 use cosmic::iced::{Alignment, Background, Color, Length};
 use cosmic::widget;
 
@@ -34,32 +34,32 @@ pub(super) fn selected_provider_view<'a>(
     };
     let accounts = state.accounts_for(provider.provider);
     let detected_without_accounts = detected_without_accounts(state, detection, provider.provider);
-    let summary = provider_summary(provider, detected_without_accounts);
-
-    if accounts.is_empty() {
-        column![
-            summary,
-            section_title(fl!("usage-label")),
-            usage_card(account_body_items(None, provider, state, config, detection)),
-        ]
-        .spacing(PROVIDER_CARD_SPACING)
-        .width(Length::Fill)
-        .into()
+    let active_account = if !accounts.is_empty() {
+        let active = clamp_account_page(account_page, accounts.len());
+        Some(accounts[active])
     } else {
-        let total = accounts.len();
-        let active = clamp_account_page(account_page, total);
-        let account = accounts[active];
-        let pager = (total > 1).then_some((active, total));
-        column![
-            summary,
-            account_view(account, provider, state, config, detection, pager,),
-        ]
-        .spacing(PROVIDER_CARD_SPACING)
-        .width(Length::Fill)
-        .into()
-    }
+        None
+    };
+
+    let plan = active_account
+        .and_then(|a| a.snapshot.as_ref())
+        .and_then(|s| s.identity.plan.as_deref());
+
+    let summary = provider_summary(provider, detected_without_accounts, plan);
+
+    let body = account_body_items(active_account, provider, state, config, detection);
+
+    column![
+        summary,
+        subtle_divider(),
+        usage_card(body),
+    ]
+    .spacing(14)
+    .width(Length::Fill)
+    .into()
 }
 
+#[allow(dead_code)]
 fn account_pager(
     account: &ProviderAccountRuntimeState,
     active: usize,
@@ -114,14 +114,14 @@ fn account_pager_button_class() -> cosmic::theme::Button {
 }
 
 fn account_pager_button_style(theme: &cosmic::Theme, hovered: bool) -> widget::button::Style {
-    let cosmic = theme.cosmic();
+    let _cosmic = theme.cosmic();
     let mut style = widget::button::Style::new();
     style.background = Some(Background::Color(if hovered {
         component_hover_color(theme)
     } else {
         component_divider_color(theme)
     }));
-    style.border_radius = cosmic.corner_radii.radius_s.into();
+    style.border_radius = 2.0.into();
     style.icon_color = Some(component_on_color(theme));
     style.text_color = Some(component_on_color(theme));
     style
@@ -130,30 +130,24 @@ fn account_pager_button_style(theme: &cosmic::Theme, hovered: bool) -> widget::b
 fn account_page_dot(active: bool) -> Element<'static, Message> {
     container(
         cosmic::iced::widget::Space::new()
-            .width(Length::Fixed(7.0))
-            .height(Length::Fixed(7.0)),
+            .width(Length::Fixed(12.0))
+            .height(Length::Fixed(3.0)),
     )
-    .style(move |theme: &cosmic::Theme| {
-        let cosmic = theme.cosmic();
+    .style(move |_theme: &cosmic::Theme| {
         let color = if active {
-            cosmic.accent.base.into()
+            Color::from_rgb(0.95, 0.95, 0.95)
         } else {
-            component_divider_color(theme)
-        };
-        let shadow = cosmic::iced::Shadow {
-            color: apply_alpha(color, if active { 0.72 } else { 0.38 }),
-            offset: cosmic::iced::Vector::new(0.0, 0.0),
-            blur_radius: if active { 6.0 } else { 3.0 },
+            Color::from_rgba(1.0, 1.0, 1.0, 0.20)
         };
         widget::container::Style {
             text_color: None,
             background: Some(Background::Color(color)),
             border: cosmic::iced::Border {
-                radius: 4.0.into(),
+                radius: 1.0.into(),
                 width: 0.0,
                 color: Color::TRANSPARENT,
             },
-            shadow,
+            shadow: cosmic::iced::Shadow::default(),
             icon_color: None,
             snap: true,
         }
@@ -165,39 +159,332 @@ fn account_body_items<'a>(
     account: Option<&'a ProviderAccountRuntimeState>,
     provider: &'a ProviderRuntimeState,
     state: &'a AppState,
-    config: &'a Config,
+    _config: &'a Config,
     detection: &'a crate::detection::DetectionSnapshot,
 ) -> Vec<Element<'a, Message>> {
     let mut items = Vec::new();
+
+    // Warning banner ONLY if there is an actual error or reauth needed
+    if let Some(banner) = provider_warning_banner(provider, state, account, detection) {
+        items.push(banner);
+    }
+
     let snapshot = active_snapshot_for_account(account, provider);
     if let Some(snapshot) = snapshot {
-        if account.is_some_and(|account| account.health == ProviderHealth::Error) {
-            items.extend(provider_status_info(provider, state, account, detection));
+        // 1. Session & Weekly Limits ONLY
+        items.push(limits_section(snapshot));
+
+        // Subtle divider
+        items.push(subtle_divider());
+
+        // 2. TOKENS BY DAY
+        let days = ensure_seven_days(&snapshot.tokens_by_day);
+        items.push(tokens_by_day_section(&days));
+
+        // Subtle divider
+        items.push(subtle_divider());
+
+        // 3. TOKENS BY MODEL
+        if !snapshot.tokens_by_model.is_empty() {
+            items.push(tokens_by_model_section(&snapshot.tokens_by_model));
         }
-        items.extend(window_sections(snapshot, config));
-        match snapshot.provider {
-            ProviderId::Claude => {
-                if let Some(extra) = snapshot.extra_usage.as_ref() {
-                    items.push(extra_usage_detail_section(
-                        extra,
-                        config.usage_amount_format,
-                    ));
-                } else if let Some(cost) = snapshot.provider_cost.as_ref() {
-                    items.push(extra_usage_cost_bar(cost, None, config.usage_amount_format));
-                }
-            }
-            _ => {
-                if let Some(cost) = snapshot.provider_cost.as_ref() {
-                    items.push(cost_section(snapshot.provider, cost));
-                }
-            }
-        }
-    } else {
-        items.extend(provider_status_info(provider, state, account, detection));
     }
+
     items
 }
 
+fn subtle_divider() -> Element<'static, Message> {
+    container(cosmic::iced::widget::Space::new().height(Length::Fixed(1.0)))
+        .width(Length::Fill)
+        .style(|_| widget::container::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.08))),
+            ..Default::default()
+        })
+        .into()
+}
+
+fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
+    let now = chrono::Utc::now();
+    let section_label = container(widget::text("LIMITS").size(11))
+        .style(|_| widget::container::Style {
+            text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+            ..Default::default()
+        });
+
+    let mut meters_col = column![].spacing(16).width(Length::Fill);
+
+    let session_window = find_session_window(&snapshot.windows);
+    let weekly_window = find_weekly_window(&snapshot.windows);
+
+    if let Some(session) = session_window {
+        let pct = session.used_percent.clamp(0.0, 100.0);
+        let header_row = row![
+            widget::text("Session").size(14),
+            cosmic::iced::widget::Space::new().width(Length::Fill),
+            widget::text(format!("{:.0}%", pct)).size(13),
+        ]
+        .align_y(Alignment::Center)
+        .width(Length::Fill);
+
+        let bar = usage_progress_bar(usage_display::UsageMeter {
+            fill_percent: pct,
+            marker_percent: None,
+            tooltip: format!("Session: {:.0}%", pct),
+        });
+
+        meters_col = meters_col.push(
+            column![header_row, bar].spacing(6).width(Length::Fill)
+        );
+    }
+
+    if let Some(weekly) = weekly_window {
+        let pct = weekly.used_percent.clamp(0.0, 100.0);
+        let header_row = row![
+            widget::text("Weekly").size(14),
+            cosmic::iced::widget::Space::new().width(Length::Fill),
+            widget::text(format!("{:.0}%", pct)).size(13),
+        ]
+        .align_y(Alignment::Center)
+        .width(Length::Fill);
+
+        let bar = usage_progress_bar(usage_display::UsageMeter {
+            fill_percent: pct,
+            marker_percent: None,
+            tooltip: format!("Weekly: {:.0}%", pct),
+        });
+
+        let mut weekly_col = column![header_row, bar].spacing(6).width(Length::Fill);
+
+        if let Some(reset) = weekly.reset_at {
+            let diff = reset - now;
+            let reset_text = if diff.num_seconds() <= 0 {
+                "Resets now".to_string()
+            } else if diff.num_days() > 0 {
+                format!("Resets in {}d {}h", diff.num_days(), diff.num_hours() % 24)
+            } else if diff.num_hours() > 0 {
+                format!("Resets in {}h {}m", diff.num_hours(), diff.num_minutes() % 60)
+            } else {
+                format!("Resets in {}m", diff.num_minutes().max(1))
+            };
+
+            weekly_col = weekly_col.push(
+                container(widget::text(reset_text).size(11))
+                    .style(|_| widget::container::Style {
+                        text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                        ..Default::default()
+                    })
+            );
+        }
+
+        meters_col = meters_col.push(weekly_col);
+    }
+
+    if session_window.is_none() && weekly_window.is_none() {
+        if let Some(cost) = &snapshot.provider_cost {
+            let balance_str = if cost.used.fract() == 0.0 {
+                format!("{:.0}", cost.used)
+            } else {
+                format!("{:.2}", cost.used)
+            };
+            let cost_header = row![
+                widget::text("Prepaid Credits").size(14),
+                cosmic::iced::widget::Space::new().width(Length::Fill),
+                widget::text(format!("{balance_str} {}", cost.units)).size(13),
+            ]
+            .align_y(Alignment::Center)
+            .width(Length::Fill);
+
+            meters_col = meters_col.push(cost_header);
+        }
+    }
+
+    column![section_label, meters_col].spacing(8).width(Length::Fill).into()
+}
+
+fn find_session_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
+    windows.iter().find(|w| {
+        let label = w.label.to_lowercase();
+        label.contains("session") || label.contains("5h") || label.contains("5 hour") || label.contains("five hour") || label == "chat" || w.window_seconds == Some(5 * 3600)
+    }).or_else(|| {
+        windows.iter().find(|w| w.window_seconds.is_some_and(|s| s < 24 * 3600))
+    }).or_else(|| windows.first())
+}
+
+fn find_weekly_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
+    windows.iter().find(|w| {
+        let label = w.label.to_lowercase();
+        label.contains("week") || label.contains("7-day") || label.contains("7d") || label.contains("weekly") || w.window_seconds == Some(7 * 24 * 3600)
+    }).or_else(|| {
+        windows.iter().find(|w| {
+            let label = w.label.to_lowercase();
+            !label.contains("session") && !label.contains("5h") && !label.contains("5 hour") && w.window_seconds.is_some_and(|s| s >= 24 * 3600)
+        })
+    }).or_else(|| {
+        if windows.len() > 1 {
+            windows.get(1)
+        } else {
+            None
+        }
+    })
+}
+
+fn ensure_seven_days(days: &[crate::model::DayTokenUsage]) -> Vec<crate::model::DayTokenUsage> {
+    if !days.is_empty() {
+        return days.to_vec();
+    }
+    vec![
+        crate::model::DayTokenUsage { date: String::new(), day_label: "Sun".into(), token_count: 0, is_today: false },
+        crate::model::DayTokenUsage { date: String::new(), day_label: "Mon".into(), token_count: 0, is_today: false },
+        crate::model::DayTokenUsage { date: String::new(), day_label: "Tue".into(), token_count: 0, is_today: false },
+        crate::model::DayTokenUsage { date: String::new(), day_label: "Wed".into(), token_count: 0, is_today: false },
+        crate::model::DayTokenUsage { date: String::new(), day_label: "Thu".into(), token_count: 0, is_today: false },
+        crate::model::DayTokenUsage { date: String::new(), day_label: "Fri".into(), token_count: 0, is_today: false },
+        crate::model::DayTokenUsage { date: String::new(), day_label: "Today".into(), token_count: 0, is_today: true },
+    ]
+}
+
+fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'static, Message> {
+    let peak = days.iter().map(|d| d.token_count).max().unwrap_or(1).max(1);
+    let mut rows = column![
+        container(widget::text("TOKENS BY DAY").size(11))
+            .style(|_| widget::container::Style {
+                text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                ..Default::default()
+            })
+    ]
+    .spacing(8)
+    .width(Length::Fill);
+
+    for day in days {
+        let pct = (day.token_count as f32 / peak as f32) * 100.0;
+        let is_today = day.is_today;
+
+        let label_color = if is_today {
+            Color::from_rgb(0.95, 0.95, 0.95)
+        } else {
+            Color::from_rgba(1.0, 1.0, 1.0, 0.45)
+        };
+
+        let label = container(widget::text(day.day_label.clone()).size(12))
+            .width(Length::Fixed(44.0))
+            .style(move |_| widget::container::Style {
+                text_color: Some(label_color),
+                ..Default::default()
+            });
+
+        let bar = usage_progress_bar(usage_display::UsageMeter {
+            fill_percent: pct,
+            marker_percent: None,
+            tooltip: format!("{}: {} tokens", day.day_label, day.token_count),
+        });
+
+        let value = container(widget::text(format_token_metric(day.token_count)).size(12))
+            .width(Length::Fixed(48.0))
+            .align_x(cosmic::iced::alignment::Horizontal::Right)
+            .style(move |_| widget::container::Style {
+                text_color: Some(label_color),
+                ..Default::default()
+            });
+
+        rows = rows.push(
+            row![label, bar, value]
+                .spacing(8)
+                .align_y(Alignment::Center)
+                .width(Length::Fill),
+        );
+    }
+
+    rows.into()
+}
+
+fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<'static, Message> {
+    let peak = models.iter().map(|m| m.token_count).max().unwrap_or(1).max(1);
+    let mut rows = column![
+        container(widget::text("TOKENS BY MODEL").size(11))
+            .style(|_| widget::container::Style {
+                text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                ..Default::default()
+            })
+    ]
+    .spacing(8)
+    .width(Length::Fill);
+
+    for model in models {
+        let pct = (model.token_count as f32 / peak as f32).clamp(0.0, 100.0);
+        let fill = (pct * 10.0).round() as u16;
+        let empty = 1000 - fill;
+
+        let fill_segment = container(cosmic::iced::widget::Space::new())
+            .width(Length::FillPortion(fill))
+            .height(Length::Fill)
+            .style(|_| widget::container::Style {
+                text_color: None,
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.14))),
+                border: cosmic::iced::Border::default(),
+                shadow: cosmic::iced::Shadow::default(),
+                icon_color: None,
+                snap: true,
+            });
+
+        let empty_segment = cosmic::iced::widget::Space::new().width(Length::FillPortion(empty));
+
+        let track_row = if fill == 0 {
+            row![empty_segment]
+        } else if fill >= 1000 {
+            row![fill_segment]
+        } else {
+            row![fill_segment, empty_segment]
+        };
+
+        let slider_track = container(track_row)
+            .width(Length::Fill)
+            .height(Length::Fixed(28.0))
+            .style(|_| widget::container::Style {
+                text_color: None,
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.04))),
+                border: cosmic::iced::Border {
+                    radius: 2.0.into(),
+                    width: 1.0,
+                    color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+                },
+                shadow: cosmic::iced::Shadow::default(),
+                icon_color: None,
+                snap: true,
+            });
+
+        let text_overlay = container(
+            row![
+                widget::text(model.model_name.clone()).size(12),
+                cosmic::iced::widget::Space::new().width(Length::Fill),
+                widget::text(format_token_metric(model.token_count)).size(12),
+            ]
+            .align_y(Alignment::Center)
+            .width(Length::Fill),
+        )
+        .width(Length::Fill)
+        .height(Length::Fixed(28.0))
+        .padding([0, 10])
+        .align_y(cosmic::iced::alignment::Vertical::Center);
+
+        let slider = cosmic::iced::widget::Stack::new()
+            .push(slider_track)
+            .push(text_overlay)
+            .width(Length::Fill)
+            .height(Length::Fixed(28.0));
+
+        let slider_with_tip = widget::tooltip::tooltip(
+            slider,
+            widget::text(format!("{}: {} tokens", model.model_name, model.token_count)).size(12),
+            widget::tooltip::Position::Top,
+        );
+
+        rows = rows.push(slider_with_tip);
+    }
+
+    rows.into()
+}
+
+#[allow(dead_code)]
 fn account_header_content<'a>(
     account: &'a ProviderAccountRuntimeState,
     provider: &'a ProviderRuntimeState,
@@ -248,6 +535,7 @@ fn account_header_content<'a>(
     .into()
 }
 
+#[allow(dead_code)]
 fn account_view<'a>(
     account: &'a ProviderAccountRuntimeState,
     provider: &'a ProviderRuntimeState,
@@ -281,6 +569,7 @@ fn account_view<'a>(
     .into()
 }
 
+#[allow(dead_code)]
 fn section_title(label: String) -> Element<'static, Message> {
     widget::text(label).size(15).into()
 }
@@ -300,24 +589,23 @@ fn account_card_divider() -> Element<'static, Message> {
 }
 
 fn usage_card<'a>(items: Vec<Element<'a, Message>>) -> Element<'a, Message> {
-    let mut content = column![].spacing(PROVIDER_CARD_SPACING).width(Length::Fill);
+    let mut content = column![].spacing(14).width(Length::Fill);
     for item in items {
         content = content.push(item);
     }
     container(content)
         .width(Length::Fill)
-        .padding(8)
-        .style(component_card_style)
+        .padding(0)
         .into()
 }
 
+#[allow(dead_code)]
 fn component_card_style(theme: &cosmic::Theme) -> widget::container::Style {
-    let cosmic = theme.cosmic();
     let mut style = component_container_style(theme);
     style.background = Some(component_card_background(theme));
-    style.border.radius = cosmic.corner_radii.radius_m.into();
-    style.border.width = 0.0;
-    style.border.color = Color::TRANSPARENT;
+    style.border.radius = 2.0.into();
+    style.border.width = 1.0;
+    style.border.color = Color::from_rgba(1.0, 1.0, 1.0, 0.08);
     style.text_color = None;
     style.icon_color = None;
     style.snap = false;
@@ -360,6 +648,64 @@ pub(super) fn empty_state_view<'a>() -> Element<'a, Message> {
         .into()
 }
 
+fn provider_warning_banner(
+    provider: &ProviderRuntimeState,
+    state: &AppState,
+    active_account: Option<&ProviderAccountRuntimeState>,
+    detection: &crate::detection::DetectionSnapshot,
+) -> Option<Element<'static, Message>> {
+    let cursor_reauth_needed = active_account.is_some_and(|a| {
+        a.provider == ProviderId::Cursor && a.auth_state == AuthState::ActionRequired
+    });
+
+    let warning_text = if cursor_reauth_needed {
+        Some(fl!("cursor-account-reauth-detail"))
+    } else if let Some(account) = active_account
+        && account.health == ProviderHealth::Error
+    {
+        if account.auth_state == AuthState::ActionRequired {
+            Some(fl!("account-reauth-summary"))
+        } else if let Some(error) = &account.error {
+            Some(error.clone())
+        } else {
+            Some("Account error or expired".to_string())
+        }
+    } else if active_account.is_none() && detected_without_accounts(state, detection, provider.provider) {
+        Some(format!("{} detected. Add account in Settings.", provider.provider.label()))
+    } else {
+        None
+    };
+
+    let msg = warning_text?;
+
+    Some(
+        container(
+            row![
+                widget::icon::icon(widget::icon::from_name("dialog-warning-symbolic").into())
+                    .size(16),
+                widget::text(msg).size(12),
+            ]
+            .spacing(8)
+            .align_y(Alignment::Center)
+            .width(Length::Fill),
+        )
+        .width(Length::Fill)
+        .padding(8)
+        .style(|_| widget::container::Style {
+            text_color: Some(Color::from_rgb(0.95, 0.45, 0.45)),
+            background: Some(Background::Color(Color::from_rgba(1.0, 0.35, 0.35, 0.08))),
+            border: cosmic::iced::Border {
+                radius: 2.0.into(),
+                width: 1.0,
+                color: Color::from_rgba(1.0, 0.35, 0.35, 0.30),
+            },
+            ..Default::default()
+        })
+        .into()
+    )
+}
+
+#[allow(dead_code)]
 fn provider_status_info(
     provider: &ProviderRuntimeState,
     state: &AppState,
@@ -425,6 +771,7 @@ fn should_show_login_required_settings_action(
         && provider.account_status == AccountSelectionStatus::LoginRequired
 }
 
+#[allow(dead_code)]
 fn provider_status_message(
     provider: &ProviderRuntimeState,
     _state: &AppState,
@@ -453,6 +800,7 @@ fn provider_status_message(
     dedup_status_messages(messages).join(" ")
 }
 
+#[allow(dead_code)]
 fn dedup_status_messages(messages: Vec<String>) -> Vec<String> {
     let mut deduped = Vec::new();
     for message in messages {
@@ -472,6 +820,7 @@ fn active_snapshot_for_account<'a>(
         .or(provider.legacy_display_snapshot.as_ref())
 }
 
+#[allow(dead_code)]
 fn window_sections<'a>(
     snapshot: &'a UsageSnapshot,
     config: &'a Config,
@@ -577,6 +926,7 @@ fn overage_text(window: &UsageWindow) -> Option<String> {
     None
 }
 
+#[allow(dead_code)]
 fn extra_usage_detail_section(
     state: &ExtraUsageState,
     usage_amount_format: UsageAmountFormat,
@@ -594,12 +944,14 @@ fn extra_usage_detail_section(
     }
 }
 
+#[allow(dead_code)]
 fn extra_usage_pct_from_cost(cost: &ProviderCost) -> f32 {
     cost.limit
         .filter(|l| *l > f64::EPSILON)
         .map_or(0.0_f32, |l| usage_display::portion_percent(cost.used, l))
 }
 
+#[allow(dead_code)]
 fn extra_usage_cost_bar(
     cost: &ProviderCost,
     used_percent: Option<f32>,
@@ -630,6 +982,7 @@ fn extra_usage_cost_bar(
     )
 }
 
+#[allow(dead_code)]
 fn cost_section(provider: ProviderId, cost: &ProviderCost) -> Element<'static, Message> {
     if provider == ProviderId::Codex || provider == ProviderId::Grok {
         return credit_section(cost);
@@ -659,6 +1012,144 @@ fn credit_section(cost: &ProviderCost) -> Element<'static, Message> {
     )
 }
 
+fn format_token_metric(tokens: u64) -> String {
+    if tokens >= 1_000_000 {
+        format!("{:.1}M", tokens as f64 / 1_000_000.0)
+    } else if tokens >= 1_000 {
+        format!("{:.1}k", tokens as f64 / 1_000.0)
+    } else {
+        format!("{tokens}")
+    }
+}
+
+#[allow(dead_code)]
+fn tokens_by_day_card(days: &[crate::model::DayTokenUsage]) -> Element<'static, Message> {
+    let peak = days.iter().map(|d| d.token_count).max().unwrap_or(1).max(1);
+    let mut rows = column![widget::text("TOKENS BY DAY").size(12)].spacing(8).width(Length::Fill);
+
+    for day in days {
+        let pct = (day.token_count as f32 / peak as f32) * 100.0;
+        let is_today = day.is_today;
+
+        let label_color = if is_today {
+            Color::from_rgb(0.95, 0.95, 0.95)
+        } else {
+            Color::from_rgba(1.0, 1.0, 1.0, 0.50)
+        };
+
+        let label = container(widget::text(day.day_label.clone()).size(12))
+            .width(Length::Fixed(44.0))
+            .style(move |_| widget::container::Style {
+                text_color: Some(label_color),
+                ..Default::default()
+            });
+
+        let bar = usage_progress_bar(usage_display::UsageMeter {
+            fill_percent: pct,
+            marker_percent: None,
+            tooltip: format!("{}: {} tokens", day.day_label, day.token_count),
+        });
+
+        let value = container(widget::text(format_token_metric(day.token_count)).size(12))
+            .width(Length::Fixed(48.0))
+            .align_x(cosmic::iced::alignment::Horizontal::Right)
+            .style(move |_| widget::container::Style {
+                text_color: Some(label_color),
+                ..Default::default()
+            });
+
+        rows = rows.push(
+            row![label, bar, value]
+                .spacing(8)
+                .align_y(Alignment::Center)
+                .width(Length::Fill),
+        );
+    }
+
+    card(rows)
+}
+
+#[allow(dead_code)]
+fn tokens_by_model_card(models: &[crate::model::ModelTokenUsage]) -> Element<'static, Message> {
+    let peak = models.iter().map(|m| m.token_count).max().unwrap_or(1).max(1);
+    let mut rows = column![widget::text("TOKENS BY MODEL").size(12)].spacing(8).width(Length::Fill);
+
+    for model in models {
+        let pct = (model.token_count as f32 / peak as f32).clamp(0.0, 100.0);
+        let fill = (pct * 10.0).round() as u16;
+        let empty = 1000 - fill;
+
+        let fill_segment = container(cosmic::iced::widget::Space::new())
+            .width(Length::FillPortion(fill))
+            .height(Length::Fill)
+            .style(|_| widget::container::Style {
+                text_color: None,
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.14))),
+                border: cosmic::iced::Border::default(),
+                shadow: cosmic::iced::Shadow::default(),
+                icon_color: None,
+                snap: true,
+            });
+
+        let empty_segment = cosmic::iced::widget::Space::new().width(Length::FillPortion(empty));
+
+        let track_row = if fill == 0 {
+            row![empty_segment]
+        } else if fill >= 1000 {
+            row![fill_segment]
+        } else {
+            row![fill_segment, empty_segment]
+        };
+
+        let slider_track = container(track_row)
+            .width(Length::Fill)
+            .height(Length::Fixed(28.0))
+            .style(|_| widget::container::Style {
+                text_color: None,
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.04))),
+                border: cosmic::iced::Border {
+                    radius: 2.0.into(),
+                    width: 1.0,
+                    color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+                },
+                shadow: cosmic::iced::Shadow::default(),
+                icon_color: None,
+                snap: true,
+            });
+
+        let text_overlay = container(
+            row![
+                widget::text(model.model_name.clone()).size(12),
+                cosmic::iced::widget::Space::new().width(Length::Fill),
+                widget::text(format_token_metric(model.token_count)).size(12),
+            ]
+            .align_y(Alignment::Center)
+            .width(Length::Fill),
+        )
+        .width(Length::Fill)
+        .height(Length::Fixed(28.0))
+        .padding([0, 10])
+        .align_y(cosmic::iced::alignment::Vertical::Center);
+
+        let slider = cosmic::iced::widget::Stack::new()
+            .push(slider_track)
+            .push(text_overlay)
+            .width(Length::Fill)
+            .height(Length::Fixed(28.0));
+
+        let slider_with_tip = widget::tooltip::tooltip(
+            slider,
+            widget::text(format!("{}: {} tokens", model.model_name, model.token_count)).size(12),
+            widget::tooltip::Position::Top,
+        );
+
+        rows = rows.push(slider_with_tip);
+    }
+
+    card(rows)
+}
+
+#[allow(dead_code)]
 fn usage_block(
     title: String,
     primary: String,
@@ -667,41 +1158,57 @@ fn usage_block(
     card(usage_block_content(title, primary, details))
 }
 
+#[allow(dead_code)]
 fn usage_block_content(
     title: String,
     primary: String,
     details: UsageBlockDetails,
 ) -> Element<'static, Message> {
-    let pct_row = row![
-        widget::text(primary).size(14),
+    let header_row = row![
+        widget::text(title).size(14),
         cosmic::iced::widget::Space::new().width(Length::Fill),
-        secondary_cost_text(
-            details.secondary.unwrap_or_default(),
-            details.secondary_tooltip
-        ),
+        widget::text(primary).size(13),
     ]
-    .align_y(Alignment::Center);
+    .align_y(Alignment::Center)
+    .width(Length::Fill);
+
+    let bar = usage_progress_bar(details.meter);
 
     let mut content = column![
-        widget::text(title).size(15),
-        usage_progress_bar(details.meter),
+        header_row,
+        bar,
     ]
-    .spacing(6);
+    .spacing(6)
+    .width(Length::Fill);
+
+    if let Some(secondary) = details.secondary {
+        if !secondary.is_empty() {
+            let sec_text = container(widget::text(secondary).size(11))
+                .style(|_| widget::container::Style {
+                    text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                    ..Default::default()
+                });
+            content = content.push(sec_text);
+        }
+    }
 
     if let Some(overage) = details.overage {
         content = content.push(overage_line(overage));
     }
 
-    content.push(pct_row).into()
+    content.into()
 }
 
+#[allow(dead_code)]
 struct UsageBlockDetails {
     secondary: Option<String>,
+    #[allow(dead_code)]
     secondary_tooltip: Option<String>,
     meter: usage_display::UsageMeter,
     overage: Option<String>,
 }
 
+#[allow(dead_code)]
 fn overage_line(text: String) -> Element<'static, Message> {
     container(widget::text(text).size(13))
         .style(|theme: &cosmic::Theme| {
@@ -718,6 +1225,7 @@ fn overage_line(text: String) -> Element<'static, Message> {
         .into()
 }
 
+#[allow(dead_code)]
 fn secondary_cost_text(text: String, tooltip: Option<String>) -> Element<'static, Message> {
     if text.is_empty() {
         cosmic::iced::widget::Space::new()
@@ -736,20 +1244,61 @@ fn secondary_cost_text(text: String, tooltip: Option<String>) -> Element<'static
 }
 
 fn usage_progress_bar(meter: usage_display::UsageMeter) -> Element<'static, Message> {
-    let progress: Element<'static, Message> = progress_bar(0.0..=100.0, meter.fill_percent)
-        .length(Length::Fill)
-        .girth(Length::Fixed(8.0))
-        .into();
+    let fill = (meter.fill_percent.clamp(0.0, 100.0) * 10.0).round() as u16;
+    let empty = 1000 - fill;
 
-    let bar = if let Some(marker_percent) = meter.marker_percent {
+    let fill_segment = container(cosmic::iced::widget::Space::new())
+        .width(Length::FillPortion(fill))
+        .height(Length::Fixed(6.0))
+        .style(|_theme: &cosmic::Theme| widget::container::Style {
+            text_color: None,
+            background: Some(Background::Color(Color::from_rgb(0.92, 0.92, 0.92))),
+            border: cosmic::iced::Border {
+                radius: 1.0.into(),
+                width: 0.0,
+                color: Color::TRANSPARENT,
+            },
+            shadow: cosmic::iced::Shadow::default(),
+            icon_color: None,
+            snap: true,
+        });
+
+    let empty_segment = cosmic::iced::widget::Space::new().width(Length::FillPortion(empty));
+
+    let bar_row = if fill == 0 {
+        row![empty_segment]
+    } else if fill >= 1000 {
+        row![fill_segment]
+    } else {
+        row![fill_segment, empty_segment]
+    };
+
+    let track = container(bar_row)
+        .width(Length::Fill)
+        .height(Length::Fixed(8.0))
+        .padding([1, 1])
+        .style(|_theme: &cosmic::Theme| widget::container::Style {
+            text_color: None,
+            background: Some(Background::Color(Color::from_rgb(0.12, 0.12, 0.14))),
+            border: cosmic::iced::Border {
+                radius: 2.0.into(),
+                width: 1.0,
+                color: Color::from_rgba(1.0, 1.0, 1.0, 0.10),
+            },
+            shadow: cosmic::iced::Shadow::default(),
+            icon_color: None,
+            snap: true,
+        });
+
+    let bar: Element<'static, Message> = if let Some(marker_percent) = meter.marker_percent {
         cosmic::iced::widget::Stack::new()
-            .push(progress)
+            .push(track)
             .push(pace_marker(marker_percent))
             .width(Length::Fill)
             .height(Length::Fixed(8.0))
             .into()
     } else {
-        progress
+        track.into()
     };
 
     widget::tooltip::tooltip(
@@ -766,18 +1315,13 @@ fn pace_marker(expected_percent: f32) -> Element<'static, Message> {
     row![
         cosmic::iced::widget::Space::new().width(Length::FillPortion(left)),
         container(cosmic::iced::widget::Space::new())
-            .width(Length::Fixed(3.0))
+            .width(Length::Fixed(2.0))
             .height(Length::Fixed(8.0))
-            .style(|theme: &cosmic::Theme| {
-                let cosmic = theme.cosmic();
+            .style(|_theme: &cosmic::Theme| {
                 widget::container::Style {
                     text_color: None,
-                    background: Some(Background::Color(cosmic.accent.pressed.into())),
-                    border: cosmic::iced::Border {
-                        radius: cosmic.corner_radii.radius_xl.into(),
-                        width: 0.0,
-                        color: Color::TRANSPARENT,
-                    },
+                    background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.6))),
+                    border: cosmic::iced::Border::default(),
                     shadow: cosmic::iced::Shadow::default(),
                     icon_color: None,
                     snap: true,

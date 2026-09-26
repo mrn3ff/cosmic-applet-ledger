@@ -161,9 +161,11 @@ pub enum LaunchMode {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PopupRoute {
     ProviderDetail,
+    SwitchProvider,
     Settings,
     ManageProviders,
     ManageAccounts(ProviderId),
+    #[allow(dead_code)]
     About,
 }
 
@@ -504,6 +506,7 @@ impl AppModel {
                 self.handle_provider_account_statuses_refreshed(provider, accounts);
             }
             Message::SelectProvider(provider) => {
+                self.popup_route = PopupRoute::ProviderDetail;
                 return Some(self.select_provider_tab(provider));
             }
             Message::PageProviderAccount(direction) => {

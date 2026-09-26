@@ -1,31 +1,38 @@
 <div align="center">
 
-# Ledger
-(cosmic-applet-ledger)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="resources/ledger-icon/svg/ledger-lockup-mark-dark.svg">
+  <img src="resources/ledger-icon/svg/ledger-lockup-mark-dark.svg" alt="Ledger" width="360">
+</picture>
 
-**A clean, minimalist COSMIC panel applet tracking AI usage, quota, and credits across coding agents and providers.**
+<br>
+<br>
 
-*Forked from YapCap by Topi Csarno, redesigned with a flat, minimalist asesthetic inspired by Omarchy.*
+**A flat, minimalist Pop!_OS COSMIC panel applet for tracking AI usage, rate limits, and tokens across coding agents and providers.**
+
+*Forked from YapCap by Topi Csarno, redesigned with a high-contrast aesthetic inspired by Omarchy.*
 
 </div>
 
 ---
 
-# Features
+## Features
 
-- Native COSMIC Integration: Docks directly into the Pop!_OS COSMIC top panel or dock.
-- Local & Private: Communicates directly with provider APIs and local CLI session transcripts. No third-party servers, telemetry, or sync required.
-- Multi-Service Tracking:
-  - Claude Code — 5h session windows, 7-day weekly caps, and extra usage
-  - Codex CLI — 5h and weekly quotas plus credits
-  - OpenRouter — Prepaid credits and usage monitoring (in development)
-  - OpenCode Go — API key usage tracking
-  - Cursor, Copilot, Gemini, Grok, and more
-- Clean Display: Minimalist, high-contrast monochrome layout showing token burn, reset countdowns, and balance meters.
+- **Native COSMIC Integration:** Docks directly into the Pop!_OS COSMIC top panel or dock.
+- **Top-Down Dashboard:**
+  - **Hero:** Current provider, active plan tier, inline provider switcher (`...`), settings, and manual sync.
+  - **LIMITS:** Session and Weekly usage percentages, full-width status bars, and weekly reset countdowns.
+  - **TOKENS BY DAY:** 7-day token burn breakdown (`Sun` through `Today`) with stark white highlight for today.
+  - **TOKENS BY MODEL:** Proportional 28px horizontal sliders displaying model names and token volumes directly inside the bars.
+- **Unified Across Providers:** Consistent layout across Claude Code, Codex CLI, OpenCode Go, Cursor, Copilot, Gemini, Grok, and more.
+- **Local & Private:** Communicates directly with local transcripts and provider APIs using secure OS keychain credentials. No third-party servers, telemetry, or external sync.
+- **Minimalist Settings:** Streamlined provider enablement toggles and account configuration with zero UI fluff.
 
-# Prerequisites
+---
 
-Make sure you have Rust (1.85+) and the required system development libraries installed:
+## Prerequisites
+
+Ensure you have Rust (1.85+) and the required system development libraries installed:
 
 ```bash
 # Install Rust toolchain
@@ -35,11 +42,13 @@ source "$HOME/.cargo/env"
 # Install COSMIC build dependencies
 sudo apt update
 sudo apt install -y build-essential pkg-config libxkbcommon-dev libwayland-dev libfontconfig1-dev libssl-dev just
-
 ```
-# Build & Install
 
-The build and installation are managed via just:
+---
+
+## Build & Install
+
+The build and installation are managed via `just`:
 
 ```bash
 # Build the release binary
@@ -49,22 +58,24 @@ just build-release
 just install
 ```
 
-**To run it in a standalone test window without installing to the panel:**
+**Run in a standalone test window with demo data:**
 
 ```bash
-cargo run
+just run-demo
+# or
+env LEDGER_DEMO=1 cargo run
 ```
 
-**To uninstall and remove from the panel:**
+**Uninstall and remove from the panel:**
 
 ```bash
 just uninstall
 ```
 
+---
 
+## License & Attribution
 
-# License & Attribution
-
-This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See LICENSE for details.
+This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](LICENSE) for details.
 
 *Original codebase and provider engine: YapCap © Topi Csarno.*

@@ -253,8 +253,8 @@ fn account_row_container<'a>(
     selected: bool,
     enabled: bool,
     action_required: bool,
-    first: bool,
-    last: bool,
+    _first: bool,
+    _last: bool,
 ) -> Element<'a, Message> {
     container(
         row![selector, delete_button]
@@ -275,7 +275,7 @@ fn account_row_container<'a>(
         } else {
             component_container_background(theme)
         };
-        style.border.radius = account_row_radius(cosmic.corner_radii.radius_s, first, last);
+        style.border.radius = 2.0.into();
         style.border.width = if selected { 2.0 } else { 1.0 };
         style.border.color = if selected {
             if enabled {
@@ -296,15 +296,6 @@ fn account_row_container<'a>(
         style
     })
     .into()
-}
-
-fn account_row_radius(radius: [f32; 4], first: bool, last: bool) -> cosmic::iced::border::Radius {
-    cosmic::iced::border::Radius {
-        top_left: if first { radius[0] } else { 0.0 },
-        top_right: if first { radius[1] } else { 0.0 },
-        bottom_right: if last { radius[2] } else { 0.0 },
-        bottom_left: if last { radius[3] } else { 0.0 },
-    }
 }
 
 fn account_row_button_class(selected: bool) -> cosmic::theme::Button {
@@ -334,7 +325,7 @@ fn account_row_button_style(
 
     style.icon_color = Some(apply_alpha(foreground, opacity));
     style.text_color = Some(apply_alpha(foreground, opacity));
-    style.border_radius = cosmic.corner_radii.radius_s.into();
+    style.border_radius = 2.0.into();
     style.border_width = if focused && selected { 1.0 } else { 0.0 };
     style.border_color = cosmic.accent.base.into();
 
@@ -400,7 +391,7 @@ fn account_row_icon_button_style(theme: &cosmic::Theme, opacity: f32) -> widget:
 
     style.icon_color = Some(apply_alpha(foreground, opacity));
     style.text_color = Some(apply_alpha(foreground, opacity));
-    style.border_radius = cosmic.corner_radii.radius_m.into();
+    style.border_radius = 2.0.into();
 
     style
 }

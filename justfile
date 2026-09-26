@@ -15,6 +15,7 @@ bin-debug-dst := base-dir / 'bin' / name-debug
 desktop-dst := base-dir / 'share' / 'applications' / appid + '.desktop'
 desktop-debug-dst := base-dir / 'share' / 'applications' / 'cosmic-applet-ledger-debug.desktop'
 icon-dst := base-dir / 'share' / 'icons' / 'hicolor' / 'scalable' / 'apps' / appid + '.svg'
+icon-symbolic-dst := base-dir / 'share' / 'icons' / 'hicolor' / 'symbolic' / 'apps' / appid + '-symbolic.svg'
 
 # Default recipe which runs `just build-release`
 default: build-release
@@ -123,7 +124,8 @@ install: build-release add-to-panel
     install -Dm0755 {{ cargo-target-dir / 'release' / name }} {{bin-dst}}
     install -Dm0644 resources/app.desktop {{desktop-dst}}
     install -Dm0644 resources/app.metainfo.xml {{appdata-dst}}
-    install -Dm0644 resources/icon.svg {{icon-dst}}
+    install -Dm0644 resources/ledger-icon/linux/hicolor/scalable/apps/ledger.svg {{icon-dst}}
+    install -Dm0644 resources/ledger-icon/linux/hicolor/symbolic/apps/ledger-symbolic.svg {{icon-symbolic-dst}}
 
 # Installs debug build as `cosmic-applet-ledger-debug` and a separate desktop entry (LEDGER_DEMO) for screenshots
 install-demo: build-debug add-to-panel
@@ -136,7 +138,7 @@ uninstall-demo: remove-from-panel
 
 # Uninstalls installed files (and debug demo install if present)
 uninstall: uninstall-demo
-    rm {{bin-dst}} {{desktop-dst}} {{appdata-dst}} {{icon-dst}}
+    rm -f {{bin-dst}} {{desktop-dst}} {{appdata-dst}} {{icon-dst}} {{icon-symbolic-dst}}
 
 # Builds the Flatpak (recreates build-dir; reuses .flatpak-builder cache)
 flatpak-build:

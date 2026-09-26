@@ -16,7 +16,8 @@ assets = [
     ["target/release/cosmic-applet-ledger", "usr/bin/", "755"],
     ["resources/app.desktop", "usr/share/applications/io.github.mrn3ff.cosmic-applet-ledger.desktop", "644"],
     ["resources/app.metainfo.xml", "usr/share/metainfo/io.github.mrn3ff.cosmic-applet-ledger.metainfo.xml", "644"],
-    ["resources/icon.svg", "usr/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg", "644"],
+    ["resources/ledger-icon/linux/hicolor/scalable/apps/ledger.svg", "usr/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg", "644"],
+    ["resources/ledger-icon/linux/hicolor/symbolic/apps/ledger-symbolic.svg", "usr/share/icons/hicolor/symbolic/apps/io.github.mrn3ff.cosmic-applet-ledger-symbolic.svg", "644"],
     ["README.md", "usr/share/doc/cosmic-applet-ledger/README.md", "644"],
 ]
 extended-description = """
@@ -31,7 +32,8 @@ assets = [
     { source = "target/release/cosmic-applet-ledger", dest = "/usr/bin/cosmic-applet-ledger", mode = "755" },
     { source = "resources/app.desktop", dest = "/usr/share/applications/io.github.mrn3ff.cosmic-applet-ledger.desktop", mode = "644" },
     { source = "resources/app.metainfo.xml", dest = "/usr/share/metainfo/io.github.mrn3ff.cosmic-applet-ledger.metainfo.xml", mode = "644" },
-    { source = "resources/icon.svg", dest = "/usr/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg", mode = "644" },
+    { source = "resources/ledger-icon/linux/hicolor/scalable/apps/ledger.svg", dest = "/usr/share/icons/hicolor/scalable/apps/io.github.mrn3ff.cosmic-applet-ledger.svg", mode = "644" },
+    { source = "resources/ledger-icon/linux/hicolor/symbolic/apps/ledger-symbolic.svg", dest = "/usr/share/icons/hicolor/symbolic/apps/io.github.mrn3ff.cosmic-applet-ledger-symbolic.svg", mode = "644" },
     { source = "README.md", dest = "/usr/share/doc/cosmic-applet-ledger/README.md", mode = "644", doc = true },
 ]
 

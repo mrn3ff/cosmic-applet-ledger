@@ -335,6 +335,7 @@ fn normalize(
         return Err(ClaudeError::NoUsageData);
     }
     let extra_usage = payload.extra_usage.as_ref().map(claude_extra_usage_state);
+    let (tokens_by_day, tokens_by_model) = claude_local_stats();
     Ok(UsageSnapshot {
         provider: ProviderId::Claude,
         source: "OAuth".to_string(),
@@ -348,7 +349,78 @@ fn normalize(
             plan,
             ..Default::default()
         },
+        tokens_by_day,
+        tokens_by_model,
     })
+}
+
+fn claude_local_stats() -> (Vec<crate::model::DayTokenUsage>, Vec<crate::model::ModelTokenUsage>) {
+    let Ok(home) = std::env::var("HOME") else {
+        return (Vec::new(), Vec::new());
+    };
+    let path = std::path::PathBuf::from(home).join(".claude").join("stats-cache.json");
+    let Ok(content) = std::fs::read_to_string(path) else {
+        return (Vec::new(), Vec::new());
+    };
+    let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) else {
+        return (Vec::new(), Vec::new());
+    };
+
+    let mut days = Vec::new();
+    if let Some(daily) = val.get("dailyActivity").and_then(|d| d.as_array()) {
+        let now = chrono::Local::now().format("%Y-%m-%d").to_string();
+        for item in daily.iter().rev().take(7).rev() {
+            if let Some(date_str) = item.get("date").and_then(|d| d.as_str()) {
+                let count = item.get("messageCount").and_then(|c| c.as_u64()).unwrap_or(0);
+                let is_today = date_str == now;
+                let day_label = if is_today {
+                    "Today".to_string()
+                } else if let Ok(parsed) = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
+                    parsed.format("%a").to_string()
+                } else {
+                    date_str.to_string()
+                };
+                days.push(crate::model::DayTokenUsage {
+                    date: date_str.to_string(),
+                    day_label,
+                    token_count: count,
+                    is_today,
+                });
+            }
+        }
+    }
+
+    let mut models = Vec::new();
+    if let Some(model_usage) = val.get("modelUsage").and_then(|m| m.as_object()) {
+        for (model_id, data) in model_usage {
+            let input = data.get("inputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
+            let output = data.get("outputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
+            let cache_read = data.get("cacheReadInputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
+            let cache_write = data.get("cacheCreationInputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
+            let total = input + output + cache_read + cache_write;
+            if total > 0 {
+                let friendly_name = if model_id.contains("3-7-sonnet") {
+                    "Claude 3.7 Sonnet".to_string()
+                } else if model_id.contains("3-5-sonnet") {
+                    "Claude 3.5 Sonnet".to_string()
+                } else if model_id.contains("3-5-haiku") {
+                    "Claude 3.5 Haiku".to_string()
+                } else if model_id.contains("opus") {
+                    "Claude 3 Opus".to_string()
+                } else {
+                    model_id.clone()
+                };
+                models.push(crate::model::ModelTokenUsage {
+                    model_name: friendly_name,
+                    token_count: total,
+                });
+            }
+        }
+    }
+    models.sort_by(|a, b| b.token_count.cmp(&a.token_count));
+    models.truncate(4);
+
+    (days, models)
 }
 
 fn normalize_window(

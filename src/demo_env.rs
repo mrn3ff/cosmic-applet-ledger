@@ -16,7 +16,8 @@ use chrono::{DateTime, Duration, Utc};
 use std::path::PathBuf;
 use std::sync::Once;
 
-const DEMO_ENV: &str = "YAPCAP_DEMO";
+const DEMO_ENV: &str = "LEDGER_DEMO";
+const LEGACY_DEMO_ENV: &str = "YAPCAP_DEMO";
 const DEMO_ID_PREFIX: &str = "yapcap-demo:";
 const CODEX_PRO_ID: &str = "yapcap-demo:codex-pro";
 const CODEX_FREE_ID: &str = "yapcap-demo:codex-free";
@@ -34,21 +35,33 @@ const OPENCODE_GO_ID: &str = "yapcap-demo:opencode-go";
 const GROK_PRIMARY_ID: &str = "yapcap-demo:grok-primary";
 const ZAI_PRIMARY_ID: &str = "yapcap-demo:zai-coding-plan";
 
+fn is_val_truthy(val: &str) -> bool {
+    let value = val.trim();
+    !(value == "0"
+        || value.eq_ignore_ascii_case("false")
+        || value.eq_ignore_ascii_case("no")
+        || value.eq_ignore_ascii_case("off"))
+}
+
 fn env_truthy() -> bool {
-    std::env::var(DEMO_ENV).is_ok_and(|value| {
-        let value = value.trim();
-        !(value == "0"
-            || value.eq_ignore_ascii_case("false")
-            || value.eq_ignore_ascii_case("no")
-            || value.eq_ignore_ascii_case("off"))
-    })
+    if let Ok(v) = std::env::var(DEMO_ENV) {
+        if is_val_truthy(&v) {
+            return true;
+        }
+    }
+    if let Ok(v) = std::env::var(LEGACY_DEMO_ENV) {
+        if is_val_truthy(&v) {
+            return true;
+        }
+    }
+    false
 }
 
 pub fn is_active() -> bool {
     if !cfg!(debug_assertions) {
         return false;
     }
-    std::env::var(DEMO_ENV).is_ok() && env_truthy()
+    env_truthy()
 }
 
 pub fn detection_snapshot() -> crate::detection::DetectionSnapshot {
@@ -465,6 +478,41 @@ fn codex_demo_windows(
     ]
 }
 
+fn demo_tokens_by_day() -> Vec<crate::model::DayTokenUsage> {
+    vec![
+        crate::model::DayTokenUsage { date: "2026-03-21".into(), day_label: "Sun".into(), token_count: 8_420, is_today: false },
+        crate::model::DayTokenUsage { date: "2026-03-22".into(), day_label: "Mon".into(), token_count: 19_150, is_today: false },
+        crate::model::DayTokenUsage { date: "2026-03-23".into(), day_label: "Tue".into(), token_count: 14_890, is_today: false },
+        crate::model::DayTokenUsage { date: "2026-03-24".into(), day_label: "Wed".into(), token_count: 27_400, is_today: false },
+        crate::model::DayTokenUsage { date: "2026-03-25".into(), day_label: "Thu".into(), token_count: 22_100, is_today: false },
+        crate::model::DayTokenUsage { date: "2026-03-26".into(), day_label: "Fri".into(), token_count: 31_250, is_today: false },
+        crate::model::DayTokenUsage { date: "2026-03-27".into(), day_label: "Today".into(), token_count: 18_600, is_today: true },
+    ]
+}
+
+fn demo_tokens_by_model(provider: ProviderId) -> Vec<crate::model::ModelTokenUsage> {
+    match provider {
+        ProviderId::Claude => vec![
+            crate::model::ModelTokenUsage { model_name: "Claude 3.7 Sonnet".into(), token_count: 84_200 },
+            crate::model::ModelTokenUsage { model_name: "Claude 3.5 Haiku".into(), token_count: 38_100 },
+            crate::model::ModelTokenUsage { model_name: "Claude 3.5 Sonnet".into(), token_count: 19_500 },
+        ],
+        ProviderId::Codex => vec![
+            crate::model::ModelTokenUsage { model_name: "o3-mini".into(), token_count: 62_400 },
+            crate::model::ModelTokenUsage { model_name: "gpt-4o".into(), token_count: 45_800 },
+            crate::model::ModelTokenUsage { model_name: "codex-preview".into(), token_count: 23_100 },
+        ],
+        ProviderId::Grok => vec![
+            crate::model::ModelTokenUsage { model_name: "Grok 3".into(), token_count: 51_000 },
+            crate::model::ModelTokenUsage { model_name: "Grok 3 Mini".into(), token_count: 28_400 },
+        ],
+        _ => vec![
+            crate::model::ModelTokenUsage { model_name: "Primary Model".into(), token_count: 42_000 },
+            crate::model::ModelTokenUsage { model_name: "Fast Model".into(), token_count: 18_500 },
+        ],
+    }
+}
+
 fn snapshot_codex_pro() -> UsageSnapshot {
     let now = Utc::now();
     UsageSnapshot {
@@ -485,6 +533,8 @@ fn snapshot_codex_pro() -> UsageSnapshot {
             plan: Some("pro".to_string()),
             display_name: Some("Pro".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Codex),
     }
 }
 
@@ -504,6 +554,8 @@ fn snapshot_codex_free() -> UsageSnapshot {
             plan: Some("free".to_string()),
             display_name: Some("Free".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Codex),
     }
 }
 
@@ -558,6 +610,8 @@ fn snapshot_claude_primary() -> UsageSnapshot {
             plan: Some("pro".to_string()),
             display_name: Some("Pro".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Claude),
     }
 }
 
@@ -629,6 +683,8 @@ fn snapshot_claude_max() -> UsageSnapshot {
             plan: Some("max".to_string()),
             display_name: Some("Max".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Claude),
     }
 }
 
@@ -678,6 +734,8 @@ fn snapshot_gemini_primary() -> UsageSnapshot {
             ),
             display_name: Some("Pro".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Gemini),
     }
 }
 
@@ -705,6 +763,8 @@ fn snapshot_cursor_primary() -> UsageSnapshot {
             plan: Some("pro".to_string()),
             display_name: Some("Pro".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Cursor),
     }
 }
 
@@ -743,6 +803,8 @@ fn snapshot_copilot_free() -> UsageSnapshot {
             plan: Some("Free".to_string()),
             display_name: Some("Copilot Free".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Copilot),
     }
 }
 
@@ -774,6 +836,8 @@ fn snapshot_copilot_pro() -> UsageSnapshot {
             plan: Some("Pro+".to_string()),
             display_name: Some("Copilot Pro+".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Copilot),
     }
 }
 
@@ -880,6 +944,8 @@ fn snapshot_minimax_primary() -> UsageSnapshot {
             plan: Some("M2".to_string()),
             display_name: Some("MiniMax M2".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Minimax),
     }
 }
 
@@ -918,6 +984,8 @@ fn snapshot_kimi_primary() -> UsageSnapshot {
             plan: Some("Intermediate".to_string()),
             display_name: Some("Kimi Intermediate".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Kimi),
     }
 }
 
@@ -965,6 +1033,8 @@ fn snapshot_zai_primary() -> UsageSnapshot {
             plan: Some("Coding Plan".to_string()),
             display_name: Some("Z.AI Coding Plan".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Zai),
     }
 }
 
@@ -1012,6 +1082,8 @@ fn snapshot_opencode_go() -> UsageSnapshot {
             plan: Some("Go".to_string()),
             display_name: Some("OpenCode Go".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::OpenCodeGo),
     }
 }
 
@@ -1039,6 +1111,8 @@ fn snapshot_grok() -> UsageSnapshot {
             plan: Some("SuperGrok".to_string()),
             display_name: Some("Grok User".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Grok),
     }
 }
 
@@ -1234,6 +1308,8 @@ fn snapshot_antigravity_primary() -> UsageSnapshot {
             ),
             display_name: Some("Pro".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Antigravity),
     }
 }
 
@@ -1261,6 +1337,8 @@ fn snapshot_antigravity_free() -> UsageSnapshot {
             plan: Some("Free".to_string()),
             display_name: Some("Free".to_string()),
         },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: demo_tokens_by_model(ProviderId::Antigravity),
     }
 }
 

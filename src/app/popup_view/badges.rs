@@ -17,21 +17,22 @@ pub(super) fn apply_alpha(mut color: Color, opacity: f32) -> Color {
 pub(super) fn badge_success(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let color = cosmic.success.base.into();
-        badge_style(apply_alpha(color, 0.14), color, color, theme)
+        badge_style(
+            Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+            Color::from_rgb(0.95, 0.95, 0.95),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.24),
+            theme,
+        )
     })
 }
 
 pub(super) fn badge_success_soft(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let color = cosmic.success.base.into();
         badge_style(
-            apply_alpha(color, 0.06),
-            apply_alpha(color, 0.52),
-            apply_alpha(color, 0.28),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.04),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.70),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.14),
             theme,
         )
     })
@@ -40,21 +41,22 @@ pub(super) fn badge_success_soft(label: impl Into<String>) -> Element<'static, M
 pub(super) fn badge_warning(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let color = cosmic.warning.base.into();
-        badge_style(apply_alpha(color, 0.14), color, color, theme)
+        badge_style(
+            Color::from_rgba(1.0, 0.85, 0.4, 0.08),
+            Color::from_rgb(0.92, 0.82, 0.55),
+            Color::from_rgba(1.0, 0.85, 0.4, 0.25),
+            theme,
+        )
     })
 }
 
 pub(super) fn badge_warning_soft(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let color = cosmic.warning.base.into();
         badge_style(
-            apply_alpha(color, 0.06),
-            apply_alpha(color, 0.52),
-            apply_alpha(color, 0.28),
+            Color::from_rgba(1.0, 0.85, 0.4, 0.04),
+            Color::from_rgba(0.92, 0.82, 0.55, 0.65),
+            Color::from_rgba(1.0, 0.85, 0.4, 0.15),
             theme,
         )
     })
@@ -63,21 +65,22 @@ pub(super) fn badge_warning_soft(label: impl Into<String>) -> Element<'static, M
 pub(super) fn badge_destructive(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let color = cosmic.destructive.base.into();
-        badge_style(apply_alpha(color, 0.14), color, color, theme)
+        badge_style(
+            Color::from_rgba(1.0, 0.35, 0.35, 0.08),
+            Color::from_rgb(0.95, 0.45, 0.45),
+            Color::from_rgba(1.0, 0.35, 0.35, 0.25),
+            theme,
+        )
     })
 }
 
 pub(super) fn badge_destructive_soft(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let color = cosmic.destructive.base.into();
         badge_style(
-            apply_alpha(color, 0.06),
-            apply_alpha(color, 0.52),
-            apply_alpha(color, 0.28),
+            Color::from_rgba(1.0, 0.35, 0.35, 0.04),
+            Color::from_rgba(0.95, 0.45, 0.45, 0.65),
+            Color::from_rgba(1.0, 0.35, 0.35, 0.15),
             theme,
         )
     })
@@ -86,12 +89,10 @@ pub(super) fn badge_destructive_soft(label: impl Into<String>) -> Element<'stati
 pub(super) fn badge_neutral(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let surface = &cosmic.background(theme.transparent).component;
         badge_style(
-            apply_alpha(surface.base.into(), 0.42),
-            surface.on.into(),
-            surface.divider.into(),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.06),
+            Color::from_rgb(0.95, 0.95, 0.95),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.20),
             theme,
         )
     })
@@ -100,12 +101,10 @@ pub(super) fn badge_neutral(label: impl Into<String>) -> Element<'static, Messag
 pub(super) fn badge_neutral_soft(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let surface = &cosmic.background(theme.transparent).component;
         badge_style(
-            apply_alpha(surface.base.into(), 0.24),
-            apply_alpha(surface.on.into(), 0.52),
-            apply_alpha(surface.divider.into(), 0.45),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.03),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.60),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.12),
             theme,
         )
     })
@@ -114,9 +113,12 @@ pub(super) fn badge_neutral_soft(label: impl Into<String>) -> Element<'static, M
 pub(super) fn badge_accent(label: impl Into<String>) -> Element<'static, Message> {
     let label = label.into();
     badge_container(label, move |theme| {
-        let cosmic = theme.cosmic();
-        let color = cosmic.accent.base.into();
-        badge_style(apply_alpha(color, 0.14), color, color, theme)
+        badge_style(
+            Color::from_rgba(1.0, 1.0, 1.0, 0.12),
+            Color::from_rgb(1.0, 1.0, 1.0),
+            Color::from_rgba(1.0, 1.0, 1.0, 0.32),
+            theme,
+        )
     })
 }
 
@@ -195,8 +197,8 @@ fn badge_container(
     style: impl Fn(&cosmic::Theme) -> widget::container::Style + 'static,
 ) -> Element<'static, Message> {
     Element::from(
-        container(widget::text(label).size(12))
-            .padding([3, 7])
+        container(widget::text(label).size(11))
+            .padding([2, 6])
             .style(style),
     )
 }
@@ -205,14 +207,13 @@ fn badge_style(
     bg: Color,
     text_color: Color,
     border_color: Color,
-    theme: &cosmic::Theme,
+    _theme: &cosmic::Theme,
 ) -> widget::container::Style {
-    let cosmic = theme.cosmic();
     widget::container::Style {
         text_color: Some(text_color),
         background: Some(Background::Color(bg)),
         border: cosmic::iced::Border {
-            radius: cosmic.corner_radii.radius_s.into(),
+            radius: 2.0.into(),
             width: 1.0,
             color: border_color,
         },
@@ -222,7 +223,7 @@ fn badge_style(
     }
 }
 
-fn format_plan_label(label: &str) -> String {
+pub(super) fn format_plan_label(label: &str) -> String {
     let mut chars = label.trim().chars();
     let Some(first) = chars.next() else {
         return String::new();
