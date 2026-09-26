@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Crop YapCap panels from full-screen screenshots."""
+"""Crop Ledger panels from full-screen screenshots."""
 import argparse
 import os
 import subprocess

@@ -1108,26 +1108,26 @@ mod tests {
     #[test]
     fn flatpak_paths_use_dot_var_layout() {
         let mut env = crate::test_support::test_env();
-        env.set("FLATPAK_ID", "com.example.YapCapTest");
+        env.set("FLATPAK_ID", "com.example.LedgerTest");
         let p = paths();
 
         use std::path::Path;
         assert!(
             p.cache_dir
-                .ends_with(Path::new("com.example.YapCapTest/cache/yapcap")),
+                .ends_with(Path::new("com.example.LedgerTest/cache/cosmic-applet-ledger")),
             "unexpected cache_dir: {}",
             p.cache_dir.display()
         );
         assert!(
             p.claude_accounts_dir.ends_with(Path::new(
-                "com.example.YapCapTest/data/yapcap/claude-accounts"
+                "com.example.LedgerTest/data/cosmic-applet-ledger/claude-accounts"
             )),
             "unexpected claude_accounts_dir: {}",
             p.claude_accounts_dir.display()
         );
         assert!(
             p.log_dir
-                .ends_with(Path::new("com.example.YapCapTest/data/yapcap/logs")),
+                .ends_with(Path::new("com.example.LedgerTest/data/cosmic-applet-ledger/logs")),
             "unexpected log_dir: {}",
             p.log_dir.display()
         );
@@ -1145,7 +1145,7 @@ mod tests {
         let p = paths();
         assert!(
             p.grok_accounts_dir
-                .ends_with(std::path::Path::new("yapcap/grok-accounts")),
+                .ends_with(std::path::Path::new("cosmic-applet-ledger/grok-accounts")),
             "unexpected grok_accounts_dir: {}",
             p.grok_accounts_dir.display()
         );
@@ -1156,7 +1156,7 @@ mod tests {
         let p = paths();
         assert!(
             p.zai_accounts_dir
-                .ends_with(std::path::Path::new("yapcap/zai-accounts")),
+                .ends_with(std::path::Path::new("cosmic-applet-ledger/zai-accounts")),
             "unexpected zai_accounts_dir: {}",
             p.zai_accounts_dir.display()
         );

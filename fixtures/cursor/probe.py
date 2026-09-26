@@ -45,7 +45,7 @@ TOKENS_NAMES = ("tokens.json", "token.json")
 def _default_cursor_accounts_dir() -> Path:
     xdg = os.environ.get("XDG_STATE_HOME", "").strip()
     base = Path(xdg) if xdg else Path.home() / ".local" / "state"
-    return base / "yapcap" / "cursor-accounts"
+    return base / "cosmic-applet-ledger" / "cursor-accounts"
 
 
 def _pick_tokens_file(
@@ -224,24 +224,24 @@ def main() -> int:
         "--cursor-accounts-dir",
         type=Path,
         default=default_accounts,
-        help=f"YapCap cursor-accounts root (default: {default_accounts})",
+        help=f"Ledger cursor-accounts root (default: {default_accounts})",
     )
     p.add_argument(
         "--tokens-file",
         type=Path,
         default=None,
-        help="Explicit tokens.json (or token.json) path",
+        help="Use this tokens.json instead of discovering under --cursor-accounts-dir",
     )
     p.add_argument(
         "--account",
         default=None,
         metavar="ID",
-        help="Account subdirectory under cursor-accounts (cursor-…)",
+        help="Account subdirectory name under cursor-accounts (cursor-…)",
     )
     p.add_argument(
         "--no-local-state",
         action="store_true",
-        help="Do not load YapCap state; credentials from environment only",
+        help="Do not load Ledger state; credentials from environment only",
     )
     p.add_argument(
         "--skip-refresh",
@@ -289,7 +289,7 @@ def main() -> int:
         if not args.skip_refresh:
             if not refresh:
                 print(
-                    "error: no refresh_token (use YapCap Cursor account or set "
+                    "error: no refresh_token (use Ledger Cursor account or set "
                     "CURSOR_REFRESH_TOKEN / YAPCAP_CURSOR_REFRESH_TOKEN; "
                     "or pass --skip-refresh with access token)",
                     file=sys.stderr,

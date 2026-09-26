@@ -1,5 +1,5 @@
 <!--
-  THROWAWAY PROTOTYPE — browser model of the YapCap COSMIC popup.
+  THROWAWAY PROTOTYPE — browser model of the Ledger COSMIC popup.
   Single provider-account layout based on the selected F design; Cursor starts with no accounts; no state persists after a reload.
   Open directly in a browser, or run: python3 -m http.server -d . 8000
 -->
@@ -8,7 +8,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>YapCap UI prototype</title>
+  <title>Ledger UI prototype</title>
   <style>
     :root { color-scheme: dark; --bg:#181a1f; --panel:#252830; --card:#30333b; --line:#41454f; --text:#f2f2f4; --muted:#a8acb8; --accent:#f28b8b; --accent-soft:#56353d; --green:#74d89c; --yellow:#f1c96a; --red:#ee7777; }
     * { box-sizing:border-box } body { margin:0; min-height:100vh; display:grid; place-items:center; background:radial-gradient(circle at 50% 12%,#343844 0,#17191e 48%); font-family:Inter,ui-sans-serif,system-ui,sans-serif; color:var(--text); font-size:14px; }
@@ -174,7 +174,7 @@
 </head>
 <body>
   <div class="prototype-note">throwaway UI prototype · state resets on reload</div>
-  <main class="popup" aria-label="YapCap UI prototype">
+  <main class="popup" aria-label="Ledger UI prototype">
     <div id="chrome" class="chrome"></div>
     <div id="nav"></div>
     <div id="body" class="body"></div>
@@ -197,7 +197,7 @@
     const $=s=>document.querySelector(s); const icon=p=>`${providerIconPath}${p.icon}`; const current=()=>providers.find(p=>p.id===state.provider); const e=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     function tabs(items,selected,click,kind='tabs'){return `<div class="${kind}">${items.map(x=>`<button class="tab ${x.id===selected?'active':''}" data-${click}="${x.id}">${x.icon?`<img src="${icon(x)}" alt="">`:''}<span>${e(x.name)}</span>${x.weekly!==undefined?`<span class="tab-usage" aria-label="${x.weekly}% weekly usage"><i style="width:${x.weekly}%"></i></span>`:''}</button>`).join('')}</div>`}
     function overview(){const enabled=providers.filter(p=>p.enabled);const lastStart=Math.max(0,enabled.length-6);const visible=enabled.slice(state.overviewStart,state.overviewStart+6);return `<div class="overview overview-a" aria-label="Overview provider selector"><div class="overview-row"><button class="overview-arrow" data-overview-step="-1" aria-label="Previous providers" ${state.overviewStart===0?'disabled':''}>‹</button><div class="overview-viewport"><div class="provider-line">${visible.map(p=>`<button class="provider-choice ${p.id===state.provider?'active':''}" data-overview-provider="${p.id}" aria-label="${e(p.name)}" title="${e(p.name)}"><img src="${icon(p)}" alt=""></button>`).join('')}</div></div><button class="overview-arrow" data-overview-step="1" aria-label="Next providers" ${state.overviewStart===lastStart?'disabled':''}>›</button></div></div>`}
-    function renderChrome(){ const isAbout=state.page==='about',isDetail=state.page==='detail',isSubpage=state.page==='settings'||state.page==='accounts'||state.page==='providers'; $('#chrome').innerHTML=isAbout||isSubpage?`<div class="header"><button class="text-button back" data-back>‹ Back</button></div>`:`<div class="header"><button class="title" data-home>YapCap</button><span class="spacer"></span><button class="icon-button header-action" data-about aria-label="About YapCap">ⓘ${state.updateAvailable?'<i class="notification-dot"></i>':''}</button><button class="icon-button header-action" data-manage-providers aria-label="Manage providers">☷</button><button class="icon-button header-action" data-settings aria-label="Settings">⚙</button><button class="icon-button header-action" data-refresh aria-label="Refresh">↻</button></div>`; $('#nav').innerHTML=isDetail?overview():''; }
+    function renderChrome(){ const isAbout=state.page==='about',isDetail=state.page==='detail',isSubpage=state.page==='settings'||state.page==='accounts'||state.page==='providers'; $('#chrome').innerHTML=isAbout||isSubpage?`<div class="header"><button class="text-button back" data-back>‹ Back</button></div>`:`<div class="header"><button class="title" data-home>Ledger</button><span class="spacer"></span><button class="icon-button header-action" data-about aria-label="About Ledger">ⓘ${state.updateAvailable?'<i class="notification-dot"></i>':''}</button><button class="icon-button header-action" data-manage-providers aria-label="Manage providers">☷</button><button class="icon-button header-action" data-settings aria-label="Settings">⚙</button><button class="icon-button header-action" data-refresh aria-label="Refresh">↻</button></div>`; $('#nav').innerHTML=isDetail?overview():''; }
     function accountSwitch(p,accounts){if(accounts.length===1)return '';const i=state.accountPage%accounts.length,dots=accounts.map((_,index)=>`<i class="${index===i?'active':''}"></i>`).join('');return `<div class="card-switcher wide"><button class="switch-arrow" data-account-page="-1">‹</button>${dots}<button class="switch-arrow" data-account-page="1">›</button></div>`}
     function manageAccounts(p){return `<button class="manage-accounts" data-manage-accounts="${p.id}"><span>Manage accounts</span><span>›</span></button>`}
     function accountCard(p,email){const accounts=accountsFor(p);return `<div class="detail-section"><div class="box-title">Account</div><section class="card account-card" data-account-card><div class="account"><div><strong>${e(email)}</strong></div><span class="plan">${p.plan}</span></div><div class="card-meta"><span class="badge">Live</span><span class="badge">Active</span><span class="updated">Updated just now</span></div>${manageAccounts(p)}${accountSwitch(p,accounts)}</section><div class="box-title">Usage</div><section class="card">${meter('Session',p.used,p.session)}${meter('Weekly',p.weekly,'4d 8h',true)}</section></div>`}

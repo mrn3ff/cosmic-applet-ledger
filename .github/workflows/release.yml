@@ -35,7 +35,7 @@ jobs:
       - name: Verify tag matches package version
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
-          PACKAGE_VERSION="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "yapcap") | .version')"
+          PACKAGE_VERSION="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "cosmic-applet-ledger") | .version')"
           if [[ "$TAG_VERSION" != "$PACKAGE_VERSION" ]]; then
             echo "tag version $TAG_VERSION does not match package version $PACKAGE_VERSION" >&2
             exit 1
@@ -50,9 +50,9 @@ jobs:
       - name: Package tarball
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          PKG="yapcap-${VERSION}-x86_64-linux"
+          PKG="cosmic-applet-ledger-${VERSION}-x86_64-linux"
           mkdir -p "dist/${PKG}"
-          cp target/release/yapcap "dist/${PKG}/"
+          cp target/release/cosmic-applet-ledger "dist/${PKG}/"
           cp README.md LICENSE "dist/${PKG}/"
           cp -r resources "dist/${PKG}/"
           tar -czf "dist/${PKG}.tar.gz" -C dist "${PKG}"

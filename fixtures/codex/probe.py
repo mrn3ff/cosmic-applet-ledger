@@ -39,7 +39,7 @@ TOKENS_NAMES = ("tokens.json", "token.json")
 def _default_codex_accounts_dir() -> Path:
     xdg = os.environ.get("XDG_STATE_HOME", "").strip()
     base = Path(xdg) if xdg else Path.home() / ".local" / "state"
-    return base / "yapcap" / "codex-accounts"
+    return base / "cosmic-applet-ledger" / "codex-accounts"
 
 
 def _pick_tokens_file(
@@ -225,13 +225,13 @@ def main() -> int:
         "--codex-accounts-dir",
         type=Path,
         default=default_accounts,
-        help=f"YapCap codex-accounts root (default: {default_accounts})",
+        help=f"Ledger codex-accounts root (default: {default_accounts})",
     )
     p.add_argument(
         "--tokens-file",
         type=Path,
         default=None,
-        help="Use this tokens.json (or token.json) instead of discovering",
+        help="Use this tokens.json instead of discovering under --codex-accounts-dir",
     )
     p.add_argument(
         "--account",
@@ -242,7 +242,7 @@ def main() -> int:
     p.add_argument(
         "--no-local-state",
         action="store_true",
-        help="Do not read tokens or metadata from YapCap state; use environment only",
+        help="Do not read tokens or metadata from Ledger state; use environment only",
     )
     p.add_argument("--token-only", action="store_true", help="Only POST token endpoint")
     p.add_argument("--usage-only", action="store_true", help="Only GET usage endpoint")
@@ -292,7 +292,7 @@ def main() -> int:
         if not args.usage_only:
             if not refresh:
                 print(
-                    "error: no refresh_token (log in with YapCap or set "
+                    "error: no refresh_token (log in with Ledger or set "
                     "CODEX_REFRESH_TOKEN / YAPCAP_CODEX_REFRESH_TOKEN)",
                     file=sys.stderr,
                 )

@@ -77,7 +77,7 @@ INVALID_TOKEN_PLACEHOLDER = "gho_INVALID_PROBE_FORCED_INVALID_TOKEN_FOR_ERROR_CA
 
 def _cache_path() -> Path:
     base = os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")
-    return Path(base) / "yapcap" / "copilot-probe-gh-token.json"
+    return Path(base) / "cosmic-applet-ledger" / "copilot-probe-gh-token.json"
 
 
 def _iso_now() -> str:

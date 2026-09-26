@@ -39,7 +39,7 @@ TOKENS_NAMES = ("tokens.json", "token.json")
 def _default_claude_accounts_dir() -> Path:
     xdg = os.environ.get("XDG_STATE_HOME", "").strip()
     base = Path(xdg) if xdg else Path.home() / ".local" / "state"
-    return base / "yapcap" / "claude-accounts"
+    return base / "cosmic-applet-ledger" / "claude-accounts"
 
 
 def _pick_tokens_file(
@@ -216,7 +216,7 @@ def main() -> int:
         "--claude-accounts-dir",
         type=Path,
         default=default_accounts,
-        help=f"YapCap claude-accounts root (default: {default_accounts})",
+        help=f"Ledger claude-accounts root (default: {default_accounts})",
     )
     p.add_argument(
         "--tokens-file",
@@ -233,7 +233,7 @@ def main() -> int:
     p.add_argument(
         "--no-local-state",
         action="store_true",
-        help="Do not read tokens from YapCap state; use environment only",
+        help="Do not read tokens from Ledger state; use environment only",
     )
     p.add_argument("--token-only", action="store_true", help="Only POST token endpoint")
     p.add_argument("--usage-only", action="store_true", help="Only GET usage endpoint")
@@ -275,7 +275,7 @@ def main() -> int:
         if not args.usage_only:
             if not refresh:
                 print(
-                    "error: no refresh_token (log in with YapCap or set "
+                    "error: no refresh_token (log in with Ledger or set "
                     "CLAUDE_REFRESH_TOKEN / YAPCAP_CLAUDE_REFRESH_TOKEN)",
                     file=sys.stderr,
                 )

@@ -24,15 +24,15 @@ Visual indicators showing how much of a provider’s usage has been consumed wit
 
 ## Settings
 
-The separate page for configuring YapCap.
+The separate page for configuring Ledger.
 
 ## General settings
 
-Global settings that apply across YapCap rather than to one specific provider.
+Global settings that apply across Ledger rather than to one specific provider.
 
 ## About
 
-Information about the YapCap application, including its version and update status.
+Information about the Ledger application, including its version and update status.
 
 ## Account card
 
@@ -52,7 +52,7 @@ Global settings contain refresh interval, panel icon, reset time, and usage amou
 
 ## Updates
 
-When a newer version is available, the About info button displays a red notification dot. The About page shows an update card linking to the YapCap release page.
+When a newer version is available, the About info button displays a red notification dot. The About page shows an update card linking to the Ledger release page.
 
 ## Terminology
 
@@ -62,6 +62,6 @@ When a newer version is available, the About info button displays a red notifica
 - **Account switcher**: The final row of the account card, containing previous/next arrows and accent-colored position dots.
 - **Manage accounts**: The card action that opens account settings for the currently selected provider.
 - **Manage providers**: The page listing all providers with enable or disable toggles.
-- **Global settings**: Settings that apply across YapCap, including refresh interval, panel icon, reset time, and usage amount.
+- **Global settings**: Settings that apply across Ledger, including refresh interval, panel icon, reset time, and usage amount.
 - **About page**: The standalone application information page, including version, links, developer, license, and update information.
 - **Update notification**: The red dot on the info button indicating that a newer version is available.
