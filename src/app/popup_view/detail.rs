@@ -188,6 +188,24 @@ fn account_body_items<'a>(
         if !snapshot.tokens_by_model.is_empty() {
             items.push(tokens_by_model_section(&snapshot.tokens_by_model));
         }
+    } else if state.accounts_for(provider.provider).is_empty() {
+        // When no account is configured yet, show a clean empty state helper below the banner
+        let no_account_notice = container(
+            column![
+                widget::text("No active usage data").size(14),
+                container(widget::text("Click the gear icon above to configure credentials in Settings.").size(12))
+                    .style(|_| widget::container::Style {
+                        text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                        ..Default::default()
+                    }),
+            ]
+            .spacing(4)
+            .width(Length::Fill),
+        )
+        .padding([8, 0])
+        .width(Length::Fill);
+
+        items.push(no_account_notice.into());
     }
 
     items
@@ -658,6 +676,7 @@ fn provider_warning_banner(
         a.provider == ProviderId::Cursor && a.auth_state == AuthState::ActionRequired
     });
 
+    let accounts = state.accounts_for(provider.provider);
     let warning_text = if cursor_reauth_needed {
         Some(fl!("cursor-account-reauth-detail"))
     } else if let Some(account) = active_account
@@ -670,8 +689,14 @@ fn provider_warning_banner(
         } else {
             Some("Account error or expired".to_string())
         }
-    } else if active_account.is_none() && detected_without_accounts(state, detection, provider.provider) {
-        Some(format!("{} detected. Add account in Settings.", provider.provider.label()))
+    } else if accounts.is_empty() {
+        if detected_without_accounts(state, detection, provider.provider) {
+            Some(format!("{} detected on machine. Add account in Settings.", provider.provider.label()))
+        } else {
+            Some(format!("No account configured for {}. Add in Settings.", provider.provider.label()))
+        }
+    } else if provider.account_status == AccountSelectionStatus::LoginRequired {
+        Some(format!("Login required for {}. Configure in Settings.", provider.provider.label()))
     } else {
         None
     };

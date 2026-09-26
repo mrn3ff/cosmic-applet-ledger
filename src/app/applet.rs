@@ -1,4 +1,4 @@
-use super::provider_assets::{app_icon_handle, app_symbolic_icon_handle};
+use super::provider_assets::app_symbolic_icon_handle;
 use super::{
     APPLET_BAR_WIDTH_HEIGHT_MULTIPLIER, APPLET_ICON_GAP, APPLET_PERCENT_CELL_HORIZONTAL_PAD,
     APPLET_PERCENT_GLYPH_WIDTH, Alignment, AppModel, AppState, Config, CosmicButton,
