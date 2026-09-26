@@ -10,7 +10,7 @@
 
 **A flat, minimalist Pop!_OS COSMIC panel applet for tracking AI usage, rate limits, and tokens across coding agents and providers.**
 
-*Forked from YapCap by Topi Csarno, redesigned with a high-contrast aesthetic inspired by Omarchy.*
+*Forked from YapCap by Topi Csarno, redesigned with a minimalist aesthetic inspired by Omarchy.*
 
 </div>
 
@@ -23,8 +23,8 @@
   - **Hero:** Current provider, active plan tier, inline provider switcher (`...`), settings, and manual sync.
   - **LIMITS:** Session and Weekly usage percentages, full-width status bars, and weekly reset countdowns.
   - **TOKENS BY DAY:** 7-day token burn breakdown (`Sun` through `Today`) with stark white highlight for today.
-  - **TOKENS BY MODEL:** Proportional 28px horizontal sliders displaying model names and token volumes directly inside the bars.
-- **Unified Across Providers:** Consistent layout across Claude Code, Codex CLI, OpenCode Go, Cursor, Copilot, Gemini, Grok, and more.
+  - **TOKENS BY MODEL:** Proportional horizontal sliders displaying model names and token volumes directly inside the bars.
+- **Unified Across Providers:** Consistent layout across all providers.
 - **Local & Private:** Communicates directly with local transcripts and provider APIs using secure OS keychain credentials. No third-party servers, telemetry, or external sync.
 - **Minimalist Settings:** Streamlined provider enablement toggles and account configuration with zero UI fluff.
 
