@@ -58,6 +58,11 @@
     <keyword>Applet</keyword>
   </keywords>
   <releases>
+    <release type="stable" version="0.2.1" date="2026-09-27">
+      <description>
+        <p>Renames the Debian package to cosmic-applet-ledger so it no longer clashes with the unrelated ledger accounting package.</p>
+      </description>
+    </release>
     <release type="stable" version="0.2.0" date="2026-09-27">
       <description>
         <p>Adds the OpenRouter provider and token usage charts, and redesigns the applet.</p>

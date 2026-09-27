@@ -5,6 +5,14 @@ All notable changes to Ledger are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-09-27
+
+### Fixed
+- The Debian package is now named `cosmic-applet-ledger`, matching the
+  RPM and tarball. It was published as `ledger`, which clashes with the
+  unrelated `ledger` accounting package in Debian and Ubuntu. Installing
+  0.2.1 replaces an earlier `ledger` build cleanly.
+
 ## [0.2.0] - 2026-09-27
 
 ### Added
