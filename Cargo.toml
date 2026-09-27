@@ -7,9 +7,14 @@ description = "COSMIC panel applet tracking AI usage and credits"
 repository = "https://github.com/mrn3ff/cosmic-applet-ledger"
 
 [package.metadata.deb]
-name = "ledger"
+name = "cosmic-applet-ledger"
 maintainer = "netw0rkn1nja <mrn3ff@users.noreply.github.com>"
 depends = "$auto, libxkbcommon0, libwayland-client0, libfontconfig1"
+# Releases up to 0.2.0 shipped as "ledger", which collides with the
+# unrelated Debian/Ubuntu `ledger` accounting package (3.x). Take over
+# files from those builds so they upgrade cleanly.
+replaces = "ledger (<< 0.2.1)"
+breaks = "ledger (<< 0.2.1)"
 section = "utils"
 priority = "optional"
 assets = [
