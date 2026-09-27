@@ -501,81 +501,60 @@ fn codex_demo_windows(
     ]
 }
 
-fn demo_tokens_by_day() -> Vec<crate::model::DayTokenUsage> {
+/// Only Claude (local transcripts) and OpenRouter (analytics API) report token
+/// usage, so the other demo providers show no token charts, as in real use.
+fn reports_tokens(provider: ProviderId) -> bool {
+    matches!(provider, ProviderId::Claude | ProviderId::OpenRouter)
+}
+
+fn demo_tokens_by_day(provider: ProviderId) -> Vec<crate::model::DayTokenUsage> {
     use chrono::{Duration, Local};
-    let today = Local::now().date_naive();
-    let counts = [8_420, 19_150, 14_890, 27_400, 22_100, 31_250, 18_600];
-    let mut result = Vec::with_capacity(7);
-    for i in (0..7).rev() {
-        let date = today - Duration::days(i);
-        let is_today = i == 0;
-        let day_label = if is_today {
-            "Today".to_string()
-        } else {
-            date.format("%a").to_string()
-        };
-        let token_count = counts[(6 - i) as usize];
-        result.push(crate::model::DayTokenUsage {
-            date: date.format("%Y-%m-%d").to_string(),
-            day_label,
-            token_count,
-            is_today,
-        });
+    if !reports_tokens(provider) {
+        return Vec::new();
     }
-    result
+    let today = Local::now().date_naive();
+    let counts: [u64; 7] = [
+        34_200_000, 61_800_000, 47_500_000, 88_300_000, 72_900_000, 79_400_000, 52_600_000,
+    ];
+    (0..7)
+        .rev()
+        .map(|offset| {
+            let date = today - Duration::days(offset);
+            let is_today = offset == 0;
+            crate::model::DayTokenUsage {
+                date: date.format("%Y-%m-%d").to_string(),
+                day_label: if is_today {
+                    "Today".to_string()
+                } else {
+                    date.format("%a").to_string()
+                },
+                token_count: counts[(6 - offset) as usize],
+                is_today,
+            }
+        })
+        .collect()
 }
 
 fn demo_tokens_by_model(provider: ProviderId) -> Vec<crate::model::ModelTokenUsage> {
-    match provider {
-        ProviderId::Claude => vec![
-            crate::model::ModelTokenUsage {
-                model_name: "Claude 3.7 Sonnet".into(),
-                token_count: 84_200,
-            },
-            crate::model::ModelTokenUsage {
-                model_name: "Claude 3.5 Haiku".into(),
-                token_count: 38_100,
-            },
-            crate::model::ModelTokenUsage {
-                model_name: "Claude 3.5 Sonnet".into(),
-                token_count: 19_500,
-            },
+    let models: &[(&str, u64)] = match provider {
+        ProviderId::Claude => &[
+            ("Opus 5.5", 268_400_000),
+            ("Sonnet 5", 121_300_000),
+            ("Haiku 4.5", 47_000_000),
         ],
-        ProviderId::Codex => vec![
-            crate::model::ModelTokenUsage {
-                model_name: "o3-mini".into(),
-                token_count: 62_400,
-            },
-            crate::model::ModelTokenUsage {
-                model_name: "gpt-4o".into(),
-                token_count: 45_800,
-            },
-            crate::model::ModelTokenUsage {
-                model_name: "codex-preview".into(),
-                token_count: 23_100,
-            },
+        ProviderId::OpenRouter => &[
+            ("google/gemini-3.8-flash", 312_600_000),
+            ("anthropic/claude-sonnet-5", 124_100_000),
         ],
-        ProviderId::Grok => vec![
-            crate::model::ModelTokenUsage {
-                model_name: "Grok 3".into(),
-                token_count: 51_000,
-            },
-            crate::model::ModelTokenUsage {
-                model_name: "Grok 3 Mini".into(),
-                token_count: 28_400,
-            },
-        ],
-        _ => vec![
-            crate::model::ModelTokenUsage {
-                model_name: "Primary Model".into(),
-                token_count: 42_000,
-            },
-            crate::model::ModelTokenUsage {
-                model_name: "Fast Model".into(),
-                token_count: 18_500,
-            },
-        ],
-    }
+        _ => &[],
+    };
+    models
+        .iter()
+        .map(|(name, tokens)| crate::model::ModelTokenUsage {
+            model_name: (*name).to_string(),
+            token_count: *tokens,
+        })
+        .collect()
 }
 
 fn snapshot_codex_pro() -> UsageSnapshot {
@@ -598,7 +577,7 @@ fn snapshot_codex_pro() -> UsageSnapshot {
             plan: Some("pro".to_string()),
             display_name: Some("Pro".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Codex),
         tokens_by_model: demo_tokens_by_model(ProviderId::Codex),
     }
 }
@@ -619,7 +598,7 @@ fn snapshot_codex_free() -> UsageSnapshot {
             plan: Some("free".to_string()),
             display_name: Some("Free".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Codex),
         tokens_by_model: demo_tokens_by_model(ProviderId::Codex),
     }
 }
@@ -675,7 +654,7 @@ fn snapshot_claude_primary() -> UsageSnapshot {
             plan: Some("pro".to_string()),
             display_name: Some("Pro".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Claude),
         tokens_by_model: demo_tokens_by_model(ProviderId::Claude),
     }
 }
@@ -748,7 +727,7 @@ fn snapshot_claude_max() -> UsageSnapshot {
             plan: Some("max".to_string()),
             display_name: Some("Max".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Claude),
         tokens_by_model: demo_tokens_by_model(ProviderId::Claude),
     }
 }
@@ -799,7 +778,7 @@ fn snapshot_gemini_primary() -> UsageSnapshot {
             ),
             display_name: Some("Pro".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Gemini),
         tokens_by_model: demo_tokens_by_model(ProviderId::Gemini),
     }
 }
@@ -828,7 +807,7 @@ fn snapshot_cursor_primary() -> UsageSnapshot {
             plan: Some("pro".to_string()),
             display_name: Some("Pro".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Cursor),
         tokens_by_model: demo_tokens_by_model(ProviderId::Cursor),
     }
 }
@@ -868,7 +847,7 @@ fn snapshot_copilot_free() -> UsageSnapshot {
             plan: Some("Free".to_string()),
             display_name: Some("Copilot Free".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Copilot),
         tokens_by_model: demo_tokens_by_model(ProviderId::Copilot),
     }
 }
@@ -901,7 +880,7 @@ fn snapshot_copilot_pro() -> UsageSnapshot {
             plan: Some("Pro+".to_string()),
             display_name: Some("Copilot Pro+".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Copilot),
         tokens_by_model: demo_tokens_by_model(ProviderId::Copilot),
     }
 }
@@ -1021,7 +1000,7 @@ fn snapshot_minimax_primary() -> UsageSnapshot {
             plan: Some("M2".to_string()),
             display_name: Some("MiniMax M2".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Minimax),
         tokens_by_model: demo_tokens_by_model(ProviderId::Minimax),
     }
 }
@@ -1061,7 +1040,7 @@ fn snapshot_kimi_primary() -> UsageSnapshot {
             plan: Some("Intermediate".to_string()),
             display_name: Some("Kimi Intermediate".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Kimi),
         tokens_by_model: demo_tokens_by_model(ProviderId::Kimi),
     }
 }
@@ -1110,7 +1089,7 @@ fn snapshot_zai_primary() -> UsageSnapshot {
             plan: Some("Coding Plan".to_string()),
             display_name: Some("Z.AI Coding Plan".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Zai),
         tokens_by_model: demo_tokens_by_model(ProviderId::Zai),
     }
 }
@@ -1159,7 +1138,7 @@ fn snapshot_opencode_go() -> UsageSnapshot {
             plan: Some("Go".to_string()),
             display_name: Some("OpenCode Go".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::OpenCodeGo),
         tokens_by_model: demo_tokens_by_model(ProviderId::OpenCodeGo),
     }
 }
@@ -1188,7 +1167,7 @@ fn snapshot_grok() -> UsageSnapshot {
             plan: Some("SuperGrok".to_string()),
             display_name: Some("Grok User".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Grok),
         tokens_by_model: demo_tokens_by_model(ProviderId::Grok),
     }
 }
@@ -1220,17 +1199,8 @@ fn snapshot_openrouter() -> UsageSnapshot {
             plan: Some("$15.58 balance".to_string()),
             display_name: Some("Demo key".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
-        tokens_by_model: vec![
-            crate::model::ModelTokenUsage {
-                model_name: "google/gemini-3.8-flash".into(),
-                token_count: 96_300,
-            },
-            crate::model::ModelTokenUsage {
-                model_name: "anthropic/claude-sonnet-5".into(),
-                token_count: 34_900,
-            },
-        ],
+        tokens_by_day: demo_tokens_by_day(ProviderId::OpenRouter),
+        tokens_by_model: demo_tokens_by_model(ProviderId::OpenRouter),
     }
 }
 
@@ -1426,7 +1396,7 @@ fn snapshot_antigravity_primary() -> UsageSnapshot {
             ),
             display_name: Some("Pro".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Antigravity),
         tokens_by_model: demo_tokens_by_model(ProviderId::Antigravity),
     }
 }
@@ -1455,7 +1425,7 @@ fn snapshot_antigravity_free() -> UsageSnapshot {
             plan: Some("Free".to_string()),
             display_name: Some("Free".to_string()),
         },
-        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_day: demo_tokens_by_day(ProviderId::Antigravity),
         tokens_by_model: demo_tokens_by_model(ProviderId::Antigravity),
     }
 }
