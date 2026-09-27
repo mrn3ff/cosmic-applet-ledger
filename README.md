@@ -22,37 +22,6 @@
 
 Ledger sits in the COSMIC panel and shows how much of your AI quota you've used — session and weekly limits, spend, and token usage — for every provider you connect. It talks to provider APIs directly with accounts you add in Ledger. No telemetry, no cloud sync, no third-party servers.
 
-## Screenshots
-
-<table>
-  <tr>
-    <th width="33%">Claude</th>
-    <th width="33%">OpenRouter</th>
-    <th width="33%">Codex</th>
-  </tr>
-  <tr>
-    <td valign="top"><img src="resources/screenshots/screenshot-claude.png" alt="Claude: limits, tokens by day and tokens by model" width="100%"></td>
-    <td valign="top"><img src="resources/screenshots/screenshot-openrouter.png" alt="OpenRouter: daily and weekly spend with token charts" width="100%"></td>
-    <td valign="top"><img src="resources/screenshots/screenshot-codex.png" alt="Codex: session and weekly limits" width="100%"></td>
-  </tr>
-  <tr>
-    <th>Settings</th>
-    <th>Switch provider</th>
-    <th>Accounts</th>
-  </tr>
-  <tr>
-    <td valign="top"><img src="resources/screenshots/screenshot-settings.png" alt="Settings: providers, preferences and about" width="100%"></td>
-    <td valign="top"><img src="resources/screenshots/screenshot-switch-provider.png" alt="Switch provider list" width="100%"></td>
-    <td valign="top"><img src="resources/screenshots/screenshot-accounts.png" alt="Claude account settings" width="100%"></td>
-  </tr>
-</table>
-
-<p align="center">
-  <img src="resources/screenshots/screenshot-panel.png" alt="Ledger in the COSMIC panel in icon-only mode" width="560">
-  <br>
-  <sub>Ledger in the panel (icon-only mode). Screenshots use demo data from <code>just run-demo</code>.</sub>
-</p>
-
 ## Features
 
 - **One layout for every provider.** Each provider's page shows a **LIMITS** card with its session and weekly windows and a reset countdown.
@@ -124,10 +93,33 @@ Remove it again with `just uninstall`.
 
 1. If you installed a package, add Ledger to the panel: **COSMIC Settings → Desktop → Panel → Configure panel applets**, then add **Ledger**.
 2. Click the panel icon to open Ledger. Providers detected on your machine already have a tab.
+
+   <img src="resources/screenshots/screenshot-panel.png" alt="Ledger's icon in the COSMIC panel" width="560">
+
 3. Open **Settings** (the gear icon). Under **PROVIDERS**, switch on any provider you want that wasn't detected.
+
+   <img src="resources/screenshots/screenshot-settings.png" alt="Settings: providers, preferences and about" width="320">
+
 4. Click a provider's name to open its account page and add an account.
 
+   <img src="resources/screenshots/screenshot-accounts.png" alt="Claude account settings" width="320">
+
 Once an account is connected, the provider's tab shows its limits and usage. Use the `…` button to switch providers and the refresh button to update right away.
+
+<table>
+  <tr>
+    <th width="33%">Claude</th>
+    <th width="33%">OpenRouter</th>
+    <th width="33%">Codex</th>
+  </tr>
+  <tr>
+    <td valign="top"><img src="resources/screenshots/screenshot-claude.png" alt="Claude: limits, tokens by day and tokens by model" width="100%"></td>
+    <td valign="top"><img src="resources/screenshots/screenshot-openrouter.png" alt="OpenRouter: daily and weekly spend with token charts" width="100%"></td>
+    <td valign="top"><img src="resources/screenshots/screenshot-codex.png" alt="Codex: session and weekly limits" width="100%"></td>
+  </tr>
+</table>
+
+<sub>Screenshots use demo data from <code>just run-demo</code>.</sub>
 
 ### Settings
 
