@@ -96,7 +96,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            refresh_interval_seconds: 10,
+            refresh_interval_seconds: 300,
             reset_time_format: ResetTimeFormat::Relative,
             usage_amount_format: UsageAmountFormat::Used,
             panel_icon_style: PanelIconStyle::LogoAndBars,
@@ -928,7 +928,7 @@ mod tests {
             config.provider_visibility_mode,
             ProviderVisibilityMode::UserManaged
         );
-        assert_eq!(config.refresh_interval_seconds, 10);
+        assert_eq!(config.refresh_interval_seconds, 300);
         assert_eq!(config.reset_time_format, ResetTimeFormat::Relative);
         assert_eq!(config.usage_amount_format, UsageAmountFormat::Used);
         assert_eq!(config.panel_icon_style, PanelIconStyle::LogoAndBars);

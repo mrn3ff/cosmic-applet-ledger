@@ -24,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   flat, minimalist look.
 - Providers are listed alphabetically in the applet and demo mode, and in
   the code.
-- Default refresh interval lowered from 5 minutes to 10 seconds.
 - Token chart bars scale against fixed token tiers instead of the busiest
   day, so bars are comparable between refreshes.
 

@@ -266,7 +266,9 @@ pub(super) fn settings_view(
     .align_y(Alignment::Center)
     .width(Length::Fill);
 
-    let refresh_options: &[(u64, &str)] = &[(5, "5s"), (10, "10s"), (30, "30s"), (60, "1m"), (300, "5m")];
+    // Provider usage endpoints rate-limit aggressive polling, so the shortest
+    // interval offered is one minute.
+    let refresh_options: &[(u64, &str)] = &[(60, "1m"), (300, "5m"), (900, "15m"), (1800, "30m")];
     let refresh_row = row![
         widget::text("Refresh Interval").size(14),
         cosmic::iced::widget::Space::new().width(Length::Fill),
