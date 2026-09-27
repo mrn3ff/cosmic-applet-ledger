@@ -35,7 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of showing seven empty bars.
 - The detail view explains when a provider is detected but has no
   account, or needs a login, instead of showing nothing.
-- The test suite compiles again after the token usage fields were added.
+- The test suite compiles and passes again: fixtures gained the token
+  usage fields, storage-path tests use the rebranded
+  `cosmic-applet-ledger` directory, and UI tests match the redesign.
 
 ## [0.1.0] - 2026-09-26
 

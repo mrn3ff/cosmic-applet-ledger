@@ -549,7 +549,7 @@ fn selecting_disabled_provider_does_not_request_refresh() {
 }
 
 #[test]
-fn selecting_provider_preserves_local_popup_state() {
+fn selecting_provider_returns_to_its_detail_view() {
     let mut app = test_app(None);
     let popup = cosmic::iced::window::Id::unique();
     app.popup = Some(popup);
@@ -560,10 +560,7 @@ fn selecting_provider_preserves_local_popup_state() {
     let _task = app.handle_message(Message::SelectProvider(ProviderId::Gemini));
 
     assert_eq!(app.popup, Some(popup));
-    assert_eq!(
-        app.popup_route,
-        PopupRoute::ManageAccounts(ProviderId::Codex)
-    );
+    assert_eq!(app.popup_route, PopupRoute::ProviderDetail);
 }
 
 #[test]
@@ -838,7 +835,8 @@ fn applet_fallback_button_size_is_icon_only() {
     } else {
         (minor_padding, major_padding)
     };
-    let icon_px = suggested_w.min(suggested_h);
+    // The fallback icon is drawn 10px smaller than the panel's suggested size.
+    let icon_px = suggested_w.min(suggested_h).saturating_sub(10).max(14);
 
     let (width, height) = applet_fallback_button_size(&core);
 

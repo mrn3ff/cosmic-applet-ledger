@@ -47,7 +47,7 @@ impl KeyAuthenticationCase for KimiCase {
     }
 
     fn storage_root(root: &Path) -> PathBuf {
-        root.join("yapcap/kimi-accounts")
+        root.join("cosmic-applet-ledger/kimi-accounts")
     }
 
     fn account_facts(config: &Config, account_id: &str) -> Option<AccountFacts> {
@@ -98,7 +98,7 @@ impl KeyAuthenticationCase for MinimaxCase {
     }
 
     fn storage_root(root: &Path) -> PathBuf {
-        root.join("yapcap/minimax-accounts")
+        root.join("cosmic-applet-ledger/minimax-accounts")
     }
 
     fn account_facts(config: &Config, account_id: &str) -> Option<AccountFacts> {
@@ -151,7 +151,7 @@ impl KeyAuthenticationCase for OpenCodeGoCase {
     }
 
     fn storage_root(root: &Path) -> PathBuf {
-        root.join("yapcap/opencode-go-accounts")
+        root.join("cosmic-applet-ledger/opencode-go-accounts")
     }
 
     fn account_facts(config: &Config, account_id: &str) -> Option<AccountFacts> {
@@ -204,7 +204,7 @@ impl KeyAuthenticationCase for ZaiCase {
     }
 
     fn storage_root(root: &Path) -> PathBuf {
-        root.join("yapcap/zai-accounts")
+        root.join("cosmic-applet-ledger/zai-accounts")
     }
 
     fn account_facts(config: &Config, account_id: &str) -> Option<AccountFacts> {

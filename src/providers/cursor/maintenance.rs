@@ -274,7 +274,7 @@ mod tests {
     fn sync_drops_legacy_token_only_accounts() {
         let _guard = test_support::env_lock();
         let state_root = test_dir("cursor-legacy-token");
-        let legacy_root = state_root.join("yapcap/cursor-accounts/legacy");
+        let legacy_root = state_root.join("cosmic-applet-ledger/cursor-accounts/legacy");
         fs::create_dir_all(&legacy_root).unwrap();
         fs::write(legacy_root.join("cursor_token"), "cookie").unwrap();
         unsafe {
