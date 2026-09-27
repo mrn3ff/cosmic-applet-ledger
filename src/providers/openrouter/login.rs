@@ -101,7 +101,10 @@ pub fn prepare() -> OpenRouterLoginState {
     prepare_key_authentication::<OpenRouterKeyAuthentication>()
 }
 
-pub fn prepare_for_reauth(config: Config, account_id: &str) -> Result<OpenRouterLoginState, String> {
+pub fn prepare_for_reauth(
+    config: Config,
+    account_id: &str,
+) -> Result<OpenRouterLoginState, String> {
     prepare_key_authentication_for_reauth::<OpenRouterKeyAuthentication>(&config, account_id)
 }
 

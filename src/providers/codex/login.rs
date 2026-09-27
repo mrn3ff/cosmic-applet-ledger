@@ -466,7 +466,8 @@ mod tests {
         assert!(success.account.codex_home.join("metadata.json").exists());
         assert!(success.account.codex_home.join("tokens.json").exists());
 
-        let storage = ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/codex-accounts"));
+        let storage =
+            ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/codex-accounts"));
         let tokens = storage.load_tokens("codex-test").unwrap();
         assert_eq!(tokens.access_token, "access-1");
         assert_eq!(tokens.refresh_token, "refresh");
@@ -516,7 +517,8 @@ mod tests {
         );
         assert!(second.account.codex_home.ends_with("codex-new"));
 
-        let storage = ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/codex-accounts"));
+        let storage =
+            ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/codex-accounts"));
         let original_tokens = storage.load_tokens("codex-existing").unwrap();
         assert_eq!(original_tokens.access_token, "access-1");
         let new_tokens = storage.load_tokens("codex-new").unwrap();

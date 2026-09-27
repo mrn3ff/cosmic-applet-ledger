@@ -1,6 +1,5 @@
 use super::super::super::{
-    Alignment, Background, Color, Element, Length, Message, ProviderId,
-    container, fl, row, widget,
+    Alignment, Background, Color, Element, Length, Message, ProviderId, container, fl, row, widget,
 };
 use crate::providers::interface::ProviderAccountAddAction;
 

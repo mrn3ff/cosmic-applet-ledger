@@ -932,7 +932,10 @@ impl OpenRouterError {
             Self::RateLimited { .. } => true,
             Self::UsageRequest(source) => request_could_not_reach_network(source),
             Self::UsageHttp { status } => matches!(*status, 500 | 502 | 503 | 504),
-            Self::LoginRequired | Self::InvalidApiKey | Self::DecodeUsage(_) | Self::InvalidEnvelope => false,
+            Self::LoginRequired
+            | Self::InvalidApiKey
+            | Self::DecodeUsage(_)
+            | Self::InvalidEnvelope => false,
         }
     }
 }

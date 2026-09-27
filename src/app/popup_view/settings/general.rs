@@ -4,8 +4,8 @@ use super::super::{
     Alignment, Background, ButtonInteraction, Element, Length, Message, PanelIconStyle, ProviderId,
     ResetTimeFormat, UsageAmountFormat, UsageWindow, apply_alpha, component_container_style,
     component_divider_color, component_hover_color, component_on_color, component_selected_color,
-    component_surface_color, container, fl, provider_icon_handle,
-    provider_icon_variant, row, settings_block, usage_display, widget,
+    component_surface_color, container, fl, provider_icon_handle, provider_icon_variant, row,
+    settings_block, usage_display, widget,
 };
 
 pub(super) fn general_settings_view<'a>(config: &'a crate::config::Config) -> Element<'a, Message> {

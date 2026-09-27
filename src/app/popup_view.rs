@@ -11,9 +11,7 @@ use self::badges::{
     plan_badge,
 };
 use self::detail::{empty_state_view, selected_provider_view};
-use self::settings::{
-    about_view, manage_providers_view, provider_settings_view, settings_view,
-};
+use self::settings::{about_view, manage_providers_view, provider_settings_view, settings_view};
 use super::provider_assets::{provider_icon_handle, provider_icon_variant};
 use crate::app::{Message, PopupRoute};
 use crate::config::{Config, PanelIconStyle, ResetTimeFormat, UsageAmountFormat};
@@ -100,16 +98,16 @@ pub fn popup_content<'a>(
 
     let mut content_col = column![].width(Length::Fill);
     if let Some(h) = header {
-        content_col = content_col.push(narrow_chrome(h)).push(cosmic::iced::widget::Space::new().height(10));
+        content_col = content_col
+            .push(narrow_chrome(h))
+            .push(cosmic::iced::widget::Space::new().height(10));
     }
     if let Some(nav_row) = nav_row {
         content_col = content_col.push(narrow_chrome(nav_row));
     }
     content_col = content_col.push(body_panel);
 
-    let content = content_col
-        .padding(16)
-        .width(Length::Fill);
+    let content = content_col.padding(16).width(Length::Fill);
 
     Element::from(content)
 }
@@ -158,7 +156,10 @@ fn popup_body_container<'a>(
 }
 
 fn popup_body_is_scrollable(route: &PopupRoute) -> bool {
-    !matches!(route, PopupRoute::Settings | PopupRoute::About | PopupRoute::SwitchProvider)
+    !matches!(
+        route,
+        PopupRoute::Settings | PopupRoute::About | PopupRoute::SwitchProvider
+    )
 }
 
 pub(super) fn popup_empty_state_active(state: &AppState) -> bool {
@@ -221,7 +222,10 @@ fn panel<'a>(content: impl Into<Element<'a, Message>>) -> Element<'a, Message> {
     Element::from(container(content).width(Length::Fill).padding(0))
 }
 
-pub(super) fn switch_provider_view(state: &AppState, current: ProviderId) -> Element<'static, Message> {
+pub(super) fn switch_provider_view(
+    state: &AppState,
+    current: ProviderId,
+) -> Element<'static, Message> {
     let enabled_providers: Vec<_> = state
         .providers
         .iter()
@@ -280,61 +284,55 @@ pub(super) fn switch_provider_view(state: &AppState, current: ProviderId) -> Ele
             row_content = row_content.push(cosmic::iced::widget::Space::new().width(Length::Fill));
         }
 
-        let btn = widget::button::custom(
-            container(row_content)
+        let btn =
+            widget::button::custom(container(row_content).width(Length::Fill).padding([10, 12]))
                 .width(Length::Fill)
-                .padding([10, 12]),
-        )
-        .width(Length::Fill)
-        .class(cosmic::theme::Button::Custom {
-            active: Box::new(move |_focused, _theme| widget::button::Style {
-                background: Some(Background::Color(if is_current {
-                    Color::from_rgba(1.0, 1.0, 1.0, 0.08)
-                } else {
-                    Color::from_rgba(1.0, 1.0, 1.0, 0.02)
-                })),
-                border_radius: 2.0.into(),
-                border_width: 1.0,
-                border_color: if is_current {
-                    Color::from_rgba(1.0, 1.0, 1.0, 0.30)
-                } else {
-                    Color::from_rgba(1.0, 1.0, 1.0, 0.08)
-                },
-                text_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
-                icon_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
-                ..Default::default()
-            }),
-            disabled: Box::new(|_| widget::button::Style::new()),
-            hovered: Box::new(move |_focused, _theme| widget::button::Style {
-                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.14))),
-                border_radius: 2.0.into(),
-                border_width: 1.0,
-                border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.40),
-                text_color: Some(Color::WHITE),
-                icon_color: Some(Color::WHITE),
-                ..Default::default()
-            }),
-            pressed: Box::new(move |_focused, _theme| widget::button::Style {
-                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
-                border_radius: 2.0.into(),
-                border_width: 1.0,
-                border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.50),
-                text_color: Some(Color::WHITE),
-                icon_color: Some(Color::WHITE),
-                ..Default::default()
-            }),
-        })
-        .on_press(Message::SelectProvider(provider));
+                .class(cosmic::theme::Button::Custom {
+                    active: Box::new(move |_focused, _theme| widget::button::Style {
+                        background: Some(Background::Color(if is_current {
+                            Color::from_rgba(1.0, 1.0, 1.0, 0.08)
+                        } else {
+                            Color::from_rgba(1.0, 1.0, 1.0, 0.02)
+                        })),
+                        border_radius: 2.0.into(),
+                        border_width: 1.0,
+                        border_color: if is_current {
+                            Color::from_rgba(1.0, 1.0, 1.0, 0.30)
+                        } else {
+                            Color::from_rgba(1.0, 1.0, 1.0, 0.08)
+                        },
+                        text_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
+                        icon_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
+                        ..Default::default()
+                    }),
+                    disabled: Box::new(|_| widget::button::Style::new()),
+                    hovered: Box::new(move |_focused, _theme| widget::button::Style {
+                        background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.14))),
+                        border_radius: 2.0.into(),
+                        border_width: 1.0,
+                        border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.40),
+                        text_color: Some(Color::WHITE),
+                        icon_color: Some(Color::WHITE),
+                        ..Default::default()
+                    }),
+                    pressed: Box::new(move |_focused, _theme| widget::button::Style {
+                        background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+                        border_radius: 2.0.into(),
+                        border_width: 1.0,
+                        border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.50),
+                        text_color: Some(Color::WHITE),
+                        icon_color: Some(Color::WHITE),
+                        ..Default::default()
+                    }),
+                })
+                .on_press(Message::SelectProvider(provider));
 
         rows = rows.push(btn);
     }
 
     list = list.push(rows);
 
-    container(list)
-        .width(Length::Fill)
-        .padding(12)
-        .into()
+    container(list).width(Length::Fill).padding(12).into()
 }
 
 fn popup_header(
@@ -350,7 +348,7 @@ fn popup_header(
                 .leading_icon(widget::icon::from_name("go-previous-symbolic"))
                 .class(back_button_class())
                 .on_press(Message::NavigateTo(PopupRoute::ProviderDetail))
-                .into()
+                .into(),
         )
     }
 }
@@ -550,13 +548,10 @@ fn account_action_button_with_icon(
 ) -> Element<'static, Message> {
     let copy = widget::text(label).size(14);
 
-    let content = row![
-        icon,
-        copy,
-    ]
-    .spacing(10)
-    .align_y(Alignment::Center)
-    .width(Length::Fill);
+    let content = row![icon, copy,]
+        .spacing(10)
+        .align_y(Alignment::Center)
+        .width(Length::Fill);
 
     widget::button::custom(content)
         .width(Length::Fill)
@@ -986,21 +981,17 @@ fn provider_summary(
     let mut name_column = column![widget::text(provider.provider.label()).size(16)].spacing(1);
     if let Some(plan_str) = plan {
         let subtext = format_plan_label(plan_str);
-        name_column = name_column.push(
-            container(widget::text(subtext).size(11))
-                .style(|_| widget::container::Style {
-                    text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
-                    ..Default::default()
-                }),
-        );
+        name_column = name_column.push(container(widget::text(subtext).size(11)).style(|_| {
+            widget::container::Style {
+                text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                ..Default::default()
+            }
+        }));
     }
 
-    let mut title = row![
-        icon,
-        name_column,
-    ]
-    .spacing(10)
-    .align_y(Alignment::Center);
+    let mut title = row![icon, name_column,]
+        .spacing(10)
+        .align_y(Alignment::Center);
 
     if detected_without_accounts {
         title = title.push(badge_accent(fl!("provider-detected-chip")));

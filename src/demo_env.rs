@@ -4,8 +4,8 @@ use crate::config::{
     Config, ManagedAntigravityAccountConfig, ManagedClaudeAccountConfig, ManagedCodexAccountConfig,
     ManagedCopilotAccountConfig, ManagedCursorAccountConfig, ManagedGeminiAccountConfig,
     ManagedGrokAccountConfig, ManagedKimiAccountConfig, ManagedMinimaxAccountConfig,
-    ManagedOpenCodeGoAccountConfig, ManagedOpenRouterAccountConfig, ManagedZaiAccountConfig, ProviderEnablement,
-    ProviderVisibilityMode, paths,
+    ManagedOpenCodeGoAccountConfig, ManagedOpenRouterAccountConfig, ManagedZaiAccountConfig,
+    ProviderEnablement, ProviderVisibilityMode, paths,
 };
 use crate::model::{
     AccountSelectionStatus, AppState, AuthState, ExtraUsageState, ProviderAccountRuntimeState,
@@ -528,22 +528,52 @@ fn demo_tokens_by_day() -> Vec<crate::model::DayTokenUsage> {
 fn demo_tokens_by_model(provider: ProviderId) -> Vec<crate::model::ModelTokenUsage> {
     match provider {
         ProviderId::Claude => vec![
-            crate::model::ModelTokenUsage { model_name: "Claude 3.7 Sonnet".into(), token_count: 84_200 },
-            crate::model::ModelTokenUsage { model_name: "Claude 3.5 Haiku".into(), token_count: 38_100 },
-            crate::model::ModelTokenUsage { model_name: "Claude 3.5 Sonnet".into(), token_count: 19_500 },
+            crate::model::ModelTokenUsage {
+                model_name: "Claude 3.7 Sonnet".into(),
+                token_count: 84_200,
+            },
+            crate::model::ModelTokenUsage {
+                model_name: "Claude 3.5 Haiku".into(),
+                token_count: 38_100,
+            },
+            crate::model::ModelTokenUsage {
+                model_name: "Claude 3.5 Sonnet".into(),
+                token_count: 19_500,
+            },
         ],
         ProviderId::Codex => vec![
-            crate::model::ModelTokenUsage { model_name: "o3-mini".into(), token_count: 62_400 },
-            crate::model::ModelTokenUsage { model_name: "gpt-4o".into(), token_count: 45_800 },
-            crate::model::ModelTokenUsage { model_name: "codex-preview".into(), token_count: 23_100 },
+            crate::model::ModelTokenUsage {
+                model_name: "o3-mini".into(),
+                token_count: 62_400,
+            },
+            crate::model::ModelTokenUsage {
+                model_name: "gpt-4o".into(),
+                token_count: 45_800,
+            },
+            crate::model::ModelTokenUsage {
+                model_name: "codex-preview".into(),
+                token_count: 23_100,
+            },
         ],
         ProviderId::Grok => vec![
-            crate::model::ModelTokenUsage { model_name: "Grok 3".into(), token_count: 51_000 },
-            crate::model::ModelTokenUsage { model_name: "Grok 3 Mini".into(), token_count: 28_400 },
+            crate::model::ModelTokenUsage {
+                model_name: "Grok 3".into(),
+                token_count: 51_000,
+            },
+            crate::model::ModelTokenUsage {
+                model_name: "Grok 3 Mini".into(),
+                token_count: 28_400,
+            },
         ],
         _ => vec![
-            crate::model::ModelTokenUsage { model_name: "Primary Model".into(), token_count: 42_000 },
-            crate::model::ModelTokenUsage { model_name: "Fast Model".into(), token_count: 18_500 },
+            crate::model::ModelTokenUsage {
+                model_name: "Primary Model".into(),
+                token_count: 42_000,
+            },
+            crate::model::ModelTokenUsage {
+                model_name: "Fast Model".into(),
+                token_count: 18_500,
+            },
         ],
     }
 }
@@ -1192,8 +1222,14 @@ fn snapshot_openrouter() -> UsageSnapshot {
         },
         tokens_by_day: demo_tokens_by_day(),
         tokens_by_model: vec![
-            crate::model::ModelTokenUsage { model_name: "google/gemini-3.8-flash".into(), token_count: 96_300 },
-            crate::model::ModelTokenUsage { model_name: "anthropic/claude-sonnet-5".into(), token_count: 34_900 },
+            crate::model::ModelTokenUsage {
+                model_name: "google/gemini-3.8-flash".into(),
+                token_count: 96_300,
+            },
+            crate::model::ModelTokenUsage {
+                model_name: "anthropic/claude-sonnet-5".into(),
+                token_count: 34_900,
+            },
         ],
     }
 }
@@ -1622,9 +1658,11 @@ mod tests {
                     .iter()
                     .map(|a| &a.id)
                     .collect(),
-                ProviderId::OpenRouter => {
-                    config.openrouter_managed_accounts.iter().map(|a| &a.id).collect()
-                }
+                ProviderId::OpenRouter => config
+                    .openrouter_managed_accounts
+                    .iter()
+                    .map(|a| &a.id)
+                    .collect(),
                 ProviderId::Zai => config.zai_managed_accounts.iter().map(|a| &a.id).collect(),
             };
             for id in selected {

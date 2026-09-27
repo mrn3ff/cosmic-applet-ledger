@@ -131,7 +131,8 @@ impl LoginFlow for OpenRouterLoginFlow {
                                 if let Some(login) = app.openrouter_login.as_mut() {
                                     login.status = OpenRouterLoginStatus::Editing;
                                     login.error = Some(
-                                        "Failed to save OpenRouter account configuration".to_string(),
+                                        "Failed to save OpenRouter account configuration"
+                                            .to_string(),
                                     );
                                 }
                                 Task::none()

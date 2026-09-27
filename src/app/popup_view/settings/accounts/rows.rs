@@ -1,10 +1,8 @@
 use super::super::super::{
-    Alignment, Background, Color, Element, Length, Message, ProviderId,
-    account_label_text, apply_alpha, badge_destructive, badge_destructive_soft, badge_neutral,
-    badge_neutral_soft, badge_success, badge_success_soft, badge_warning, badge_warning_soft,
-    badge_with_tooltip,
-    component_on_color, container, disabled_account_label_text, fl, row,
-    widget,
+    Alignment, Background, Color, Element, Length, Message, ProviderId, account_label_text,
+    apply_alpha, badge_destructive, badge_destructive_soft, badge_neutral, badge_neutral_soft,
+    badge_success, badge_success_soft, badge_warning, badge_warning_soft, badge_with_tooltip,
+    component_on_color, container, disabled_account_label_text, fl, row, widget,
 };
 use crate::providers::interface::{
     ProviderAccountAction, ProviderAccountFacts, ProviderAccountStatus, ProviderAccountStatusKind,
@@ -169,9 +167,7 @@ pub(super) fn account_settings_row(
 pub(super) fn account_selector_list<'a>(
     rows: impl Into<Element<'a, Message>>,
 ) -> Element<'a, Message> {
-    container(rows)
-        .width(Length::Fill)
-        .into()
+    container(rows).width(Length::Fill).into()
 }
 
 pub(super) fn account_action_container<'a>(

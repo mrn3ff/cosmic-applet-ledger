@@ -99,9 +99,9 @@ impl ProviderAdapter for OpenRouterAdapter {
         let provider = self.id();
         Box::pin(async move {
             match handle {
-                ProviderAccountHandle::OpenRouter(account) => {
-                    openrouter::fetch(client, account).await.map_err(AppError::from)
-                }
+                ProviderAccountHandle::OpenRouter(account) => openrouter::fetch(client, account)
+                    .await
+                    .map_err(AppError::from),
                 _ => Err(AppError::InvalidAccountHandle { provider }),
             }
         })

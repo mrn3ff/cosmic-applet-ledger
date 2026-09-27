@@ -1157,8 +1157,9 @@ mod tests {
 
         use std::path::Path;
         assert!(
-            p.cache_dir
-                .ends_with(Path::new("com.example.LedgerTest/cache/cosmic-applet-ledger")),
+            p.cache_dir.ends_with(Path::new(
+                "com.example.LedgerTest/cache/cosmic-applet-ledger"
+            )),
             "unexpected cache_dir: {}",
             p.cache_dir.display()
         );
@@ -1170,8 +1171,9 @@ mod tests {
             p.claude_accounts_dir.display()
         );
         assert!(
-            p.log_dir
-                .ends_with(Path::new("com.example.LedgerTest/data/cosmic-applet-ledger/logs")),
+            p.log_dir.ends_with(Path::new(
+                "com.example.LedgerTest/data/cosmic-applet-ledger/logs"
+            )),
             "unexpected log_dir: {}",
             p.log_dir.display()
         );

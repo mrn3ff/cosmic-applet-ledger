@@ -49,13 +49,10 @@ pub(super) fn selected_provider_view<'a>(
 
     let body = account_body_items(active_account, provider, state, config, detection);
 
-    column![
-        summary,
-        usage_card(body),
-    ]
-    .spacing(14)
-    .width(Length::Fill)
-    .into()
+    column![summary, usage_card(body),]
+        .spacing(14)
+        .width(Length::Fill)
+        .into()
 }
 
 #[allow(dead_code)]
@@ -188,11 +185,14 @@ fn account_body_items<'a>(
         let no_account_notice = container(
             column![
                 widget::text("No active usage data").size(14),
-                container(widget::text("Click the gear icon above to configure credentials in Settings.").size(12))
-                    .style(|_| widget::container::Style {
-                        text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
-                        ..Default::default()
-                    }),
+                container(
+                    widget::text("Click the gear icon above to configure credentials in Settings.")
+                        .size(12)
+                )
+                .style(|_| widget::container::Style {
+                    text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                    ..Default::default()
+                }),
             ]
             .spacing(4)
             .width(Length::Fill),
@@ -217,8 +217,8 @@ fn account_body_items<'a>(
 
 fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
     let now = chrono::Utc::now();
-    let section_label = container(widget::text("LIMITS").size(11))
-        .style(|_| widget::container::Style {
+    let section_label =
+        container(widget::text("LIMITS").size(11)).style(|_| widget::container::Style {
             text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
             ..Default::default()
         });
@@ -244,9 +244,7 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
             tooltip: format!("Session: {right_label}"),
         });
 
-        meters_col = meters_col.push(
-            column![header_row, bar].spacing(6).width(Length::Fill)
-        );
+        meters_col = meters_col.push(column![header_row, bar].spacing(6).width(Length::Fill));
     }
 
     if let Some(weekly) = weekly_window {
@@ -275,18 +273,22 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
             } else if diff.num_days() > 0 {
                 format!("Resets in {}d {}h", diff.num_days(), diff.num_hours() % 24)
             } else if diff.num_hours() > 0 {
-                format!("Resets in {}h {}m", diff.num_hours(), diff.num_minutes() % 60)
+                format!(
+                    "Resets in {}h {}m",
+                    diff.num_hours(),
+                    diff.num_minutes() % 60
+                )
             } else {
                 format!("Resets in {}m", diff.num_minutes().max(1))
             };
 
-            weekly_col = weekly_col.push(
-                container(widget::text(reset_text).size(11))
-                    .style(|_| widget::container::Style {
+            weekly_col =
+                weekly_col.push(container(widget::text(reset_text).size(11)).style(|_| {
+                    widget::container::Style {
                         text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
                         ..Default::default()
-                    })
-            );
+                    }
+                }));
         }
 
         meters_col = meters_col.push(weekly_col);
@@ -363,31 +365,53 @@ fn limit_windows(windows: &[UsageWindow]) -> (Option<&UsageWindow>, Option<&Usag
 
 fn is_session_like(w: &UsageWindow) -> bool {
     let label = w.label.to_lowercase();
-    label.contains("session") || label.contains("5h") || label.contains("5 hour") || label.contains("five hour") || label == "chat" || w.window_seconds == Some(5 * 3600)
+    label.contains("session")
+        || label.contains("5h")
+        || label.contains("5 hour")
+        || label.contains("five hour")
+        || label == "chat"
+        || w.window_seconds == Some(5 * 3600)
 }
 
 fn find_session_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
-    windows.iter().find(|w| is_session_like(w)).or_else(|| {
-        windows.iter().find(|w| w.window_seconds.is_some_and(|s| s < 24 * 3600))
-    }).or_else(|| windows.first())
+    windows
+        .iter()
+        .find(|w| is_session_like(w))
+        .or_else(|| {
+            windows
+                .iter()
+                .find(|w| w.window_seconds.is_some_and(|s| s < 24 * 3600))
+        })
+        .or_else(|| windows.first())
 }
 
 fn find_weekly_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
-    windows.iter().find(|w| {
-        let label = w.label.to_lowercase();
-        label.contains("week") || label.contains("7-day") || label.contains("7d") || label.contains("weekly") || w.window_seconds == Some(7 * 24 * 3600)
-    }).or_else(|| {
-        windows.iter().find(|w| {
+    windows
+        .iter()
+        .find(|w| {
             let label = w.label.to_lowercase();
-            !label.contains("session") && !label.contains("5h") && !label.contains("5 hour") && w.window_seconds.is_some_and(|s| s >= 24 * 3600)
+            label.contains("week")
+                || label.contains("7-day")
+                || label.contains("7d")
+                || label.contains("weekly")
+                || w.window_seconds == Some(7 * 24 * 3600)
         })
-    }).or_else(|| {
-        if windows.len() > 1 {
-            windows.get(1)
-        } else {
-            None
-        }
-    })
+        .or_else(|| {
+            windows.iter().find(|w| {
+                let label = w.label.to_lowercase();
+                !label.contains("session")
+                    && !label.contains("5h")
+                    && !label.contains("5 hour")
+                    && w.window_seconds.is_some_and(|s| s >= 24 * 3600)
+            })
+        })
+        .or_else(|| {
+            if windows.len() > 1 {
+                windows.get(1)
+            } else {
+                None
+            }
+        })
 }
 
 fn ensure_seven_days(days: &[crate::model::DayTokenUsage]) -> Vec<crate::model::DayTokenUsage> {
@@ -438,8 +462,8 @@ fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'stati
         1_000_000_000
     };
 
-    let section_label = container(widget::text("TOKENS BY DAY").size(11))
-        .style(|_| widget::container::Style {
+    let section_label =
+        container(widget::text("TOKENS BY DAY").size(11)).style(|_| widget::container::Style {
             text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
             ..Default::default()
         });
@@ -519,8 +543,8 @@ fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<
         1_000_000_000
     };
 
-    let section_label = container(widget::text("TOKENS BY MODEL").size(11))
-        .style(|_| widget::container::Style {
+    let section_label =
+        container(widget::text("TOKENS BY MODEL").size(11)).style(|_| widget::container::Style {
             text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
             ..Default::default()
         });
@@ -592,7 +616,11 @@ fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<
 
         let slider_with_tip = widget::tooltip::tooltip(
             slider,
-            widget::text(format!("{}: {} tokens", model.model_name, model.token_count)).size(12),
+            widget::text(format!(
+                "{}: {} tokens",
+                model.model_name, model.token_count
+            ))
+            .size(12),
             widget::tooltip::Position::Top,
         );
 
@@ -728,10 +756,7 @@ fn usage_card<'a>(items: Vec<Element<'a, Message>>) -> Element<'a, Message> {
     for item in items {
         content = content.push(item);
     }
-    container(content)
-        .width(Length::Fill)
-        .padding(0)
-        .into()
+    container(content).width(Length::Fill).padding(0).into()
 }
 
 #[allow(dead_code)]
@@ -808,12 +833,21 @@ fn provider_warning_banner(
         }
     } else if accounts.is_empty() {
         if detected_without_accounts(state, detection, provider.provider) {
-            Some(format!("{} detected on machine. Add account in Settings.", provider.provider.label()))
+            Some(format!(
+                "{} detected on machine. Add account in Settings.",
+                provider.provider.label()
+            ))
         } else {
-            Some(format!("No account configured for {}. Add in Settings.", provider.provider.label()))
+            Some(format!(
+                "No account configured for {}. Add in Settings.",
+                provider.provider.label()
+            ))
         }
     } else if provider.account_status == AccountSelectionStatus::LoginRequired {
-        Some(format!("Login required for {}. Configure in Settings.", provider.provider.label()))
+        Some(format!(
+            "Login required for {}. Configure in Settings.",
+            provider.provider.label()
+        ))
     } else {
         None
     };
@@ -843,7 +877,7 @@ fn provider_warning_banner(
             },
             ..Default::default()
         })
-        .into()
+        .into(),
     )
 }
 
@@ -1167,7 +1201,9 @@ fn format_token_metric(tokens: u64) -> String {
 #[allow(dead_code)]
 fn tokens_by_day_card(days: &[crate::model::DayTokenUsage]) -> Element<'static, Message> {
     let peak = days.iter().map(|d| d.token_count).max().unwrap_or(1).max(1);
-    let mut rows = column![widget::text("TOKENS BY DAY").size(12)].spacing(8).width(Length::Fill);
+    let mut rows = column![widget::text("TOKENS BY DAY").size(12)]
+        .spacing(8)
+        .width(Length::Fill);
 
     for day in days {
         let pct = (day.token_count as f32 / peak as f32) * 100.0;
@@ -1213,8 +1249,15 @@ fn tokens_by_day_card(days: &[crate::model::DayTokenUsage]) -> Element<'static, 
 
 #[allow(dead_code)]
 fn tokens_by_model_card(models: &[crate::model::ModelTokenUsage]) -> Element<'static, Message> {
-    let peak = models.iter().map(|m| m.token_count).max().unwrap_or(1).max(1);
-    let mut rows = column![widget::text("TOKENS BY MODEL").size(12)].spacing(8).width(Length::Fill);
+    let peak = models
+        .iter()
+        .map(|m| m.token_count)
+        .max()
+        .unwrap_or(1)
+        .max(1);
+    let mut rows = column![widget::text("TOKENS BY MODEL").size(12)]
+        .spacing(8)
+        .width(Length::Fill);
 
     for model in models {
         let pct = (model.token_count as f32 / peak as f32).clamp(0.0, 100.0);
@@ -1281,7 +1324,11 @@ fn tokens_by_model_card(models: &[crate::model::ModelTokenUsage]) -> Element<'st
 
         let slider_with_tip = widget::tooltip::tooltip(
             slider,
-            widget::text(format!("{}: {} tokens", model.model_name, model.token_count)).size(12),
+            widget::text(format!(
+                "{}: {} tokens",
+                model.model_name, model.token_count
+            ))
+            .size(12),
             widget::tooltip::Position::Top,
         );
 
@@ -1316,17 +1363,12 @@ fn usage_block_content(
 
     let bar = usage_progress_bar(details.meter);
 
-    let mut content = column![
-        header_row,
-        bar,
-    ]
-    .spacing(6)
-    .width(Length::Fill);
+    let mut content = column![header_row, bar,].spacing(6).width(Length::Fill);
 
     if let Some(secondary) = details.secondary {
         if !secondary.is_empty() {
-            let sec_text = container(widget::text(secondary).size(11))
-                .style(|_| widget::container::Style {
+            let sec_text =
+                container(widget::text(secondary).size(11)).style(|_| widget::container::Style {
                     text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
                     ..Default::default()
                 });

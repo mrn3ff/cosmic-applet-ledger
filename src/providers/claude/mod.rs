@@ -356,7 +356,10 @@ fn normalize(
 
 /// Tokens by day/model for the last seven local days, read from Claude Code's
 /// session transcripts (`<config>/projects/**/*.jsonl`).
-fn claude_local_stats() -> (Vec<crate::model::DayTokenUsage>, Vec<crate::model::ModelTokenUsage>) {
+fn claude_local_stats() -> (
+    Vec<crate::model::DayTokenUsage>,
+    Vec<crate::model::ModelTokenUsage>,
+) {
     let Some(config_dir) = claude_config_dir() else {
         return (Vec::new(), Vec::new());
     };
@@ -498,7 +501,9 @@ fn friendly_model_name(model_id: &str) -> String {
     let Some(rest) = base.strip_prefix("claude-") else {
         return model_id.to_string();
     };
-    let mut parts = rest.split('-').filter(|part| !(part.len() == 8 && part.chars().all(|c| c.is_ascii_digit())));
+    let mut parts = rest
+        .split('-')
+        .filter(|part| !(part.len() == 8 && part.chars().all(|c| c.is_ascii_digit())));
     let Some(family) = parts.next() else {
         return model_id.to_string();
     };
@@ -1084,7 +1089,10 @@ mod tests {
     #[test]
     fn friendly_model_name_formats_claude_ids() {
         assert_eq!(friendly_model_name("claude-opus-5-5"), "Opus 5.5");
-        assert_eq!(friendly_model_name("claude-haiku-4-5-20251001"), "Haiku 4.5");
+        assert_eq!(
+            friendly_model_name("claude-haiku-4-5-20251001"),
+            "Haiku 4.5"
+        );
         assert_eq!(friendly_model_name("claude-sonnet-5"), "Sonnet 5");
         assert_eq!(friendly_model_name("claude-opus-5-5[1m]"), "Opus 5.5");
         assert_eq!(friendly_model_name("gpt-x"), "gpt-x");

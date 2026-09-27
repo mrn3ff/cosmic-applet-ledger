@@ -486,7 +486,8 @@ mod tests {
         assert!(success.account.account_root.join("metadata.json").exists());
         assert!(success.account.account_root.join("tokens.json").exists());
 
-        let storage = ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/gemini-accounts"));
+        let storage =
+            ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/gemini-accounts"));
         let tokens = storage.load_tokens("gemini-test").unwrap();
         assert_eq!(tokens.access_token, "access-1");
         assert_eq!(tokens.refresh_token, "refresh-1");
@@ -531,7 +532,8 @@ mod tests {
 
         assert_eq!(second.account.id, "gemini-existing");
         assert!(!second.account.account_root.ends_with("gemini-new"));
-        let storage = ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/gemini-accounts"));
+        let storage =
+            ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/gemini-accounts"));
         let tokens = storage.load_tokens("gemini-existing").unwrap();
         assert_eq!(tokens.access_token, "access-2");
         assert!(storage.load_tokens("gemini-new").is_err());

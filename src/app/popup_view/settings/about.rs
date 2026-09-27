@@ -24,11 +24,12 @@ fn about_identity(version: &str) -> Element<'static, Message> {
     let identity_col = cosmic::iced::widget::column![
         widget::icon::icon(app_icon_handle()).size(48),
         widget::text(fl!("app-title")).size(20),
-        container(widget::text(format!("v{version}")).size(12))
-            .style(|_| widget::container::Style {
+        container(widget::text(format!("v{version}")).size(12)).style(|_| {
+            widget::container::Style {
                 text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
                 ..Default::default()
-            }),
+            }
+        }),
     ]
     .spacing(6)
     .align_x(Alignment::Center)

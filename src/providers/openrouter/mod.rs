@@ -43,7 +43,8 @@ pub(crate) async fn fetch_with_endpoint(
     endpoint: &str,
 ) -> Result<UsageSnapshot, OpenRouterError> {
     let client = crate::runtime::http_client_without_redirects();
-    let stored_key = storage::load_api_key(&account.id).map_err(|_| OpenRouterError::LoginRequired)?;
+    let stored_key =
+        storage::load_api_key(&account.id).map_err(|_| OpenRouterError::LoginRequired)?;
     let api_key = normalize_api_key(&stored_key).map_err(|error| {
         if error == "API key is required" {
             OpenRouterError::LoginRequired
@@ -72,7 +73,10 @@ pub(crate) async fn fetch_with_endpoint(
     }
 
     let updated_at = chrono::Utc::now();
-    let body = response.text().await.map_err(OpenRouterError::UsageRequest)?;
+    let body = response
+        .text()
+        .await
+        .map_err(OpenRouterError::UsageRequest)?;
 
     // Fetch the key list for management keys (their own usage is always zero)
     let keys_body = if quota::is_management_key(&body) {

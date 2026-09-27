@@ -3,8 +3,8 @@ use super::{
     APPLET_BAR_WIDTH_HEIGHT_MULTIPLIER, APPLET_ICON_GAP, APPLET_PERCENT_CELL_HORIZONTAL_PAD,
     APPLET_PERCENT_GLYPH_WIDTH, Alignment, AppModel, AppState, Background, Color, Config,
     CosmicButton, CosmicConfigEntry, Element, Length, Limits, Message, PanelIconStyle, ProviderId,
-    Size, UsageAmountFormat, provider_icon_handle, provider_icon_variant, row,
-    usage_display, widget,
+    Size, UsageAmountFormat, provider_icon_handle, provider_icon_variant, row, usage_display,
+    widget,
 };
 use crate::model::AppletWindows;
 

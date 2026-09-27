@@ -601,8 +601,9 @@ pub(super) fn openrouter_login_controls(
     if login.status == OpenRouterLoginStatus::Editing {
         content = content.push(openrouter_login_fields(login)).push(
             row![
-                widget::button::standard(fl!("account-add"))
-                    .on_press_maybe(enabled.then_some(openrouter_login_message(OpenRouterLoginEvent::Saved))),
+                widget::button::standard(fl!("account-add")).on_press_maybe(
+                    enabled.then_some(openrouter_login_message(OpenRouterLoginEvent::Saved))
+                ),
                 widget::button::text(fl!("account-cancel")).on_press_maybe(
                     enabled.then_some(Message::CancelLogin(crate::model::ProviderId::OpenRouter))
                 ),
@@ -631,7 +632,9 @@ fn openrouter_login_fields(login: &OpenRouterLoginState) -> Element<'_, Message>
         widget::text_input::secure_input(
             "sk-or-v1-...",
             &login.api_key,
-            Some(openrouter_login_message(OpenRouterLoginEvent::ApiKeyVisibilityToggled)),
+            Some(openrouter_login_message(
+                OpenRouterLoginEvent::ApiKeyVisibilityToggled
+            )),
             !login.api_key_visible,
         )
         .on_input(|api_key| openrouter_login_message(OpenRouterLoginEvent::ApiKeyChanged(api_key)))

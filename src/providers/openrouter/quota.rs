@@ -108,7 +108,9 @@ fn spend_share(spent: f64, balance: f64) -> f32 {
 /// Analytics metric values come back as either JSON strings or numbers.
 fn metric_u64(row: &serde_json::Value, name: &str) -> u64 {
     match row.get(name) {
-        Some(serde_json::Value::String(value)) => value.parse::<f64>().map_or(0, |v| v.max(0.0) as u64),
+        Some(serde_json::Value::String(value)) => {
+            value.parse::<f64>().map_or(0, |v| v.max(0.0) as u64)
+        }
         Some(value) => value.as_f64().map_or(0, |v| v.max(0.0) as u64),
         None => 0,
     }
@@ -123,7 +125,9 @@ fn analytics_rows(body: &str) -> Option<Vec<serde_json::Value>> {
 /// the model names `/activity` reports.
 fn strip_model_date_suffix(model: &str) -> &str {
     match model.rsplit_once('-') {
-        Some((base, suffix)) if suffix.len() == 8 && suffix.chars().all(|c| c.is_ascii_digit()) => base,
+        Some((base, suffix)) if suffix.len() == 8 && suffix.chars().all(|c| c.is_ascii_digit()) => {
+            base
+        }
         _ => model,
     }
 }
@@ -263,7 +267,14 @@ pub fn parse(
                     } else {
                         item.total_tokens.or(item.tokens).unwrap_or(0)
                     };
-                    let date_str = item.date.as_deref().unwrap_or("").split_whitespace().next().unwrap_or("").to_string();
+                    let date_str = item
+                        .date
+                        .as_deref()
+                        .unwrap_or("")
+                        .split_whitespace()
+                        .next()
+                        .unwrap_or("")
+                        .to_string();
                     if !date_str.is_empty() {
                         *day_map.entry(date_str).or_insert(0) += total;
                     }
@@ -274,13 +285,24 @@ pub fn parse(
 
                 for item in items {
                     let cost = item.usage.or(item.byok_usage_inference).unwrap_or(0.0);
-                    let date_str = item.date.as_deref().unwrap_or("").split_whitespace().next().unwrap_or("").to_string();
+                    let date_str = item
+                        .date
+                        .as_deref()
+                        .unwrap_or("")
+                        .split_whitespace()
+                        .next()
+                        .unwrap_or("")
+                        .to_string();
                     if !date_str.is_empty() {
                         if date_str == today_str || date_str == utc_today_str {
                             activity_daily_cost += cost;
                         }
-                        if let Ok(parsed_date) = chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d") {
-                            if parsed_date >= seven_days_ago && (parsed_date <= today || parsed_date <= utc_today) {
+                        if let Ok(parsed_date) =
+                            chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
+                        {
+                            if parsed_date >= seven_days_ago
+                                && (parsed_date <= today || parsed_date <= utc_today)
+                            {
                                 activity_weekly_cost += cost;
                             }
                         }
@@ -294,7 +316,9 @@ pub fn parse(
                     let is_today = date_str == today_str;
                     let day_label = if is_today {
                         "Today".to_string()
-                    } else if let Ok(parsed) = chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d") {
+                    } else if let Ok(parsed) =
+                        chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
+                    {
                         parsed.format("%a").to_string()
                     } else {
                         date_str.clone()
@@ -412,8 +436,14 @@ mod tests {
         let keys = r#"{"data":[{"usage_daily":15.03,"usage_weekly":50.1},{"usage_daily":1.0,"usage_weekly":2.0}]}"#;
         assert!(is_management_key(MANAGEMENT_KEY));
         let snapshot = parse(MANAGEMENT_KEY, None, None, Some(keys), Utc::now()).unwrap();
-        assert_eq!(snapshot.windows[0].reset_description.as_deref(), Some("$16.03"));
-        assert_eq!(snapshot.windows[1].reset_description.as_deref(), Some("$52.10"));
+        assert_eq!(
+            snapshot.windows[0].reset_description.as_deref(),
+            Some("$16.03")
+        );
+        assert_eq!(
+            snapshot.windows[1].reset_description.as_deref(),
+            Some("$52.10")
+        );
     }
 
     #[test]
@@ -444,8 +474,18 @@ mod tests {
         let last = snapshot.tokens_by_day.last().unwrap();
         assert!(last.is_today);
         assert_eq!(last.token_count, 1200);
-        assert_eq!(snapshot.tokens_by_day.iter().map(|d| d.token_count).sum::<u64>(), 1234);
-        assert_eq!(snapshot.tokens_by_model[0].model_name, "google/gemini-3.8-flash");
+        assert_eq!(
+            snapshot
+                .tokens_by_day
+                .iter()
+                .map(|d| d.token_count)
+                .sum::<u64>(),
+            1234
+        );
+        assert_eq!(
+            snapshot.tokens_by_model[0].model_name,
+            "google/gemini-3.8-flash"
+        );
         assert_eq!(snapshot.tokens_by_model[0].token_count, 900);
     }
 
@@ -454,6 +494,9 @@ mod tests {
         let body = r#"{"data":{"label":"k","usage_daily":3.5,"usage_weekly":7.0}}"#;
         assert!(!is_management_key(body));
         let snapshot = parse(body, None, None, None, Utc::now()).unwrap();
-        assert_eq!(snapshot.windows[0].reset_description.as_deref(), Some("$3.50"));
+        assert_eq!(
+            snapshot.windows[0].reset_description.as_deref(),
+            Some("$3.50")
+        );
     }
 }

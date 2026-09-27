@@ -529,7 +529,9 @@ mod tests {
         }
 
         assert_eq!(second.account.id, "antigravity-existing");
-        let storage = ProviderAccountStorage::new(state_root.join("cosmic-applet-ledger/antigravity-accounts"));
+        let storage = ProviderAccountStorage::new(
+            state_root.join("cosmic-applet-ledger/antigravity-accounts"),
+        );
         let tokens = storage.load_tokens("antigravity-existing").unwrap();
         assert_eq!(tokens.access_token, "access-2");
         assert!(storage.load_tokens("antigravity-new").is_err());
