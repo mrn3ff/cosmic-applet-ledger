@@ -22,6 +22,26 @@
 
 Ledger sits in the COSMIC panel and shows how much of your AI quota you've used — session and weekly limits, spend, and token usage — for every provider you connect. It talks to provider APIs directly with accounts you add in Ledger. No telemetry, no cloud sync, no third-party servers.
 
+## Screenshots
+
+<p align="center">
+  <img src="resources/screenshots/screenshot-claude.png" alt="Claude: limits, tokens by day and tokens by model" width="280">
+  <img src="resources/screenshots/screenshot-openrouter.png" alt="OpenRouter: daily and weekly spend with token charts" width="280">
+  <img src="resources/screenshots/screenshot-settings.png" alt="Settings: providers, preferences and about" width="280">
+</p>
+
+<p align="center">
+  <img src="resources/screenshots/screenshot-codex.png" alt="Codex: session and weekly limits" width="280">
+  <img src="resources/screenshots/screenshot-accounts.png" alt="Claude account settings" width="280">
+  <img src="resources/screenshots/screenshot-switch-provider.png" alt="Switch provider list" width="280">
+</p>
+
+<p align="center">
+  <img src="resources/screenshots/screenshot-panel.png" alt="Ledger in the COSMIC panel in icon-only mode" width="560">
+  <br>
+  <sub>Screenshots use demo data (<code>just run-demo</code>).</sub>
+</p>
+
 ## Features
 
 - **One layout for every provider.** Each provider's page shows a **LIMITS** card with its session and weekly windows and a reset countdown.
