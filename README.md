@@ -24,22 +24,33 @@ Ledger sits in the COSMIC panel and shows how much of your AI quota you've used 
 
 ## Screenshots
 
-<p align="center">
-  <img src="resources/screenshots/screenshot-claude.png" alt="Claude: limits, tokens by day and tokens by model" width="280">
-  <img src="resources/screenshots/screenshot-openrouter.png" alt="OpenRouter: daily and weekly spend with token charts" width="280">
-  <img src="resources/screenshots/screenshot-settings.png" alt="Settings: providers, preferences and about" width="280">
-</p>
-
-<p align="center">
-  <img src="resources/screenshots/screenshot-codex.png" alt="Codex: session and weekly limits" width="280">
-  <img src="resources/screenshots/screenshot-accounts.png" alt="Claude account settings" width="280">
-  <img src="resources/screenshots/screenshot-switch-provider.png" alt="Switch provider list" width="280">
-</p>
+<table>
+  <tr>
+    <th width="33%">Claude</th>
+    <th width="33%">OpenRouter</th>
+    <th width="33%">Codex</th>
+  </tr>
+  <tr>
+    <td valign="top"><img src="resources/screenshots/screenshot-claude.png" alt="Claude: limits, tokens by day and tokens by model" width="100%"></td>
+    <td valign="top"><img src="resources/screenshots/screenshot-openrouter.png" alt="OpenRouter: daily and weekly spend with token charts" width="100%"></td>
+    <td valign="top"><img src="resources/screenshots/screenshot-codex.png" alt="Codex: session and weekly limits" width="100%"></td>
+  </tr>
+  <tr>
+    <th>Settings</th>
+    <th>Switch provider</th>
+    <th>Accounts</th>
+  </tr>
+  <tr>
+    <td valign="top"><img src="resources/screenshots/screenshot-settings.png" alt="Settings: providers, preferences and about" width="100%"></td>
+    <td valign="top"><img src="resources/screenshots/screenshot-switch-provider.png" alt="Switch provider list" width="100%"></td>
+    <td valign="top"><img src="resources/screenshots/screenshot-accounts.png" alt="Claude account settings" width="100%"></td>
+  </tr>
+</table>
 
 <p align="center">
   <img src="resources/screenshots/screenshot-panel.png" alt="Ledger in the COSMIC panel in icon-only mode" width="560">
   <br>
-  <sub>Screenshots use demo data (<code>just run-demo</code>).</sub>
+  <sub>Ledger in the panel (icon-only mode). Screenshots use demo data from <code>just run-demo</code>.</sub>
 </p>
 
 ## Features
