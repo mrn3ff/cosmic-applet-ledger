@@ -248,6 +248,8 @@ mod tests {
                 provider_cost: None,
                 extra_usage: None,
                 identity: crate::model::ProviderIdentity::default(),
+                tokens_by_day: Vec::new(),
+                tokens_by_model: Vec::new(),
             });
         }
         let mut account = ProviderAccountRuntimeState::empty(ProviderId::Codex, "codex-1", "Codex");
@@ -261,6 +263,8 @@ mod tests {
             provider_cost: None,
             extra_usage: None,
             identity: crate::model::ProviderIdentity::default(),
+            tokens_by_day: Vec::new(),
+            tokens_by_model: Vec::new(),
         });
         app.state.upsert_account(account);
 

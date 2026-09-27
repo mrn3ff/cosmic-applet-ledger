@@ -37,6 +37,8 @@ fn snapshot() -> UsageSnapshot {
             plan: None,
             display_name: None,
         },
+        tokens_by_day: Vec::new(),
+        tokens_by_model: Vec::new(),
     }
 }
 

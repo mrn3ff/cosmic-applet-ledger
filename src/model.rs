@@ -428,6 +428,8 @@ mod tests {
             provider_cost: None,
             extra_usage: None,
             identity: ProviderIdentity::default(),
+            tokens_by_day: Vec::new(),
+            tokens_by_model: Vec::new(),
         }
     }
 
