@@ -425,7 +425,7 @@ fn claude_local_stats() -> (
             token_count,
         })
         .collect();
-    models.sort_by(|a, b| b.token_count.cmp(&a.token_count));
+    models.sort_by_key(|model| std::cmp::Reverse(model.token_count));
     models.truncate(4);
 
     (days, models)

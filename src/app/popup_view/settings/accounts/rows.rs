@@ -261,26 +261,26 @@ fn account_row_container<'a>(
     .style(move |theme: &cosmic::Theme| {
         let cosmic = theme.cosmic();
         let warning = cosmic.warning.base;
-        let mut style = widget::container::Style::default();
-        style.text_color = Some(component_on_color(theme));
-        style.background = if action_required {
-            Some(Background::Color(apply_alpha(warning.into(), 0.08)))
-        } else {
-            None
-        };
-        style.border.radius = 2.0.into();
-        style.border.width = if action_required { 1.0 } else { 0.0 };
-        style.border.color = if action_required {
-            apply_alpha(warning.into(), 0.72)
-        } else {
-            Color::TRANSPARENT
-        };
-        style.icon_color = Some(if enabled {
-            component_on_color(theme)
-        } else {
-            apply_alpha(component_on_color(theme), 0.45)
-        });
-        style
+        widget::container::Style {
+            text_color: Some(component_on_color(theme)),
+            background: action_required
+                .then(|| Background::Color(apply_alpha(warning.into(), 0.08))),
+            border: cosmic::iced::Border {
+                radius: 2.0.into(),
+                width: if action_required { 1.0 } else { 0.0 },
+                color: if action_required {
+                    apply_alpha(warning.into(), 0.72)
+                } else {
+                    Color::TRANSPARENT
+                },
+            },
+            icon_color: Some(if enabled {
+                component_on_color(theme)
+            } else {
+                apply_alpha(component_on_color(theme), 0.45)
+            }),
+            ..Default::default()
+        }
     })
     .into()
 }

@@ -195,7 +195,7 @@ pub fn apply_analytics(
                 token_count,
             })
             .collect();
-        models.sort_by(|a, b| b.token_count.cmp(&a.token_count));
+        models.sort_by_key(|model| std::cmp::Reverse(model.token_count));
         models.truncate(5);
         snapshot.tokens_by_model = models;
     }
@@ -221,21 +221,21 @@ pub fn parse(
     let limit_remaining = data.limit_remaining;
 
     let mut credits_remaining: Option<f64> = None;
-    if let Some(c_body) = credits_body {
-        if let Ok(c_resp) = serde_json::from_str::<CreditsResponse>(c_body) {
-            let total = c_resp
-                .data
-                .as_ref()
-                .and_then(|d| d.total_credits)
-                .or(c_resp.total_credits);
-            let used = c_resp
-                .data
-                .as_ref()
-                .and_then(|d| d.total_usage)
-                .or(c_resp.total_usage);
-            if let (Some(total), Some(used)) = (total, used) {
-                credits_remaining = Some((total - used).max(0.0));
-            }
+    if let Some(c_body) = credits_body
+        && let Ok(c_resp) = serde_json::from_str::<CreditsResponse>(c_body)
+    {
+        let total = c_resp
+            .data
+            .as_ref()
+            .and_then(|d| d.total_credits)
+            .or(c_resp.total_credits);
+        let used = c_resp
+            .data
+            .as_ref()
+            .and_then(|d| d.total_usage)
+            .or(c_resp.total_usage);
+        if let (Some(total), Some(used)) = (total, used) {
+            credits_remaining = Some((total - used).max(0.0));
         }
     }
 
@@ -245,101 +245,95 @@ pub fn parse(
     let mut activity_daily_cost = 0.0;
     let mut activity_weekly_cost = 0.0;
 
-    if let Some(a_body) = activity_body {
-        if let Ok(a_resp) = serde_json::from_str::<ActivityResponse>(a_body) {
-            if let Some(items) = a_resp.data.or(a_resp.rows) {
-                use std::collections::HashMap;
-                let mut day_map: HashMap<String, u64> = HashMap::new();
-                let mut model_map: HashMap<String, u64> = HashMap::new();
+    if let Some(a_body) = activity_body
+        && let Ok(a_resp) = serde_json::from_str::<ActivityResponse>(a_body)
+        && let Some(items) = a_resp.data.or(a_resp.rows)
+    {
+        use std::collections::HashMap;
+        let mut day_map: HashMap<String, u64> = HashMap::new();
+        let mut model_map: HashMap<String, u64> = HashMap::new();
 
-                let today = Local::now().date_naive();
-                let today_str = today.format("%Y-%m-%d").to_string();
-                let utc_today = updated_at.date_naive();
-                let utc_today_str = utc_today.format("%Y-%m-%d").to_string();
-                let seven_days_ago = today - chrono::Duration::days(7);
+        let today = Local::now().date_naive();
+        let today_str = today.format("%Y-%m-%d").to_string();
+        let utc_today = updated_at.date_naive();
+        let utc_today_str = utc_today.format("%Y-%m-%d").to_string();
+        let seven_days_ago = today - chrono::Duration::days(7);
 
-                for item in &items {
-                    let prompt = item.prompt_tokens.unwrap_or(0);
-                    let completion = item.completion_tokens.unwrap_or(0);
-                    let reasoning = item.reasoning_tokens.unwrap_or(0);
-                    let total = if prompt + completion + reasoning > 0 {
-                        prompt + completion + reasoning
-                    } else {
-                        item.total_tokens.or(item.tokens).unwrap_or(0)
-                    };
-                    let date_str = item
-                        .date
-                        .as_deref()
-                        .unwrap_or("")
-                        .split_whitespace()
-                        .next()
-                        .unwrap_or("")
-                        .to_string();
-                    if !date_str.is_empty() {
-                        *day_map.entry(date_str).or_insert(0) += total;
-                    }
-                    if let Some(ref model) = item.model {
-                        *model_map.entry(model.clone()).or_insert(0) += total;
-                    }
+        for item in &items {
+            let prompt = item.prompt_tokens.unwrap_or(0);
+            let completion = item.completion_tokens.unwrap_or(0);
+            let reasoning = item.reasoning_tokens.unwrap_or(0);
+            let total = if prompt + completion + reasoning > 0 {
+                prompt + completion + reasoning
+            } else {
+                item.total_tokens.or(item.tokens).unwrap_or(0)
+            };
+            let date_str = item
+                .date
+                .as_deref()
+                .unwrap_or("")
+                .split_whitespace()
+                .next()
+                .unwrap_or("")
+                .to_string();
+            if !date_str.is_empty() {
+                *day_map.entry(date_str).or_insert(0) += total;
+            }
+            if let Some(ref model) = item.model {
+                *model_map.entry(model.clone()).or_insert(0) += total;
+            }
+        }
+
+        for item in items {
+            let cost = item.usage.or(item.byok_usage_inference).unwrap_or(0.0);
+            let date_str = item
+                .date
+                .as_deref()
+                .unwrap_or("")
+                .split_whitespace()
+                .next()
+                .unwrap_or("")
+                .to_string();
+            if !date_str.is_empty() {
+                if date_str == today_str || date_str == utc_today_str {
+                    activity_daily_cost += cost;
                 }
-
-                for item in items {
-                    let cost = item.usage.or(item.byok_usage_inference).unwrap_or(0.0);
-                    let date_str = item
-                        .date
-                        .as_deref()
-                        .unwrap_or("")
-                        .split_whitespace()
-                        .next()
-                        .unwrap_or("")
-                        .to_string();
-                    if !date_str.is_empty() {
-                        if date_str == today_str || date_str == utc_today_str {
-                            activity_daily_cost += cost;
-                        }
-                        if let Ok(parsed_date) =
-                            chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
-                        {
-                            if parsed_date >= seven_days_ago
-                                && (parsed_date <= today || parsed_date <= utc_today)
-                            {
-                                activity_weekly_cost += cost;
-                            }
-                        }
-                    }
-                }
-
-                let mut sorted_days: Vec<(String, u64)> = day_map.into_iter().collect();
-                sorted_days.sort_by(|a, b| a.0.cmp(&b.0));
-
-                for (date_str, count) in sorted_days.into_iter().rev().take(7).rev() {
-                    let is_today = date_str == today_str;
-                    let day_label = if is_today {
-                        "Today".to_string()
-                    } else if let Ok(parsed) =
-                        chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
-                    {
-                        parsed.format("%a").to_string()
-                    } else {
-                        date_str.clone()
-                    };
-                    tokens_by_day.push(DayTokenUsage {
-                        date: date_str,
-                        day_label,
-                        token_count: count,
-                        is_today,
-                    });
-                }
-
-                let mut sorted_models: Vec<(String, u64)> = model_map.into_iter().collect();
-                sorted_models.sort_by(|a, b| b.1.cmp(&a.1));
-                for (model_name, count) in sorted_models.into_iter().take(5) {
-                    tokens_by_model.push(ModelTokenUsage {
-                        model_name,
-                        token_count: count,
-                    });
+                if let Ok(parsed_date) = chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
+                    && parsed_date >= seven_days_ago
+                    && (parsed_date <= today || parsed_date <= utc_today)
+                {
+                    activity_weekly_cost += cost;
                 }
             }
+        }
+
+        let mut sorted_days: Vec<(String, u64)> = day_map.into_iter().collect();
+        sorted_days.sort();
+
+        for (date_str, count) in sorted_days.into_iter().rev().take(7).rev() {
+            let is_today = date_str == today_str;
+            let day_label = if is_today {
+                "Today".to_string()
+            } else if let Ok(parsed) = chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d") {
+                parsed.format("%a").to_string()
+            } else {
+                date_str.clone()
+            };
+            tokens_by_day.push(DayTokenUsage {
+                date: date_str,
+                day_label,
+                token_count: count,
+                is_today,
+            });
+        }
+
+        let mut sorted_models: Vec<(String, u64)> = model_map.into_iter().collect();
+        sorted_models.sort_by_key(|(_, count)| std::cmp::Reverse(*count));
+        for (model_name, count) in sorted_models.into_iter().take(5) {
+            tokens_by_model.push(ModelTokenUsage {
+                model_name,
+                token_count: count,
+            });
         }
     }
 

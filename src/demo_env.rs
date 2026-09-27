@@ -45,15 +45,15 @@ fn is_val_truthy(val: &str) -> bool {
 }
 
 fn env_truthy() -> bool {
-    if let Ok(v) = std::env::var(DEMO_ENV) {
-        if is_val_truthy(&v) {
-            return true;
-        }
+    if let Ok(v) = std::env::var(DEMO_ENV)
+        && is_val_truthy(&v)
+    {
+        return true;
     }
-    if let Ok(v) = std::env::var(LEGACY_DEMO_ENV) {
-        if is_val_truthy(&v) {
-            return true;
-        }
+    if let Ok(v) = std::env::var(LEGACY_DEMO_ENV)
+        && is_val_truthy(&v)
+    {
+        return true;
     }
     false
 }

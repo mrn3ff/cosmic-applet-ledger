@@ -294,23 +294,24 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
         meters_col = meters_col.push(weekly_col);
     }
 
-    if session_window.is_none() && weekly_window.is_none() {
-        if let Some(cost) = &snapshot.provider_cost {
-            let balance_str = if cost.used.fract() == 0.0 {
-                format!("{:.0}", cost.used)
-            } else {
-                format!("{:.2}", cost.used)
-            };
-            let cost_header = row![
-                widget::text("Prepaid Credits").size(14),
-                cosmic::iced::widget::Space::new().width(Length::Fill),
-                widget::text(format!("{balance_str} {}", cost.units)).size(13),
-            ]
-            .align_y(Alignment::Center)
-            .width(Length::Fill);
+    if session_window.is_none()
+        && weekly_window.is_none()
+        && let Some(cost) = &snapshot.provider_cost
+    {
+        let balance_str = if cost.used.fract() == 0.0 {
+            format!("{:.0}", cost.used)
+        } else {
+            format!("{:.2}", cost.used)
+        };
+        let cost_header = row![
+            widget::text("Prepaid Credits").size(14),
+            cosmic::iced::widget::Space::new().width(Length::Fill),
+            widget::text(format!("{balance_str} {}", cost.units)).size(13),
+        ]
+        .align_y(Alignment::Center)
+        .width(Length::Fill);
 
-            meters_col = meters_col.push(cost_header);
-        }
+        meters_col = meters_col.push(cost_header);
     }
 
     column![
@@ -373,7 +374,7 @@ fn is_session_like(w: &UsageWindow) -> bool {
         || w.window_seconds == Some(5 * 3600)
 }
 
-fn find_session_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
+fn find_session_window(windows: &[UsageWindow]) -> Option<&UsageWindow> {
     windows
         .iter()
         .find(|w| is_session_like(w))
@@ -385,7 +386,7 @@ fn find_session_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow
         .or_else(|| windows.first())
 }
 
-fn find_weekly_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
+fn find_weekly_window(windows: &[UsageWindow]) -> Option<&UsageWindow> {
     windows
         .iter()
         .find(|w| {
@@ -448,19 +449,19 @@ fn ensure_seven_days(days: &[crate::model::DayTokenUsage]) -> Vec<crate::model::
     result
 }
 
+/// Fixed token tiers the charts scale against, so bar lengths stay
+/// comparable between refreshes instead of always filling to the peak.
+fn token_scale_max(raw_max: u64) -> u64 {
+    match raw_max {
+        0..1_000_000 => 1_000_000,
+        1_000_000..100_000_000 => 100_000_000,
+        100_000_000..500_000_000 => 500_000_000,
+        _ => 1_000_000_000,
+    }
+}
+
 fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'static, Message> {
-    let raw_max = days.iter().map(|d| d.token_count).max().unwrap_or(0);
-    let scale_max = if raw_max == 0 {
-        1_000_000
-    } else if raw_max < 1_000_000 {
-        1_000_000
-    } else if raw_max < 100_000_000 {
-        100_000_000
-    } else if raw_max < 500_000_000 {
-        500_000_000
-    } else {
-        1_000_000_000
-    };
+    let scale_max = token_scale_max(days.iter().map(|d| d.token_count).max().unwrap_or(0));
 
     let section_label =
         container(widget::text("TOKENS BY DAY").size(11)).style(|_| widget::container::Style {
@@ -530,18 +531,7 @@ fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'stati
 }
 
 fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<'static, Message> {
-    let raw_max = models.iter().map(|m| m.token_count).max().unwrap_or(0);
-    let scale_max = if raw_max == 0 {
-        1_000_000
-    } else if raw_max < 1_000_000 {
-        1_000_000
-    } else if raw_max < 100_000_000 {
-        100_000_000
-    } else if raw_max < 500_000_000 {
-        500_000_000
-    } else {
-        1_000_000_000
-    };
+    let scale_max = token_scale_max(models.iter().map(|m| m.token_count).max().unwrap_or(0));
 
     let section_label =
         container(widget::text("TOKENS BY MODEL").size(11)).style(|_| widget::container::Style {
@@ -1365,15 +1355,15 @@ fn usage_block_content(
 
     let mut content = column![header_row, bar,].spacing(6).width(Length::Fill);
 
-    if let Some(secondary) = details.secondary {
-        if !secondary.is_empty() {
-            let sec_text =
-                container(widget::text(secondary).size(11)).style(|_| widget::container::Style {
-                    text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
-                    ..Default::default()
-                });
-            content = content.push(sec_text);
-        }
+    if let Some(secondary) = details.secondary
+        && !secondary.is_empty()
+    {
+        let sec_text =
+            container(widget::text(secondary).size(11)).style(|_| widget::container::Style {
+                text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                ..Default::default()
+            });
+        content = content.push(sec_text);
     }
 
     if let Some(overage) = details.overage {
