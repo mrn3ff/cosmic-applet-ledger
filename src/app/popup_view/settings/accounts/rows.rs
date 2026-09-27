@@ -1,9 +1,9 @@
 use super::super::super::{
-    Alignment, Background, Element, Length, Message, ProviderId, accent_selection_fill,
+    Alignment, Background, Color, Element, Length, Message, ProviderId,
     account_label_text, apply_alpha, badge_destructive, badge_destructive_soft, badge_neutral,
     badge_neutral_soft, badge_success, badge_success_soft, badge_warning, badge_warning_soft,
-    badge_with_tooltip, component_container_background, component_container_style,
-    component_divider_color, component_on_color, container, disabled_account_label_text, fl, row,
+    badge_with_tooltip,
+    component_on_color, container, disabled_account_label_text, fl, row,
     widget,
 };
 use crate::providers::interface::{
@@ -171,7 +171,6 @@ pub(super) fn account_selector_list<'a>(
 ) -> Element<'a, Message> {
     container(rows)
         .width(Length::Fill)
-        .style(component_container_style)
         .into()
 }
 
@@ -208,7 +207,7 @@ fn account_selected_marker(selected: bool, enabled: bool) -> Element<'static, Me
     .style(move |theme| {
         let cosmic = theme.cosmic();
         let color = if enabled {
-            cosmic.accent.base.into()
+            Color::WHITE
         } else {
             apply_alpha(
                 cosmic.background(theme.transparent).component.on.into(),
@@ -250,7 +249,7 @@ fn action_available(
 fn account_row_container<'a>(
     selector: Element<'a, Message>,
     delete_button: Element<'a, Message>,
-    selected: bool,
+    _selected: bool,
     enabled: bool,
     action_required: bool,
     _first: bool,
@@ -266,27 +265,19 @@ fn account_row_container<'a>(
     .style(move |theme: &cosmic::Theme| {
         let cosmic = theme.cosmic();
         let warning = cosmic.warning.base;
-        let mut style = component_container_style(theme);
+        let mut style = widget::container::Style::default();
         style.text_color = Some(component_on_color(theme));
         style.background = if action_required {
             Some(Background::Color(apply_alpha(warning.into(), 0.08)))
-        } else if selected && enabled {
-            Some(Background::Color(accent_selection_fill(theme)))
         } else {
-            component_container_background(theme)
+            None
         };
         style.border.radius = 2.0.into();
-        style.border.width = if selected { 2.0 } else { 1.0 };
-        style.border.color = if selected {
-            if enabled {
-                cosmic.accent.base.into()
-            } else {
-                apply_alpha(component_on_color(theme), 0.45)
-            }
-        } else if action_required {
+        style.border.width = if action_required { 1.0 } else { 0.0 };
+        style.border.color = if action_required {
             apply_alpha(warning.into(), 0.72)
         } else {
-            component_divider_color(theme)
+            Color::TRANSPARENT
         };
         style.icon_color = Some(if enabled {
             component_on_color(theme)
@@ -315,19 +306,20 @@ fn account_row_button_class(selected: bool) -> cosmic::theme::Button {
 
 fn account_row_button_style(
     theme: &cosmic::Theme,
-    selected: bool,
-    focused: bool,
+    _selected: bool,
+    _focused: bool,
     opacity: f32,
 ) -> widget::button::Style {
     let cosmic = theme.cosmic();
     let mut style = widget::button::Style::new();
     let foreground = cosmic.background(theme.transparent).component.on.into();
 
+    style.background = None;
     style.icon_color = Some(apply_alpha(foreground, opacity));
     style.text_color = Some(apply_alpha(foreground, opacity));
     style.border_radius = 2.0.into();
-    style.border_width = if focused && selected { 1.0 } else { 0.0 };
-    style.border_color = cosmic.accent.base.into();
+    style.border_width = 0.0;
+    style.border_color = Color::TRANSPARENT;
 
     style
 }

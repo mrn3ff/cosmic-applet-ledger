@@ -1,6 +1,6 @@
 use super::super::super::{
-    Alignment, Background, Element, Length, Message, ProviderId, component_container_style,
-    component_surface_color, container, fl, row, widget,
+    Alignment, Background, Color, Element, Length, Message, ProviderId,
+    container, fl, row, widget,
 };
 use crate::providers::interface::ProviderAccountAddAction;
 
@@ -54,44 +54,33 @@ fn empty_account_button_class(accent: bool, enabled: bool) -> cosmic::theme::But
 }
 
 fn empty_account_button_style(
-    theme: &cosmic::Theme,
-    accent: bool,
+    _theme: &cosmic::Theme,
+    _accent: bool,
     enabled: bool,
     hovered: bool,
     pressed: bool,
 ) -> widget::button::Style {
-    let cosmic = theme.cosmic();
-    let component = if accent {
-        &cosmic.accent_button
-    } else {
-        &cosmic.button
-    };
     let mut style = widget::button::Style::new();
-    let background = if !accent && theme.transparent && !pressed && !hovered {
-        Some(Background::Color(component_surface_color(theme)))
+    style.background = if !enabled {
+        None
+    } else if pressed {
+        Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20)))
+    } else if hovered {
+        Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10)))
     } else {
-        Some(Background::Color(if !enabled {
-            component.disabled.into()
-        } else if pressed {
-            component.pressed.into()
-        } else if hovered {
-            component.hover.into()
-        } else {
-            component.base.into()
-        }))
+        Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.05)))
     };
-    style.background = background;
     style.border_radius = 2.0.into();
     style.border_width = 1.0;
     style.border_color = if enabled {
-        component.border.into()
+        Color::from_rgba(1.0, 1.0, 1.0, 0.15)
     } else {
-        component.disabled_border.into()
+        Color::from_rgba(1.0, 1.0, 1.0, 0.05)
     };
     style.text_color = Some(if enabled {
-        component.on.into()
+        Color::from_rgb(0.95, 0.95, 0.95)
     } else {
-        component.on_disabled.into()
+        Color::from_rgba(1.0, 1.0, 1.0, 0.35)
     });
     style.icon_color = style.text_color;
     style
@@ -170,6 +159,6 @@ pub(super) fn empty_accounts_state(
         .into()
 }
 
-fn empty_accounts_state_style(theme: &cosmic::Theme) -> widget::container::Style {
-    component_container_style(theme)
+fn empty_accounts_state_style(_theme: &cosmic::Theme) -> widget::container::Style {
+    widget::container::Style::default()
 }

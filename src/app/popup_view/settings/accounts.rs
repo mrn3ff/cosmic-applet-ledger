@@ -12,25 +12,13 @@ use self::rows::{
     AccountRowPosition, account_action_container, account_selector_list, account_settings_row,
 };
 use super::super::{
-    Alignment, AppState, Config, DetectionSnapshot, Element, Length, Message, ProviderId,
-    ProviderLoginStates, component_container_style, container, detected_without_accounts, fl,
-    provider_icon_handle, provider_icon_variant, row, settings_block_enabled, widget,
+    Alignment, AppState, Background, Color, Config, DetectionSnapshot, Element, Length, Message, ProviderId,
+    ProviderLoginStates, container, detected_without_accounts, fl,
+    provider_icon_handle, provider_icon_variant, row, widget,
 };
 use crate::providers::cursor::CursorScanState;
 use crate::providers::interface::{ProviderAccountFacts, ProviderLoginKind};
 use crate::providers::registry;
-
-fn accounts_section_title(empty: bool) -> Element<'static, Message> {
-    if empty {
-        widget::text(fl!("accounts-title")).size(22).into()
-    } else {
-        widget::text(fl!("accounts-title")).size(16).into()
-    }
-}
-
-fn provider_enablement_style(theme: &cosmic::Theme) -> widget::container::Style {
-    component_container_style(theme)
-}
 
 pub(super) fn provider_settings_view<'a>(
     state: &'a AppState,
@@ -44,35 +32,97 @@ pub(super) fn provider_settings_view<'a>(
         .provider(provider_id)
         .is_some_and(|provider| provider.enabled);
 
-    let provider_title = container(
+    let on_btn = widget::button::custom(
+        container(widget::text("ON").size(12))
+            .padding([3, 10])
+    )
+    .padding(0)
+    .class(cosmic::theme::Button::Custom {
+        active: Box::new(move |_focused, _theme| widget::button::Style {
+            background: if enabled {
+                Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.15)))
+            } else {
+                None
+            },
+            text_color: Some(if enabled { Color::WHITE } else { Color::from_rgba(1.0, 1.0, 1.0, 0.45) }),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: if enabled { Color::from_rgba(1.0, 1.0, 1.0, 0.3) } else { Color::from_rgba(1.0, 1.0, 1.0, 0.08) },
+            ..Default::default()
+        }),
+        disabled: Box::new(|_| widget::button::Style::new()),
+        hovered: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.25),
+            ..Default::default()
+        }),
+        pressed: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::WHITE,
+            ..Default::default()
+        }),
+    })
+    .on_press(Message::SetProviderEnabled(provider_id, true));
+
+    let off_btn = widget::button::custom(
+        container(widget::text("OFF").size(12))
+            .padding([3, 10])
+    )
+    .padding(0)
+    .class(cosmic::theme::Button::Custom {
+        active: Box::new(move |_focused, _theme| widget::button::Style {
+            background: if !enabled {
+                Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.15)))
+            } else {
+                None
+            },
+            text_color: Some(if !enabled { Color::WHITE } else { Color::from_rgba(1.0, 1.0, 1.0, 0.45) }),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: if !enabled { Color::from_rgba(1.0, 1.0, 1.0, 0.3) } else { Color::from_rgba(1.0, 1.0, 1.0, 0.08) },
+            ..Default::default()
+        }),
+        disabled: Box::new(|_| widget::button::Style::new()),
+        hovered: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.25),
+            ..Default::default()
+        }),
+        pressed: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::WHITE,
+            ..Default::default()
+        }),
+    })
+    .on_press(Message::SetProviderEnabled(provider_id, false));
+
+    let provider_header = container(
         row![
-            widget::icon::icon(provider_icon_handle(provider_id, provider_icon_variant())).size(22),
-            widget::text(provider_id.label()).size(18),
+            row![
+                widget::icon::icon(provider_icon_handle(provider_id, provider_icon_variant())).size(20),
+                widget::text(provider_id.label()).size(16),
+            ]
+            .spacing(10)
+            .align_y(Alignment::Center),
+            cosmic::iced::widget::Space::new().width(Length::Fill),
+            row![off_btn, on_btn].spacing(4),
         ]
-        .spacing(10)
         .align_y(Alignment::Center)
         .width(Length::Fill),
     )
-    .padding([0, 12])
-    .width(Length::Fill);
-
-    let provider_header = container(
-        container(
-            row![
-                widget::text(fl!("provider-enable", provider = provider_id.label())).size(16),
-                cosmic::iced::widget::Space::new().width(Length::Fill),
-                widget::toggler(enabled)
-                    .on_toggle(move |enabled| Message::SetProviderEnabled(provider_id, enabled)),
-            ]
-            .spacing(10)
-            .align_y(Alignment::Center)
-            .width(Length::Fill),
-        )
-        .padding([10, 12])
-        .width(Length::Fill)
-        .style(provider_enablement_style),
-    )
-    .padding([0, 12])
+    .padding([0, 4])
     .width(Length::Fill);
 
     let login_kind = registry::login_kind(provider_id);
@@ -150,7 +200,7 @@ pub(super) fn provider_settings_view<'a>(
             }),
     });
 
-    let mut sections = cosmic::iced::widget::column![provider_title, provider_header].spacing(14);
+    let mut sections = cosmic::iced::widget::column![provider_header].spacing(16);
     if detected_without_accounts(state, detection, provider_id) {
         sections = sections.push(widget::text(fl!("provider-detected-caption")).size(13));
     }
@@ -241,5 +291,30 @@ fn account_settings_section<'a, 'd>(
         rows = rows.push(account_action_container(login_controls));
     }
 
-    settings_block_enabled(accounts_section_title(accounts.is_empty()), rows, enabled)
+    let accounts_title = container(widget::text("ACCOUNTS").size(11))
+        .style(|_| widget::container::Style {
+            text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+            ..Default::default()
+        });
+
+    let accounts_card = container(rows)
+        .padding([4, 4])
+        .width(Length::Fill)
+        .style(|_| widget::container::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.02))),
+            border: cosmic::iced::Border {
+                radius: 2.0.into(),
+                width: 1.0,
+                color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+            },
+            ..Default::default()
+        });
+
+    cosmic::iced::widget::column![
+        accounts_title,
+        accounts_card,
+    ]
+    .spacing(8)
+    .width(Length::Fill)
+    .into()
 }

@@ -1,8 +1,10 @@
+use cosmic::iced::widget::progress_bar;
+
 use super::super::{
     Alignment, Background, ButtonInteraction, Element, Length, Message, PanelIconStyle, ProviderId,
     ResetTimeFormat, UsageAmountFormat, UsageWindow, apply_alpha, component_container_style,
     component_divider_color, component_hover_color, component_on_color, component_selected_color,
-    component_surface_color, container, fl, progress_bar, provider_icon_handle,
+    component_surface_color, container, fl, provider_icon_handle,
     provider_icon_variant, row, settings_block, usage_display, widget,
 };
 
@@ -72,6 +74,7 @@ fn panel_icon_section(current_style: PanelIconStyle) -> Element<'static, Message
         PanelIconStyle::BarsOnly,
         PanelIconStyle::LogoAndPercent,
         PanelIconStyle::PercentOnly,
+        PanelIconStyle::IconOnly,
     ];
 
     let buttons =
@@ -101,6 +104,7 @@ fn panel_icon_section(current_style: PanelIconStyle) -> Element<'static, Message
                     PanelIconStyle::BarsOnly => fl!("panel-icon-bars-only-tooltip"),
                     PanelIconStyle::LogoAndPercent => fl!("panel-icon-logo-and-percent-tooltip"),
                     PanelIconStyle::PercentOnly => fl!("panel-icon-percent-only-tooltip"),
+                    PanelIconStyle::IconOnly => "Icon Only".into(),
                 };
 
                 row.push(widget::tooltip::tooltip(
@@ -148,6 +152,7 @@ fn panel_icon_preview(style: PanelIconStyle) -> Element<'static, Message> {
             .align_y(Alignment::Center)
             .into(),
         PanelIconStyle::PercentOnly => widget::text("86.5%").size(12).into(),
+        PanelIconStyle::IconOnly => logo.into(),
     };
 
     container(preview)

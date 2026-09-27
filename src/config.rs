@@ -90,7 +90,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            refresh_interval_seconds: 300,
+            refresh_interval_seconds: 10,
             reset_time_format: ResetTimeFormat::Relative,
             usage_amount_format: UsageAmountFormat::Used,
             panel_icon_style: PanelIconStyle::LogoAndBars,
@@ -292,6 +292,7 @@ pub enum PanelIconStyle {
     BarsOnly,
     LogoAndPercent,
     PercentOnly,
+    IconOnly,
 }
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
@@ -838,6 +839,7 @@ mod tests {
         let mut new = old.clone();
         new.panel_icon_style = match old.panel_icon_style {
             PanelIconStyle::PercentOnly => PanelIconStyle::LogoAndBars,
+            PanelIconStyle::IconOnly => PanelIconStyle::LogoAndBars,
             _ => PanelIconStyle::PercentOnly,
         };
         new.refresh_interval_seconds = old.refresh_interval_seconds + 60;
@@ -892,7 +894,7 @@ mod tests {
             config.provider_visibility_mode,
             ProviderVisibilityMode::UserManaged
         );
-        assert_eq!(config.refresh_interval_seconds, 300);
+        assert_eq!(config.refresh_interval_seconds, 10);
         assert_eq!(config.reset_time_format, ResetTimeFormat::Relative);
         assert_eq!(config.usage_amount_format, UsageAmountFormat::Used);
         assert_eq!(config.panel_icon_style, PanelIconStyle::LogoAndBars);
@@ -1078,6 +1080,14 @@ mod tests {
         assert_eq!(
             serde_json::to_string(&PanelIconStyle::LogoAndBars).unwrap(),
             "\"logo_and_bars\""
+        );
+        assert_eq!(
+            serde_json::to_string(&PanelIconStyle::IconOnly).unwrap(),
+            "\"icon_only\""
+        );
+        assert_eq!(
+            serde_json::from_str::<PanelIconStyle>("\"icon_only\"").unwrap(),
+            PanelIconStyle::IconOnly
         );
         assert_eq!(
             serde_json::from_str::<PanelIconStyle>("\"bars_only\"").unwrap(),

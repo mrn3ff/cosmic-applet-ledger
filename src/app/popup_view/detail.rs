@@ -51,7 +51,6 @@ pub(super) fn selected_provider_view<'a>(
 
     column![
         summary,
-        subtle_divider(),
         usage_card(body),
     ]
     .spacing(14)
@@ -174,15 +173,9 @@ fn account_body_items<'a>(
         // 1. Session & Weekly Limits ONLY
         items.push(limits_section(snapshot));
 
-        // Subtle divider
-        items.push(subtle_divider());
-
         // 2. TOKENS BY DAY
         let days = ensure_seven_days(&snapshot.tokens_by_day);
         items.push(tokens_by_day_section(&days));
-
-        // Subtle divider
-        items.push(subtle_divider());
 
         // 3. TOKENS BY MODEL
         if !snapshot.tokens_by_model.is_empty() {
@@ -202,23 +195,22 @@ fn account_body_items<'a>(
             .spacing(4)
             .width(Length::Fill),
         )
-        .padding([8, 0])
-        .width(Length::Fill);
+        .padding([12, 12])
+        .width(Length::Fill)
+        .style(|_| widget::container::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.02))),
+            border: cosmic::iced::Border {
+                radius: 2.0.into(),
+                width: 1.0,
+                color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+            },
+            ..Default::default()
+        });
 
         items.push(no_account_notice.into());
     }
 
     items
-}
-
-fn subtle_divider() -> Element<'static, Message> {
-    container(cosmic::iced::widget::Space::new().height(Length::Fixed(1.0)))
-        .width(Length::Fill)
-        .style(|_| widget::container::Style {
-            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.08))),
-            ..Default::default()
-        })
-        .into()
 }
 
 fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
@@ -316,7 +308,24 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
         }
     }
 
-    column![section_label, meters_col].spacing(8).width(Length::Fill).into()
+    column![
+        section_label,
+        container(meters_col)
+            .padding([12, 12])
+            .width(Length::Fill)
+            .style(|_| widget::container::Style {
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.02))),
+                border: cosmic::iced::Border {
+                    radius: 2.0.into(),
+                    width: 1.0,
+                    color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+                },
+                ..Default::default()
+            })
+    ]
+    .spacing(8)
+    .width(Length::Fill)
+    .into()
 }
 
 fn find_session_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
@@ -363,15 +372,13 @@ fn ensure_seven_days(days: &[crate::model::DayTokenUsage]) -> Vec<crate::model::
 
 fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'static, Message> {
     let peak = days.iter().map(|d| d.token_count).max().unwrap_or(1).max(1);
-    let mut rows = column![
-        container(widget::text("TOKENS BY DAY").size(11))
-            .style(|_| widget::container::Style {
-                text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
-                ..Default::default()
-            })
-    ]
-    .spacing(8)
-    .width(Length::Fill);
+    let section_label = container(widget::text("TOKENS BY DAY").size(11))
+        .style(|_| widget::container::Style {
+            text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+            ..Default::default()
+        });
+
+    let mut day_items = column![].spacing(8).width(Length::Fill);
 
     for day in days {
         let pct = (day.token_count as f32 / peak as f32) * 100.0;
@@ -404,7 +411,7 @@ fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'stati
                 ..Default::default()
             });
 
-        rows = rows.push(
+        day_items = day_items.push(
             row![label, bar, value]
                 .spacing(8)
                 .align_y(Alignment::Center)
@@ -412,20 +419,35 @@ fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'stati
         );
     }
 
-    rows.into()
-}
-
-fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<'static, Message> {
-    let peak = models.iter().map(|m| m.token_count).max().unwrap_or(1).max(1);
-    let mut rows = column![
-        container(widget::text("TOKENS BY MODEL").size(11))
+    column![
+        section_label,
+        container(day_items)
+            .padding([12, 12])
+            .width(Length::Fill)
             .style(|_| widget::container::Style {
-                text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.02))),
+                border: cosmic::iced::Border {
+                    radius: 2.0.into(),
+                    width: 1.0,
+                    color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+                },
                 ..Default::default()
             })
     ]
     .spacing(8)
-    .width(Length::Fill);
+    .width(Length::Fill)
+    .into()
+}
+
+fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<'static, Message> {
+    let peak = models.iter().map(|m| m.token_count).max().unwrap_or(1).max(1);
+    let section_label = container(widget::text("TOKENS BY MODEL").size(11))
+        .style(|_| widget::container::Style {
+            text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+            ..Default::default()
+        });
+
+    let mut model_items = column![].spacing(8).width(Length::Fill);
 
     for model in models {
         let pct = (model.token_count as f32 / peak as f32).clamp(0.0, 100.0);
@@ -496,10 +518,27 @@ fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<
             widget::tooltip::Position::Top,
         );
 
-        rows = rows.push(slider_with_tip);
+        model_items = model_items.push(slider_with_tip);
     }
 
-    rows.into()
+    column![
+        section_label,
+        container(model_items)
+            .padding([12, 12])
+            .width(Length::Fill)
+            .style(|_| widget::container::Style {
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.02))),
+                border: cosmic::iced::Border {
+                    radius: 2.0.into(),
+                    width: 1.0,
+                    color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+                },
+                ..Default::default()
+            })
+    ]
+    .spacing(8)
+    .width(Length::Fill)
+    .into()
 }
 
 #[allow(dead_code)]

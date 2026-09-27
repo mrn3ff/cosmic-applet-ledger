@@ -32,8 +32,8 @@ use crate::providers::zai::login::ZaiLoginState;
 use crate::updates::UpdateStatus;
 use crate::usage_display;
 use cosmic::Element;
-use cosmic::iced::widget::{column, container, progress_bar, row, scrollable};
-use cosmic::iced::{Alignment, Background, Color, ContentFit, Length};
+use cosmic::iced::widget::{column, container, row, scrollable};
+pub use cosmic::iced::{Alignment, Background, Color, ContentFit, Length};
 use cosmic::widget;
 
 const POPUP_TAB_HEIGHT: f32 = 48.0;
@@ -44,7 +44,6 @@ const PROVIDER_GROUP_SPACING: f32 = 12.0;
 const HEADER_ICON_BUTTON_SIZE: f32 = 28.0;
 const UPDATE_NOTIFICATION_DOT_COLOR: Color = Color::from_rgb(1.0, 0.31, 0.37);
 const UPDATE_NOTIFICATION_DOT_SIZE: f32 = 12.0;
-const ACCENT_SOFT_FILL_ALPHA: f32 = 0.14;
 const COMPONENT_SURFACE_ALPHA: f32 = 0.40;
 
 #[derive(Clone, Copy)]
@@ -133,7 +132,7 @@ fn popup_body_view<'a>(
             selection.account_page,
         ),
         PopupRoute::SwitchProvider => switch_provider_view(state, selection.provider),
-        PopupRoute::Settings => settings_view(state, update_status),
+        PopupRoute::Settings => settings_view(state, config, update_status),
         PopupRoute::ManageProviders => manage_providers_view(state),
         PopupRoute::ManageAccounts(id) => {
             provider_settings_view(state, config, detection, logins, *id)
@@ -553,8 +552,6 @@ fn account_action_button_with_icon(
     let content = row![
         icon,
         copy,
-        cosmic::iced::widget::Space::new().width(Length::Fill),
-        widget::icon::from_name("go-next-symbolic").icon().size(18),
     ]
     .spacing(10)
     .align_y(Alignment::Center)
@@ -570,39 +567,21 @@ fn account_action_button_with_icon(
 
 fn account_action_icon(
     icon: Element<'static, Message>,
-    accent: bool,
-    enabled: bool,
+    _accent: bool,
+    _enabled: bool,
 ) -> Element<'static, Message> {
     container(icon)
-        .width(Length::Fixed(32.0))
-        .height(Length::Fixed(32.0))
+        .width(Length::Fixed(24.0))
+        .height(Length::Fixed(24.0))
         .align_x(cosmic::iced::alignment::Horizontal::Center)
         .align_y(cosmic::iced::alignment::Vertical::Center)
-        .style(move |theme| {
-            let cosmic = theme.cosmic();
-            let opacity = if enabled { 1.0 } else { 0.45 };
-            let color = if accent {
-                apply_alpha(cosmic.accent.base.into(), opacity)
-            } else {
-                apply_alpha(component_on_color(theme), opacity)
-            };
-            let background = if accent {
-                apply_alpha(cosmic.accent.base.into(), 0.18 * opacity)
-            } else {
-                apply_alpha(component_on_color(theme), 0.12 * opacity)
-            };
-            widget::container::Style {
-                text_color: Some(color),
-                background: Some(Background::Color(background)),
-                border: cosmic::iced::Border {
-                    radius: 16.0.into(),
-                    width: 0.0,
-                    color,
-                },
-                shadow: cosmic::iced::Shadow::default(),
-                icon_color: Some(color),
-                snap: true,
-            }
+        .style(|_| widget::container::Style {
+            text_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
+            background: None,
+            border: cosmic::iced::Border::default(),
+            shadow: cosmic::iced::Shadow::default(),
+            icon_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
+            snap: true,
         })
         .into()
 }
@@ -621,17 +600,16 @@ fn account_action_card_style(
     enabled: bool,
     hovered: bool,
 ) -> widget::button::Style {
-    let _cosmic = theme.cosmic();
     let opacity = if enabled { 1.0 } else { 0.45 };
     let mut style = widget::button::Style::new();
     style.background = if hovered {
-        Some(Background::Color(component_hover_color(theme)))
+        Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.05)))
     } else {
-        component_container_background(theme)
+        None
     };
     style.border_radius = 2.0.into();
-    style.border_width = 1.0;
-    style.border_color = apply_alpha(component_divider_color(theme), opacity);
+    style.border_width = 0.0;
+    style.border_color = Color::TRANSPARENT;
     style.text_color = Some(apply_alpha(component_on_color(theme), opacity));
     style.icon_color = Some(apply_alpha(component_on_color(theme), opacity));
     style
@@ -654,11 +632,6 @@ fn account_action_button_style(theme: &cosmic::Theme, hovered: bool) -> widget::
     style.text_color = Some(component_on_color(theme));
     style.icon_color = Some(component_on_color(theme));
     style
-}
-
-fn accent_selection_fill(theme: &cosmic::Theme) -> Color {
-    let cosmic = theme.cosmic();
-    apply_alpha(cosmic.accent.base.into(), ACCENT_SOFT_FILL_ALPHA)
 }
 
 fn provider_tab_selection_fill(theme: &cosmic::Theme) -> Color {

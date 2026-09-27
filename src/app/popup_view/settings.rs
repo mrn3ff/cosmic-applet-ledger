@@ -4,13 +4,14 @@ mod general;
 
 use super::{
     Alignment, AppState, Background, Color, Config, DetectionSnapshot, Element, Length, Message,
-    PopupRoute, ProviderId, ProviderLoginStates, UpdateStatus, component_container_style,
-    component_divider_color, container, fl, provider_icon_handle, provider_icon_variant, row,
-    widget,
+    PanelIconStyle, PopupRoute, ProviderId, ProviderLoginStates, UpdateStatus,
+    component_container_style, component_divider_color, container, fl, provider_icon_handle,
+    provider_icon_variant, row, widget,
 };
 
 pub(super) fn settings_view(
     state: &AppState,
+    config: &Config,
     update_status: &UpdateStatus,
 ) -> Element<'static, Message> {
     let providers_label = container(widget::text("PROVIDERS").size(11))
@@ -32,16 +33,93 @@ pub(super) fn settings_view(
 
         let name = widget::text(provider_id.label()).size(14);
 
-        let toggle = cosmic::widget::toggler(enabled)
-            .on_toggle(move |enabled| Message::SetProviderEnabled(provider_id, enabled));
+        let off_btn = widget::button::custom(
+            container(widget::text("OFF").size(11))
+                .padding([2, 8])
+        )
+        .padding(0)
+        .class(cosmic::theme::Button::Custom {
+            active: Box::new(move |_focused, _theme| widget::button::Style {
+                background: if !enabled {
+                    Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.15)))
+                } else {
+                    None
+                },
+                text_color: Some(if !enabled { Color::WHITE } else { Color::from_rgba(1.0, 1.0, 1.0, 0.45) }),
+                border_radius: 2.0.into(),
+                border_width: 1.0,
+                border_color: if !enabled { Color::from_rgba(1.0, 1.0, 1.0, 0.3) } else { Color::from_rgba(1.0, 1.0, 1.0, 0.08) },
+                ..Default::default()
+            }),
+            disabled: Box::new(|_| widget::button::Style::new()),
+            hovered: Box::new(move |_focused, _theme| widget::button::Style {
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10))),
+                text_color: Some(Color::WHITE),
+                border_radius: 2.0.into(),
+                border_width: 1.0,
+                border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.25),
+                ..Default::default()
+            }),
+            pressed: Box::new(move |_focused, _theme| widget::button::Style {
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+                text_color: Some(Color::WHITE),
+                border_radius: 2.0.into(),
+                border_width: 1.0,
+                border_color: Color::WHITE,
+                ..Default::default()
+            }),
+        })
+        .on_press(Message::SetProviderEnabled(provider_id, false));
 
-        let configure_btn = widget::button::icon(widget::icon::from_name("pan-end-symbolic"))
-            .extra_small()
-            .padding(4)
+        let on_btn = widget::button::custom(
+            container(widget::text("ON").size(11))
+                .padding([2, 8])
+        )
+        .padding(0)
+        .class(cosmic::theme::Button::Custom {
+            active: Box::new(move |_focused, _theme| widget::button::Style {
+                background: if enabled {
+                    Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.15)))
+                } else {
+                    None
+                },
+                text_color: Some(if enabled { Color::WHITE } else { Color::from_rgba(1.0, 1.0, 1.0, 0.45) }),
+                border_radius: 2.0.into(),
+                border_width: 1.0,
+                border_color: if enabled { Color::from_rgba(1.0, 1.0, 1.0, 0.3) } else { Color::from_rgba(1.0, 1.0, 1.0, 0.08) },
+                ..Default::default()
+            }),
+            disabled: Box::new(|_| widget::button::Style::new()),
+            hovered: Box::new(move |_focused, _theme| widget::button::Style {
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10))),
+                text_color: Some(Color::WHITE),
+                border_radius: 2.0.into(),
+                border_width: 1.0,
+                border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.25),
+                ..Default::default()
+            }),
+            pressed: Box::new(move |_focused, _theme| widget::button::Style {
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+                text_color: Some(Color::WHITE),
+                border_radius: 2.0.into(),
+                border_width: 1.0,
+                border_color: Color::WHITE,
+                ..Default::default()
+            }),
+        })
+        .on_press(Message::SetProviderEnabled(provider_id, true));
+
+        let left_button_content = row![icon, name]
+            .spacing(10)
+            .align_y(Alignment::Center);
+
+        let provider_nav_btn = widget::button::custom(left_button_content)
+            .padding([8, 10])
+            .width(Length::Fill)
             .class(cosmic::theme::Button::Custom {
                 active: Box::new(|_focused, _theme| widget::button::Style {
-                    text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
-                    icon_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                    text_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
+                    icon_color: Some(Color::from_rgb(0.95, 0.95, 0.95)),
                     ..Default::default()
                 }),
                 disabled: Box::new(|_| widget::button::Style::new()),
@@ -58,19 +136,14 @@ pub(super) fn settings_view(
             })
             .on_press(Message::NavigateTo(PopupRoute::ManageAccounts(provider_id)));
 
-        let row = container(
+        let row_container = container(
             row![
-                icon,
-                name,
-                cosmic::iced::widget::Space::new().width(Length::Fill),
-                toggle,
-                configure_btn,
+                provider_nav_btn,
+                container(row![off_btn, on_btn].spacing(4)).padding([0, 10]),
             ]
-            .spacing(10)
             .align_y(Alignment::Center)
             .width(Length::Fill)
         )
-        .padding([8, 10])
         .width(Length::Fill)
         .style(|_| widget::container::Style {
             background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.02))),
@@ -82,15 +155,183 @@ pub(super) fn settings_view(
             ..Default::default()
         });
 
-        provider_rows = provider_rows.push(row);
+        provider_rows = provider_rows.push(row_container);
     }
 
-    let divider = container(cosmic::iced::widget::Space::new().height(Length::Fixed(1.0)))
-        .width(Length::Fill)
+    let divider = || {
+        container(cosmic::iced::widget::Space::new().height(Length::Fixed(1.0)))
+            .width(Length::Fill)
+            .style(|_| widget::container::Style {
+                background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.08))),
+                ..Default::default()
+            })
+    };
+
+    let preferences_label = container(widget::text("PREFERENCES").size(11))
         .style(|_| widget::container::Style {
-            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.08))),
+            text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
             ..Default::default()
         });
+
+    let bars_enabled = config.panel_icon_style != PanelIconStyle::IconOnly;
+    let off_btn = widget::button::custom(
+        container(widget::text("OFF").size(12))
+            .padding([3, 10])
+    )
+    .padding(0)
+    .class(cosmic::theme::Button::Custom {
+        active: Box::new(move |_focused, _theme| widget::button::Style {
+            background: if !bars_enabled {
+                Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.15)))
+            } else {
+                None
+            },
+            text_color: Some(if !bars_enabled { Color::WHITE } else { Color::from_rgba(1.0, 1.0, 1.0, 0.45) }),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: if !bars_enabled { Color::from_rgba(1.0, 1.0, 1.0, 0.3) } else { Color::from_rgba(1.0, 1.0, 1.0, 0.08) },
+            ..Default::default()
+        }),
+        disabled: Box::new(|_| widget::button::Style::new()),
+        hovered: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.25),
+            ..Default::default()
+        }),
+        pressed: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::WHITE,
+            ..Default::default()
+        }),
+    })
+    .on_press(Message::SetPanelIconStyle(PanelIconStyle::IconOnly));
+
+    let on_btn = widget::button::custom(
+        container(widget::text("ON").size(12))
+            .padding([3, 10])
+    )
+    .padding(0)
+    .class(cosmic::theme::Button::Custom {
+        active: Box::new(move |_focused, _theme| widget::button::Style {
+            background: if bars_enabled {
+                Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.15)))
+            } else {
+                None
+            },
+            text_color: Some(if bars_enabled { Color::WHITE } else { Color::from_rgba(1.0, 1.0, 1.0, 0.45) }),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: if bars_enabled { Color::from_rgba(1.0, 1.0, 1.0, 0.3) } else { Color::from_rgba(1.0, 1.0, 1.0, 0.08) },
+            ..Default::default()
+        }),
+        disabled: Box::new(|_| widget::button::Style::new()),
+        hovered: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.25),
+            ..Default::default()
+        }),
+        pressed: Box::new(move |_focused, _theme| widget::button::Style {
+            background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+            text_color: Some(Color::WHITE),
+            border_radius: 2.0.into(),
+            border_width: 1.0,
+            border_color: Color::WHITE,
+            ..Default::default()
+        }),
+    })
+    .on_press(Message::SetPanelIconStyle(PanelIconStyle::LogoAndBars));
+
+    let panel_bars_row = row![
+        cosmic::iced::widget::column![
+            widget::text("Panel Status Bars").size(14),
+            container(widget::text("Show usage meters in panel when minimized").size(11))
+                .style(|_| widget::container::Style {
+                    text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
+                    ..Default::default()
+                })
+        ]
+        .spacing(2),
+        cosmic::iced::widget::Space::new().width(Length::Fill),
+        row![off_btn, on_btn].spacing(4),
+    ]
+    .align_y(Alignment::Center)
+    .width(Length::Fill);
+
+    let refresh_options: &[(u64, &str)] = &[(5, "5s"), (10, "10s"), (30, "30s"), (60, "1m"), (300, "5m")];
+    let refresh_row = row![
+        widget::text("Refresh Interval").size(14),
+        cosmic::iced::widget::Space::new().width(Length::Fill),
+        refresh_options.iter().fold(row![].spacing(4), |r, (secs, label)| {
+            let is_selected = *secs == config.refresh_interval_seconds;
+            let btn = widget::button::custom(
+                container(widget::text(*label).size(12))
+                    .padding([3, 8])
+            )
+            .padding(0)
+            .class(cosmic::theme::Button::Custom {
+                active: Box::new(move |_focused, _theme| widget::button::Style {
+                    background: if is_selected {
+                        Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.15)))
+                    } else {
+                        None
+                    },
+                    text_color: Some(if is_selected { Color::WHITE } else { Color::from_rgba(1.0, 1.0, 1.0, 0.45) }),
+                    border_radius: 2.0.into(),
+                    border_width: 1.0,
+                    border_color: if is_selected { Color::from_rgba(1.0, 1.0, 1.0, 0.3) } else { Color::from_rgba(1.0, 1.0, 1.0, 0.08) },
+                    ..Default::default()
+                }),
+                disabled: Box::new(|_| widget::button::Style::new()),
+                hovered: Box::new(move |_focused, _theme| widget::button::Style {
+                    background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.10))),
+                    text_color: Some(Color::WHITE),
+                    border_radius: 2.0.into(),
+                    border_width: 1.0,
+                    border_color: Color::from_rgba(1.0, 1.0, 1.0, 0.25),
+                    ..Default::default()
+                }),
+                pressed: Box::new(move |_focused, _theme| widget::button::Style {
+                    background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.20))),
+                    text_color: Some(Color::WHITE),
+                    border_radius: 2.0.into(),
+                    border_width: 1.0,
+                    border_color: Color::WHITE,
+                    ..Default::default()
+                }),
+            })
+            .on_press(Message::SetRefreshInterval(*secs));
+
+            r.push(btn)
+        })
+    ]
+    .align_y(Alignment::Center)
+    .width(Length::Fill);
+
+    let preferences_container = container(
+        cosmic::iced::widget::column![panel_bars_row, refresh_row]
+            .spacing(12)
+            .width(Length::Fill)
+    )
+    .padding([10, 12])
+    .width(Length::Fill)
+    .style(|_| widget::container::Style {
+        background: Some(Background::Color(Color::from_rgba(1.0, 1.0, 1.0, 0.02))),
+        border: cosmic::iced::Border {
+            radius: 2.0.into(),
+            width: 1.0,
+            color: Color::from_rgba(1.0, 1.0, 1.0, 0.08),
+        },
+        ..Default::default()
+    });
 
     let about_label = container(widget::text("ABOUT").size(11))
         .style(|_| widget::container::Style {
@@ -103,7 +344,10 @@ pub(super) fn settings_view(
     cosmic::iced::widget::column![
         providers_label,
         provider_rows,
-        divider,
+        divider(),
+        preferences_label,
+        preferences_container,
+        divider(),
         about_label,
         about_content,
     ]

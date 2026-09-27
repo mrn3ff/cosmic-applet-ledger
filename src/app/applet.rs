@@ -1,9 +1,9 @@
 use super::provider_assets::app_symbolic_icon_handle;
 use super::{
     APPLET_BAR_WIDTH_HEIGHT_MULTIPLIER, APPLET_ICON_GAP, APPLET_PERCENT_CELL_HORIZONTAL_PAD,
-    APPLET_PERCENT_GLYPH_WIDTH, Alignment, AppModel, AppState, Config, CosmicButton,
-    CosmicConfigEntry, Element, Length, Limits, Message, PanelIconStyle, ProviderId, Size,
-    UsageAmountFormat, progress_bar, provider_icon_handle, provider_icon_variant, row,
+    APPLET_PERCENT_GLYPH_WIDTH, Alignment, AppModel, AppState, Background, Color, Config,
+    CosmicButton, CosmicConfigEntry, Element, Length, Limits, Message, PanelIconStyle, ProviderId,
+    Size, UsageAmountFormat, provider_icon_handle, provider_icon_variant, row,
     usage_display, widget,
 };
 use crate::model::AppletWindows;
@@ -113,6 +113,7 @@ pub(super) fn applet_indicator<'a>(
         .align_y(Alignment::Center)
         .into(),
         PanelIconStyle::PercentOnly => percent,
+        PanelIconStyle::IconOnly => applet_fallback_indicator(core),
     }
 }
 
@@ -157,7 +158,7 @@ pub(super) fn applet_fallback_button_size(core: &cosmic::Core) -> (f32, f32) {
 
 fn applet_fallback_icon_px(core: &cosmic::Core) -> u16 {
     let (suggested_w, suggested_h) = core.applet.suggested_size(false);
-    suggested_w.min(suggested_h)
+    suggested_w.min(suggested_h).saturating_sub(10).max(14)
 }
 
 pub(super) fn panel_button_size(
@@ -203,6 +204,7 @@ pub(super) fn applet_button_size(core: &cosmic::Core, style: PanelIconStyle) -> 
             logo_width + APPLET_ICON_GAP + applet_percent_cell_width()
         }
         PanelIconStyle::PercentOnly => applet_percent_cell_width(),
+        PanelIconStyle::IconOnly => f32::from(applet_fallback_icon_px(core)),
     };
     let width = content_width + f32::from(2 * horizontal_padding);
     let height = f32::from(suggested_h + 2 * vertical_padding);
@@ -238,21 +240,66 @@ pub(super) fn applet_percent_cell_alignment() -> Alignment {
     Alignment::Start
 }
 
+fn panel_mini_flat_bar(percent: f32, height: f32, width: f32) -> Element<'static, Message> {
+    let fill = (percent.clamp(0.0, 100.0) * 10.0).round() as u16;
+    let empty = 1000 - fill;
+
+    let fill_segment = widget::container(cosmic::iced::widget::Space::new())
+        .width(Length::FillPortion(fill))
+        .height(Length::Fixed(height - 2.0))
+        .style(|_theme: &cosmic::Theme| widget::container::Style {
+            text_color: None,
+            background: Some(Background::Color(Color::from_rgb(0.92, 0.92, 0.92))),
+            border: cosmic::iced::Border {
+                radius: 1.0.into(),
+                width: 0.0,
+                color: Color::TRANSPARENT,
+            },
+            shadow: cosmic::iced::Shadow::default(),
+            icon_color: None,
+            snap: true,
+        });
+
+    let empty_segment = cosmic::iced::widget::Space::new().width(Length::FillPortion(empty));
+
+    let bar_row = if fill == 0 {
+        row![empty_segment]
+    } else if fill >= 1000 {
+        row![fill_segment]
+    } else {
+        row![fill_segment, empty_segment]
+    };
+
+    widget::container(bar_row)
+        .width(Length::Fixed(width))
+        .height(Length::Fixed(height))
+        .padding([1, 1])
+        .style(|_theme: &cosmic::Theme| widget::container::Style {
+            text_color: None,
+            background: Some(Background::Color(Color::from_rgb(0.12, 0.12, 0.14))),
+            border: cosmic::iced::Border {
+                radius: 2.0.into(),
+                width: 1.0,
+                color: Color::from_rgba(1.0, 1.0, 1.0, 0.12),
+            },
+            shadow: cosmic::iced::Shadow::default(),
+            icon_color: None,
+            snap: true,
+        })
+        .into()
+}
+
 fn applet_bar_column(layout: AppletBarLayout, bar_width: f32) -> Element<'static, Message> {
-    let primary = progress_bar(0.0..=100.0, layout.primary)
-        .girth(Length::Fixed(APPLET_PRIMARY_BAR_GIRTH))
-        .length(Length::Fixed(bar_width));
+    let primary = panel_mini_flat_bar(layout.primary, APPLET_PRIMARY_BAR_GIRTH, bar_width);
     let content: Element<'static, Message> = match layout.secondary {
         Some(secondary) => cosmic::iced::widget::column![
             primary,
-            progress_bar(0.0..=100.0, secondary)
-                .girth(Length::Fixed(APPLET_SECONDARY_BAR_GIRTH))
-                .length(Length::Fixed(bar_width)),
+            panel_mini_flat_bar(secondary, APPLET_SECONDARY_BAR_GIRTH, bar_width),
         ]
         .spacing(APPLET_BAR_SPACING)
         .width(Length::Fixed(bar_width))
         .into(),
-        None => primary.into(),
+        None => primary,
     };
 
     widget::container(content)
