@@ -354,73 +354,165 @@ fn normalize(
     })
 }
 
+/// Tokens by day/model for the last seven local days, read from Claude Code's
+/// session transcripts (`<config>/projects/**/*.jsonl`).
 fn claude_local_stats() -> (Vec<crate::model::DayTokenUsage>, Vec<crate::model::ModelTokenUsage>) {
-    let Ok(home) = std::env::var("HOME") else {
+    let Some(config_dir) = claude_config_dir() else {
         return (Vec::new(), Vec::new());
     };
-    let path = std::path::PathBuf::from(home).join(".claude").join("stats-cache.json");
-    let Ok(content) = std::fs::read_to_string(path) else {
-        return (Vec::new(), Vec::new());
-    };
-    let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) else {
-        return (Vec::new(), Vec::new());
-    };
+    let today = chrono::Local::now().date_naive();
+    let first_day = today - chrono::Duration::days(6);
+    let cutoff = std::time::SystemTime::now() - std::time::Duration::from_secs(8 * 24 * 3600);
 
-    let mut days = Vec::new();
-    if let Some(daily) = val.get("dailyActivity").and_then(|d| d.as_array()) {
-        let now = chrono::Local::now().format("%Y-%m-%d").to_string();
-        for item in daily.iter().rev().take(7).rev() {
-            if let Some(date_str) = item.get("date").and_then(|d| d.as_str()) {
-                let count = item.get("messageCount").and_then(|c| c.as_u64()).unwrap_or(0);
-                let is_today = date_str == now;
-                let day_label = if is_today {
+    let mut files = Vec::new();
+    collect_jsonl_files(&config_dir.join("projects"), cutoff, &mut files);
+
+    // Streamed responses repeat a message across several lines; keep the last
+    // usage seen per message id.
+    let mut messages: std::collections::HashMap<String, (chrono::NaiveDate, String, u64)> =
+        std::collections::HashMap::new();
+    for path in files {
+        let Ok(content) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        for line in content.lines() {
+            if !line.contains("\"usage\"") {
+                continue;
+            }
+            if let Some((id, entry)) = transcript_usage(line)
+                && entry.0 >= first_day
+                && entry.0 <= today
+            {
+                messages.insert(id, entry);
+            }
+        }
+    }
+
+    let mut day_totals: std::collections::HashMap<chrono::NaiveDate, u64> =
+        std::collections::HashMap::new();
+    let mut model_totals: std::collections::HashMap<String, u64> = std::collections::HashMap::new();
+    for (date, model, tokens) in messages.into_values() {
+        *day_totals.entry(date).or_default() += tokens;
+        *model_totals.entry(model).or_default() += tokens;
+    }
+
+    let days = (0..7)
+        .rev()
+        .map(|offset| {
+            let date = today - chrono::Duration::days(offset);
+            let is_today = offset == 0;
+            crate::model::DayTokenUsage {
+                date: date.format("%Y-%m-%d").to_string(),
+                day_label: if is_today {
                     "Today".to_string()
-                } else if let Ok(parsed) = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
-                    parsed.format("%a").to_string()
                 } else {
-                    date_str.to_string()
-                };
-                days.push(crate::model::DayTokenUsage {
-                    date: date_str.to_string(),
-                    day_label,
-                    token_count: count,
-                    is_today,
-                });
+                    date.format("%a").to_string()
+                },
+                token_count: day_totals.get(&date).copied().unwrap_or(0),
+                is_today,
             }
-        }
-    }
+        })
+        .collect();
 
-    let mut models = Vec::new();
-    if let Some(model_usage) = val.get("modelUsage").and_then(|m| m.as_object()) {
-        for (model_id, data) in model_usage {
-            let input = data.get("inputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
-            let output = data.get("outputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
-            let cache_read = data.get("cacheReadInputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
-            let cache_write = data.get("cacheCreationInputTokens").and_then(|v| v.as_u64()).unwrap_or(0);
-            let total = input + output + cache_read + cache_write;
-            if total > 0 {
-                let friendly_name = if model_id.contains("3-7-sonnet") {
-                    "Claude 3.7 Sonnet".to_string()
-                } else if model_id.contains("3-5-sonnet") {
-                    "Claude 3.5 Sonnet".to_string()
-                } else if model_id.contains("3-5-haiku") {
-                    "Claude 3.5 Haiku".to_string()
-                } else if model_id.contains("opus") {
-                    "Claude 3 Opus".to_string()
-                } else {
-                    model_id.clone()
-                };
-                models.push(crate::model::ModelTokenUsage {
-                    model_name: friendly_name,
-                    token_count: total,
-                });
-            }
-        }
-    }
+    let mut models: Vec<_> = model_totals
+        .into_iter()
+        .filter(|(_, tokens)| *tokens > 0)
+        .map(|(model_id, token_count)| crate::model::ModelTokenUsage {
+            model_name: friendly_model_name(&model_id),
+            token_count,
+        })
+        .collect();
     models.sort_by(|a, b| b.token_count.cmp(&a.token_count));
     models.truncate(4);
 
     (days, models)
+}
+
+fn claude_config_dir() -> Option<std::path::PathBuf> {
+    if let Some(dir) = std::env::var_os("CLAUDE_CONFIG_DIR").filter(|dir| !dir.is_empty()) {
+        return Some(dir.into());
+    }
+    std::env::var_os("HOME").map(|home| std::path::PathBuf::from(home).join(".claude"))
+}
+
+fn collect_jsonl_files(
+    dir: &std::path::Path,
+    modified_after: std::time::SystemTime,
+    out: &mut Vec<std::path::PathBuf>,
+) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let Ok(file_type) = entry.file_type() else {
+            continue;
+        };
+        let path = entry.path();
+        if file_type.is_dir() {
+            collect_jsonl_files(&path, modified_after, out);
+        } else if file_type.is_file()
+            && path.extension().is_some_and(|ext| ext == "jsonl")
+            && entry
+                .metadata()
+                .and_then(|meta| meta.modified())
+                .is_ok_and(|modified| modified >= modified_after)
+        {
+            out.push(path);
+        }
+    }
+}
+
+/// Parses one transcript line into `(message id, (local date, model, tokens))`.
+fn transcript_usage(line: &str) -> Option<(String, (chrono::NaiveDate, String, u64))> {
+    let value = serde_json::from_str::<serde_json::Value>(line).ok()?;
+    if value.get("type").and_then(|t| t.as_str()) != Some("assistant") {
+        return None;
+    }
+    let message = value.get("message")?;
+    let model = message.get("model").and_then(|m| m.as_str())?;
+    if model.starts_with('<') {
+        // Synthetic entries such as "<synthetic>" carry no real usage.
+        return None;
+    }
+    let usage = message.get("usage")?;
+    let field = |name: &str| usage.get(name).and_then(|v| v.as_u64()).unwrap_or(0);
+    let tokens = field("input_tokens")
+        + field("output_tokens")
+        + field("cache_read_input_tokens")
+        + field("cache_creation_input_tokens");
+    let timestamp = value.get("timestamp").and_then(|t| t.as_str())?;
+    let date = DateTime::parse_from_rfc3339(timestamp)
+        .ok()?
+        .with_timezone(&chrono::Local)
+        .date_naive();
+    let id = message
+        .get("id")
+        .and_then(|id| id.as_str())
+        .or_else(|| value.get("uuid").and_then(|id| id.as_str()))?;
+    Some((id.to_string(), (date, model.to_string(), tokens)))
+}
+
+/// "claude-opus-5-5" -> "Opus 5.5", "claude-haiku-4-5-20251001" -> "Haiku 4.5".
+fn friendly_model_name(model_id: &str) -> String {
+    let base = model_id.split('[').next().unwrap_or(model_id);
+    let Some(rest) = base.strip_prefix("claude-") else {
+        return model_id.to_string();
+    };
+    let mut parts = rest.split('-').filter(|part| !(part.len() == 8 && part.chars().all(|c| c.is_ascii_digit())));
+    let Some(family) = parts.next() else {
+        return model_id.to_string();
+    };
+    let mut family_chars = family.chars();
+    let family = match family_chars.next() {
+        Some(first) => first.to_uppercase().chain(family_chars).collect::<String>(),
+        None => return model_id.to_string(),
+    };
+    let version = parts.collect::<Vec<_>>().join(".");
+    if version.is_empty() {
+        family
+    } else {
+        format!("{family} {version}")
+    }
 }
 
 fn normalize_window(
@@ -970,5 +1062,31 @@ mod tests {
         let tokens = storage.load_tokens(&account_id).unwrap();
         assert_eq!(tokens.access_token, "old-access");
         assert_eq!(tokens.refresh_token, "old-refresh");
+    }
+
+    #[test]
+    fn transcript_usage_sums_all_token_kinds() {
+        let line = r#"{"type":"assistant","timestamp":"2026-09-01T11:51:58.394Z","message":{"id":"msg_1","model":"claude-sonnet-5","usage":{"input_tokens":2,"cache_creation_input_tokens":8245,"cache_read_input_tokens":35348,"output_tokens":720}}}"#;
+        let (id, (_, model, tokens)) = transcript_usage(line).unwrap();
+        assert_eq!(id, "msg_1");
+        assert_eq!(model, "claude-sonnet-5");
+        assert_eq!(tokens, 2 + 8245 + 35348 + 720);
+    }
+
+    #[test]
+    fn transcript_usage_skips_user_and_synthetic_entries() {
+        let user = r#"{"type":"user","timestamp":"2026-09-01T11:51:58Z","message":{"usage":{}}}"#;
+        let synthetic = r#"{"type":"assistant","timestamp":"2026-09-01T11:51:58Z","message":{"id":"m","model":"<synthetic>","usage":{"input_tokens":0}}}"#;
+        assert!(transcript_usage(user).is_none());
+        assert!(transcript_usage(synthetic).is_none());
+    }
+
+    #[test]
+    fn friendly_model_name_formats_claude_ids() {
+        assert_eq!(friendly_model_name("claude-opus-5-5"), "Opus 5.5");
+        assert_eq!(friendly_model_name("claude-haiku-4-5-20251001"), "Haiku 4.5");
+        assert_eq!(friendly_model_name("claude-sonnet-5"), "Sonnet 5");
+        assert_eq!(friendly_model_name("claude-opus-5-5[1m]"), "Opus 5.5");
+        assert_eq!(friendly_model_name("gpt-x"), "gpt-x");
     }
 }
