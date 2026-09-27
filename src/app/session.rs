@@ -36,18 +36,18 @@ pub(super) fn delete_account(
 
 pub(super) fn start_login(app: &mut AppModel, provider: ProviderId) -> Task<Message> {
     match provider {
-        ProviderId::Codex => login::start_login::<login::CodexLoginFlow>(app),
-        ProviderId::Claude => login::start_login::<login::ClaudeLoginFlow>(app),
-        ProviderId::Gemini => login::start_login::<login::GeminiLoginFlow>(app),
-        ProviderId::Copilot => login::start_login::<login::CopilotLoginFlow>(app),
-        ProviderId::Minimax => login::start_login::<login::MinimaxLoginFlow>(app),
-        ProviderId::Zai => login::start_login::<login::ZaiLoginFlow>(app),
-        ProviderId::Kimi => login::start_login::<login::KimiLoginFlow>(app),
         ProviderId::Antigravity => login::start_login::<login::AntigravityLoginFlow>(app),
-        ProviderId::OpenCodeGo => login::start_login::<login::OpenCodeGoLoginFlow>(app),
-        ProviderId::Grok => login::start_login::<login::GrokLoginFlow>(app),
-        ProviderId::OpenRouter => login::start_login::<login::OpenRouterLoginFlow>(app),
+        ProviderId::Claude => login::start_login::<login::ClaudeLoginFlow>(app),
+        ProviderId::Codex => login::start_login::<login::CodexLoginFlow>(app),
+        ProviderId::Copilot => login::start_login::<login::CopilotLoginFlow>(app),
         ProviderId::Cursor => Task::none(),
+        ProviderId::Gemini => login::start_login::<login::GeminiLoginFlow>(app),
+        ProviderId::Grok => login::start_login::<login::GrokLoginFlow>(app),
+        ProviderId::Kimi => login::start_login::<login::KimiLoginFlow>(app),
+        ProviderId::Minimax => login::start_login::<login::MinimaxLoginFlow>(app),
+        ProviderId::OpenCodeGo => login::start_login::<login::OpenCodeGoLoginFlow>(app),
+        ProviderId::OpenRouter => login::start_login::<login::OpenRouterLoginFlow>(app),
+        ProviderId::Zai => login::start_login::<login::ZaiLoginFlow>(app),
     }
 }
 
@@ -90,18 +90,18 @@ pub(super) fn restore_from_grok(app: &mut AppModel, account_id: String) -> Task<
 
 pub(super) fn cancel_login(app: &mut AppModel, provider: ProviderId) {
     match provider {
-        ProviderId::Codex => login::cancel_login::<login::CodexLoginFlow>(app),
-        ProviderId::Claude => login::cancel_login::<login::ClaudeLoginFlow>(app),
-        ProviderId::Gemini => login::cancel_login::<login::GeminiLoginFlow>(app),
-        ProviderId::Copilot => login::cancel_login::<login::CopilotLoginFlow>(app),
-        ProviderId::Minimax => login::cancel_login::<login::MinimaxLoginFlow>(app),
-        ProviderId::Zai => login::cancel_login::<login::ZaiLoginFlow>(app),
-        ProviderId::Kimi => login::cancel_login::<login::KimiLoginFlow>(app),
         ProviderId::Antigravity => login::cancel_login::<login::AntigravityLoginFlow>(app),
-        ProviderId::OpenCodeGo => login::cancel_login::<login::OpenCodeGoLoginFlow>(app),
-        ProviderId::Grok => login::cancel_login::<login::GrokLoginFlow>(app),
-        ProviderId::OpenRouter => login::cancel_login::<login::OpenRouterLoginFlow>(app),
+        ProviderId::Claude => login::cancel_login::<login::ClaudeLoginFlow>(app),
+        ProviderId::Codex => login::cancel_login::<login::CodexLoginFlow>(app),
+        ProviderId::Copilot => login::cancel_login::<login::CopilotLoginFlow>(app),
         ProviderId::Cursor => {}
+        ProviderId::Gemini => login::cancel_login::<login::GeminiLoginFlow>(app),
+        ProviderId::Grok => login::cancel_login::<login::GrokLoginFlow>(app),
+        ProviderId::Kimi => login::cancel_login::<login::KimiLoginFlow>(app),
+        ProviderId::Minimax => login::cancel_login::<login::MinimaxLoginFlow>(app),
+        ProviderId::OpenCodeGo => login::cancel_login::<login::OpenCodeGoLoginFlow>(app),
+        ProviderId::OpenRouter => login::cancel_login::<login::OpenRouterLoginFlow>(app),
+        ProviderId::Zai => login::cancel_login::<login::ZaiLoginFlow>(app),
     }
 }
 
@@ -111,50 +111,50 @@ pub(super) fn reauthenticate(
     account_id: &str,
 ) -> Task<Message> {
     match provider {
-        ProviderId::Codex => login::reauthenticate::<login::CodexLoginFlow>(app, account_id),
-        ProviderId::Claude => login::reauthenticate::<login::ClaudeLoginFlow>(app, account_id),
-        ProviderId::Gemini => login::reauthenticate::<login::GeminiLoginFlow>(app, account_id),
-        ProviderId::Copilot => login::reauthenticate::<login::CopilotLoginFlow>(app, account_id),
-        ProviderId::Minimax => login::reauthenticate::<login::MinimaxLoginFlow>(app, account_id),
-        ProviderId::Zai => login::reauthenticate::<login::ZaiLoginFlow>(app, account_id),
-        ProviderId::Kimi => login::reauthenticate::<login::KimiLoginFlow>(app, account_id),
         ProviderId::Antigravity => {
             login::reauthenticate::<login::AntigravityLoginFlow>(app, account_id)
         }
+        ProviderId::Claude => login::reauthenticate::<login::ClaudeLoginFlow>(app, account_id),
+        ProviderId::Codex => login::reauthenticate::<login::CodexLoginFlow>(app, account_id),
+        ProviderId::Copilot => login::reauthenticate::<login::CopilotLoginFlow>(app, account_id),
+        ProviderId::Cursor => app.reauthenticate_cursor_account(account_id),
+        ProviderId::Gemini => login::reauthenticate::<login::GeminiLoginFlow>(app, account_id),
+        ProviderId::Grok => login::reauthenticate::<login::GrokLoginFlow>(app, account_id),
+        ProviderId::Kimi => login::reauthenticate::<login::KimiLoginFlow>(app, account_id),
+        ProviderId::Minimax => login::reauthenticate::<login::MinimaxLoginFlow>(app, account_id),
         ProviderId::OpenCodeGo => {
             login::reauthenticate::<login::OpenCodeGoLoginFlow>(app, account_id)
         }
-        ProviderId::Grok => login::reauthenticate::<login::GrokLoginFlow>(app, account_id),
         ProviderId::OpenRouter => {
             login::reauthenticate::<login::OpenRouterLoginFlow>(app, account_id)
         }
-        ProviderId::Cursor => app.reauthenticate_cursor_account(account_id),
+        ProviderId::Zai => login::reauthenticate::<login::ZaiLoginFlow>(app, account_id),
     }
 }
 
 pub(super) fn sync_metadata_after_refresh(app: &mut AppModel, provider: ProviderId) {
     match provider {
-        ProviderId::Codex => {
-            app.update_codex_metadata_from_state();
-            app.clear_codex_legacy_snapshot_after_success();
-        }
+        ProviderId::Antigravity
+        | ProviderId::Copilot
+        | ProviderId::Gemini
+        | ProviderId::Grok
+        | ProviderId::Kimi
+        | ProviderId::Minimax
+        | ProviderId::OpenCodeGo
+        | ProviderId::OpenRouter
+        | ProviderId::Zai => {}
         ProviderId::Claude => {
             app.update_claude_metadata_from_state();
             app.clear_claude_legacy_snapshot_after_success();
+        }
+        ProviderId::Codex => {
+            app.update_codex_metadata_from_state();
+            app.clear_codex_legacy_snapshot_after_success();
         }
         ProviderId::Cursor => {
             app.update_cursor_metadata_from_state();
             app.update_cursor_active_account();
         }
-        ProviderId::Gemini
-        | ProviderId::Copilot
-        | ProviderId::Minimax
-        | ProviderId::Zai
-        | ProviderId::Kimi
-        | ProviderId::Antigravity
-        | ProviderId::OpenCodeGo
-        | ProviderId::Grok
-        | ProviderId::OpenRouter => {}
     }
 }
 

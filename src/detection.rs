@@ -44,18 +44,18 @@ fn markers(provider: ProviderId) -> &'static [Marker] {
     const ZAI: [Marker; 0] = [];
     const OPENROUTER: [Marker; 0] = [];
     match provider {
-        ProviderId::Codex => &CODEX,
+        ProviderId::Antigravity => &ANTIGRAVITY,
         ProviderId::Claude => &CLAUDE,
+        ProviderId::Codex => &CODEX,
+        ProviderId::Copilot => &COPILOT,
         ProviderId::Cursor => &CURSOR,
         ProviderId::Gemini => &GEMINI,
-        ProviderId::Antigravity => &ANTIGRAVITY,
-        ProviderId::Copilot => &COPILOT,
-        ProviderId::Minimax => &MINIMAX,
-        ProviderId::Kimi => &KIMI,
-        ProviderId::OpenCodeGo => &OPENCODE_GO,
         ProviderId::Grok => &GROK,
-        ProviderId::Zai => &ZAI,
+        ProviderId::Kimi => &KIMI,
+        ProviderId::Minimax => &MINIMAX,
+        ProviderId::OpenCodeGo => &OPENCODE_GO,
         ProviderId::OpenRouter => &OPENROUTER,
+        ProviderId::Zai => &ZAI,
     }
 }
 

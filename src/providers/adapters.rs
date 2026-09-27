@@ -7,10 +7,10 @@ mod copilot_adapter;
 mod cursor_adapter;
 mod gemini_adapter;
 mod grok_adapter;
-mod openrouter_adapter;
 mod kimi_adapter;
 mod minimax_adapter;
 mod opencode_go_adapter;
+mod openrouter_adapter;
 mod zai_adapter;
 
 use crate::account_storage::ProviderAccountStorage;
@@ -23,18 +23,18 @@ use crate::providers::{claude, codex, cursor, gemini, grok, opencode_go};
 
 pub(super) fn adapter(provider: ProviderId) -> &'static dyn ProviderAdapter {
     match provider {
-        ProviderId::Codex => &CODEX_ADAPTER,
+        ProviderId::Antigravity => &ANTIGRAVITY_ADAPTER,
         ProviderId::Claude => &CLAUDE_ADAPTER,
+        ProviderId::Codex => &CODEX_ADAPTER,
+        ProviderId::Copilot => &COPILOT_ADAPTER,
         ProviderId::Cursor => &CURSOR_ADAPTER,
         ProviderId::Gemini => &GEMINI_ADAPTER,
-        ProviderId::Copilot => &COPILOT_ADAPTER,
+        ProviderId::Grok => &GROK_ADAPTER,
         ProviderId::Kimi => &KIMI_ADAPTER,
         ProviderId::Minimax => &MINIMAX_ADAPTER,
-        ProviderId::Zai => &ZAI_ADAPTER,
-        ProviderId::Antigravity => &ANTIGRAVITY_ADAPTER,
         ProviderId::OpenCodeGo => &OPENCODE_GO_ADAPTER,
-        ProviderId::Grok => &GROK_ADAPTER,
         ProviderId::OpenRouter => &OPENROUTER_ADAPTER,
+        ProviderId::Zai => &ZAI_ADAPTER,
     }
 }
 

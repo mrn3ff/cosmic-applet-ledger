@@ -349,18 +349,18 @@ impl ProviderAccountStorage {
 
     fn new_account_id(provider: ProviderId) -> String {
         let prefix = match provider {
-            ProviderId::Codex => "codex",
+            ProviderId::Antigravity => "antigravity",
             ProviderId::Claude => "claude",
+            ProviderId::Codex => "codex",
+            ProviderId::Copilot => "copilot",
             ProviderId::Cursor => "cursor",
             ProviderId::Gemini => "gemini",
-            ProviderId::Copilot => "copilot",
-            ProviderId::Minimax => "minimax",
-            ProviderId::Zai => "zai",
-            ProviderId::Kimi => "kimi",
-            ProviderId::Antigravity => "antigravity",
-            ProviderId::OpenCodeGo => "opencode_go",
             ProviderId::Grok => "grok",
+            ProviderId::Kimi => "kimi",
+            ProviderId::Minimax => "minimax",
+            ProviderId::OpenCodeGo => "opencode_go",
             ProviderId::OpenRouter => "openrouter",
+            ProviderId::Zai => "zai",
         };
         let millis = Utc::now().timestamp_millis();
         let sequence = ACCOUNT_ID_SEQUENCE.fetch_add(1, Ordering::Relaxed);

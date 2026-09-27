@@ -159,53 +159,53 @@ impl Config {
     #[must_use]
     pub fn provider_enablement(&self, provider: ProviderId) -> ProviderEnablement {
         match provider {
-            ProviderId::Codex => self.codex_enablement,
+            ProviderId::Antigravity => self.antigravity_enablement,
             ProviderId::Claude => self.claude_enablement,
+            ProviderId::Codex => self.codex_enablement,
+            ProviderId::Copilot => self.copilot_enablement,
             ProviderId::Cursor => self.cursor_enablement,
             ProviderId::Gemini => self.gemini_enablement,
-            ProviderId::Copilot => self.copilot_enablement,
-            ProviderId::Minimax => self.minimax_enablement,
-            ProviderId::Zai => self.zai_enablement,
-            ProviderId::Kimi => self.kimi_enablement,
-            ProviderId::Antigravity => self.antigravity_enablement,
-            ProviderId::OpenCodeGo => self.opencode_go_enablement,
             ProviderId::Grok => self.grok_enablement,
+            ProviderId::Kimi => self.kimi_enablement,
+            ProviderId::Minimax => self.minimax_enablement,
+            ProviderId::OpenCodeGo => self.opencode_go_enablement,
             ProviderId::OpenRouter => self.openrouter_enablement,
+            ProviderId::Zai => self.zai_enablement,
         }
     }
 
     #[must_use]
     pub fn selected_account_ids(&self, provider: ProviderId) -> &[String] {
         match provider {
-            ProviderId::Codex => &self.selected_codex_account_ids,
+            ProviderId::Antigravity => &self.selected_antigravity_account_ids,
             ProviderId::Claude => &self.selected_claude_account_ids,
+            ProviderId::Codex => &self.selected_codex_account_ids,
+            ProviderId::Copilot => &self.selected_copilot_account_ids,
             ProviderId::Cursor => &self.selected_cursor_account_ids,
             ProviderId::Gemini => &self.selected_gemini_account_ids,
-            ProviderId::Copilot => &self.selected_copilot_account_ids,
-            ProviderId::Minimax => &self.selected_minimax_account_ids,
-            ProviderId::Zai => &self.selected_zai_account_ids,
-            ProviderId::Kimi => &self.selected_kimi_account_ids,
-            ProviderId::Antigravity => &self.selected_antigravity_account_ids,
-            ProviderId::OpenCodeGo => &self.selected_opencode_go_account_ids,
             ProviderId::Grok => &self.selected_grok_account_ids,
+            ProviderId::Kimi => &self.selected_kimi_account_ids,
+            ProviderId::Minimax => &self.selected_minimax_account_ids,
+            ProviderId::OpenCodeGo => &self.selected_opencode_go_account_ids,
             ProviderId::OpenRouter => &self.selected_openrouter_account_ids,
+            ProviderId::Zai => &self.selected_zai_account_ids,
         }
     }
 
     pub fn selected_account_ids_mut(&mut self, provider: ProviderId) -> &mut Vec<String> {
         match provider {
-            ProviderId::Codex => &mut self.selected_codex_account_ids,
+            ProviderId::Antigravity => &mut self.selected_antigravity_account_ids,
             ProviderId::Claude => &mut self.selected_claude_account_ids,
+            ProviderId::Codex => &mut self.selected_codex_account_ids,
+            ProviderId::Copilot => &mut self.selected_copilot_account_ids,
             ProviderId::Cursor => &mut self.selected_cursor_account_ids,
             ProviderId::Gemini => &mut self.selected_gemini_account_ids,
-            ProviderId::Copilot => &mut self.selected_copilot_account_ids,
-            ProviderId::Minimax => &mut self.selected_minimax_account_ids,
-            ProviderId::Zai => &mut self.selected_zai_account_ids,
-            ProviderId::Kimi => &mut self.selected_kimi_account_ids,
-            ProviderId::Antigravity => &mut self.selected_antigravity_account_ids,
-            ProviderId::OpenCodeGo => &mut self.selected_opencode_go_account_ids,
             ProviderId::Grok => &mut self.selected_grok_account_ids,
+            ProviderId::Kimi => &mut self.selected_kimi_account_ids,
+            ProviderId::Minimax => &mut self.selected_minimax_account_ids,
+            ProviderId::OpenCodeGo => &mut self.selected_opencode_go_account_ids,
             ProviderId::OpenRouter => &mut self.selected_openrouter_account_ids,
+            ProviderId::Zai => &mut self.selected_zai_account_ids,
         }
     }
 
@@ -250,52 +250,52 @@ pub fn migrate_provider_enablement(context: &cosmic_config::Config, config: &mut
 
 fn provider_enabled_key(provider: ProviderId) -> &'static str {
     match provider {
-        ProviderId::Codex => "codex_enabled",
+        ProviderId::Antigravity => "antigravity_enabled",
         ProviderId::Claude => "claude_enabled",
+        ProviderId::Codex => "codex_enabled",
+        ProviderId::Copilot => "copilot_enabled",
         ProviderId::Cursor => "cursor_enabled",
         ProviderId::Gemini => "gemini_enabled",
-        ProviderId::Copilot => "copilot_enabled",
-        ProviderId::Minimax => "minimax_enabled",
-        ProviderId::Zai => "zai_enabled",
-        ProviderId::Kimi => "kimi_enabled",
-        ProviderId::Antigravity => "antigravity_enabled",
-        ProviderId::OpenCodeGo => "opencode_go_enabled",
         ProviderId::Grok => "grok_enabled",
+        ProviderId::Kimi => "kimi_enabled",
+        ProviderId::Minimax => "minimax_enabled",
+        ProviderId::OpenCodeGo => "opencode_go_enabled",
         ProviderId::OpenRouter => "openrouter_enabled",
+        ProviderId::Zai => "zai_enabled",
     }
 }
 
 fn provider_enablement_key(provider: ProviderId) -> &'static str {
     match provider {
-        ProviderId::Codex => "codex_enablement",
+        ProviderId::Antigravity => "antigravity_enablement",
         ProviderId::Claude => "claude_enablement",
+        ProviderId::Codex => "codex_enablement",
+        ProviderId::Copilot => "copilot_enablement",
         ProviderId::Cursor => "cursor_enablement",
         ProviderId::Gemini => "gemini_enablement",
-        ProviderId::Copilot => "copilot_enablement",
-        ProviderId::Minimax => "minimax_enablement",
-        ProviderId::Zai => "zai_enablement",
-        ProviderId::Kimi => "kimi_enablement",
-        ProviderId::Antigravity => "antigravity_enablement",
-        ProviderId::OpenCodeGo => "opencode_go_enablement",
         ProviderId::Grok => "grok_enablement",
+        ProviderId::Kimi => "kimi_enablement",
+        ProviderId::Minimax => "minimax_enablement",
+        ProviderId::OpenCodeGo => "opencode_go_enablement",
         ProviderId::OpenRouter => "openrouter_enablement",
+        ProviderId::Zai => "zai_enablement",
     }
 }
 
 fn provider_enablement_mut(config: &mut Config, provider: ProviderId) -> &mut ProviderEnablement {
     match provider {
-        ProviderId::Codex => &mut config.codex_enablement,
+        ProviderId::Antigravity => &mut config.antigravity_enablement,
         ProviderId::Claude => &mut config.claude_enablement,
+        ProviderId::Codex => &mut config.codex_enablement,
+        ProviderId::Copilot => &mut config.copilot_enablement,
         ProviderId::Cursor => &mut config.cursor_enablement,
         ProviderId::Gemini => &mut config.gemini_enablement,
-        ProviderId::Copilot => &mut config.copilot_enablement,
-        ProviderId::Minimax => &mut config.minimax_enablement,
-        ProviderId::Zai => &mut config.zai_enablement,
-        ProviderId::Kimi => &mut config.kimi_enablement,
-        ProviderId::Antigravity => &mut config.antigravity_enablement,
-        ProviderId::OpenCodeGo => &mut config.opencode_go_enablement,
         ProviderId::Grok => &mut config.grok_enablement,
+        ProviderId::Kimi => &mut config.kimi_enablement,
+        ProviderId::Minimax => &mut config.minimax_enablement,
+        ProviderId::OpenCodeGo => &mut config.opencode_go_enablement,
         ProviderId::OpenRouter => &mut config.openrouter_enablement,
+        ProviderId::Zai => &mut config.zai_enablement,
     }
 }
 

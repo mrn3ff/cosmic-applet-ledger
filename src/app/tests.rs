@@ -1403,6 +1403,26 @@ fn delete_account_requests_refresh_for_all_providers() {
         let keep_id = "keep";
 
         let remove_account_id = match provider {
+            ProviderId::Antigravity => {
+                app.config
+                    .antigravity_managed_accounts
+                    .push(antigravity_account(keep_id));
+                app.config
+                    .antigravity_managed_accounts
+                    .push(antigravity_account("remove"));
+                app.config.selected_antigravity_account_ids = vec![keep_id.to_string()];
+                "remove".to_string()
+            }
+            ProviderId::Claude => {
+                app.config
+                    .claude_managed_accounts
+                    .push(claude_account(keep_id));
+                app.config
+                    .claude_managed_accounts
+                    .push(claude_account("remove"));
+                app.config.selected_claude_account_ids = vec![keep_id.to_string()];
+                "remove".to_string()
+            }
             ProviderId::Codex => {
                 seed_account_storage(
                     crate::config::paths().codex_accounts_dir,
@@ -1419,14 +1439,14 @@ fn delete_account_requests_refresh_for_all_providers() {
                 app.config.selected_codex_account_ids = vec![keep_id.to_string()];
                 "remove".to_string()
             }
-            ProviderId::Claude => {
+            ProviderId::Copilot => {
                 app.config
-                    .claude_managed_accounts
-                    .push(claude_account(keep_id));
+                    .copilot_managed_accounts
+                    .push(copilot_account(keep_id, "keep"));
                 app.config
-                    .claude_managed_accounts
-                    .push(claude_account("remove"));
-                app.config.selected_claude_account_ids = vec![keep_id.to_string()];
+                    .copilot_managed_accounts
+                    .push(copilot_account("remove", "remove"));
+                app.config.selected_copilot_account_ids = vec![keep_id.to_string()];
                 "remove".to_string()
             }
             ProviderId::Cursor => {
@@ -1456,14 +1476,13 @@ fn delete_account_requests_refresh_for_all_providers() {
                 app.config.selected_gemini_account_ids = vec![keep_id.to_string()];
                 "remove".to_string()
             }
-            ProviderId::Copilot => {
+            ProviderId::Grok | ProviderId::OpenCodeGo | ProviderId::OpenRouter => continue,
+            ProviderId::Kimi => {
+                app.config.kimi_managed_accounts.push(kimi_account(keep_id));
                 app.config
-                    .copilot_managed_accounts
-                    .push(copilot_account(keep_id, "keep"));
-                app.config
-                    .copilot_managed_accounts
-                    .push(copilot_account("remove", "remove"));
-                app.config.selected_copilot_account_ids = vec![keep_id.to_string()];
+                    .kimi_managed_accounts
+                    .push(kimi_account("remove"));
+                app.config.selected_kimi_account_ids = vec![keep_id.to_string()];
                 "remove".to_string()
             }
             ProviderId::Minimax => {
@@ -1482,25 +1501,6 @@ fn delete_account_requests_refresh_for_all_providers() {
                 app.config.selected_zai_account_ids = vec![keep_id.to_string()];
                 "remove".to_string()
             }
-            ProviderId::Kimi => {
-                app.config.kimi_managed_accounts.push(kimi_account(keep_id));
-                app.config
-                    .kimi_managed_accounts
-                    .push(kimi_account("remove"));
-                app.config.selected_kimi_account_ids = vec![keep_id.to_string()];
-                "remove".to_string()
-            }
-            ProviderId::Antigravity => {
-                app.config
-                    .antigravity_managed_accounts
-                    .push(antigravity_account(keep_id));
-                app.config
-                    .antigravity_managed_accounts
-                    .push(antigravity_account("remove"));
-                app.config.selected_antigravity_account_ids = vec![keep_id.to_string()];
-                "remove".to_string()
-            }
-            ProviderId::OpenCodeGo | ProviderId::Grok | ProviderId::OpenRouter => continue,
         };
 
         let _task = app.delete_account(provider, &remove_account_id);

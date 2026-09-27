@@ -19,20 +19,20 @@ use std::sync::Once;
 const DEMO_ENV: &str = "LEDGER_DEMO";
 const LEGACY_DEMO_ENV: &str = "YAPCAP_DEMO";
 const DEMO_ID_PREFIX: &str = "yapcap-demo:";
-const CODEX_PRO_ID: &str = "yapcap-demo:codex-pro";
-const CODEX_FREE_ID: &str = "yapcap-demo:codex-free";
-const CLAUDE_PRIMARY_ID: &str = "yapcap-demo:claude-primary";
-const CLAUDE_MAX_ID: &str = "yapcap-demo:claude-max";
-const CURSOR_PRIMARY_ID: &str = "yapcap-demo:cursor-primary";
-const GEMINI_PRIMARY_ID: &str = "yapcap-demo:gemini-primary";
-const COPILOT_FREE_ID: &str = "yapcap-demo:copilot-casey-free";
-const COPILOT_PRO_ID: &str = "yapcap-demo:copilot-morgan-pro";
-const MINIMAX_PRIMARY_ID: &str = "yapcap-demo:minimax-primary";
-const KIMI_PRIMARY_ID: &str = "yapcap-demo:kimi-primary";
 const ANTIGRAVITY_PRIMARY_ID: &str = "yapcap-demo:antigravity-primary";
 const ANTIGRAVITY_FREE_ID: &str = "yapcap-demo:antigravity-free";
-const OPENCODE_GO_ID: &str = "yapcap-demo:opencode-go";
+const CLAUDE_PRIMARY_ID: &str = "yapcap-demo:claude-primary";
+const CLAUDE_MAX_ID: &str = "yapcap-demo:claude-max";
+const CODEX_PRO_ID: &str = "yapcap-demo:codex-pro";
+const CODEX_FREE_ID: &str = "yapcap-demo:codex-free";
+const COPILOT_FREE_ID: &str = "yapcap-demo:copilot-casey-free";
+const COPILOT_PRO_ID: &str = "yapcap-demo:copilot-morgan-pro";
+const CURSOR_PRIMARY_ID: &str = "yapcap-demo:cursor-primary";
+const GEMINI_PRIMARY_ID: &str = "yapcap-demo:gemini-primary";
 const GROK_PRIMARY_ID: &str = "yapcap-demo:grok-primary";
+const KIMI_PRIMARY_ID: &str = "yapcap-demo:kimi-primary";
+const MINIMAX_PRIMARY_ID: &str = "yapcap-demo:minimax-primary";
+const OPENCODE_GO_ID: &str = "yapcap-demo:opencode-go";
 const OPENROUTER_PRIMARY_ID: &str = "yapcap-demo:openrouter-primary";
 const ZAI_PRIMARY_ID: &str = "yapcap-demo:zai-coding-plan";
 
@@ -74,73 +74,74 @@ pub fn apply_config(config: &mut Config) {
         return;
     }
 
-    config.codex_enablement = ProviderEnablement::Enabled;
+    config.antigravity_enablement = ProviderEnablement::Enabled;
     config.claude_enablement = ProviderEnablement::Enabled;
+    config.codex_enablement = ProviderEnablement::Enabled;
+    config.copilot_enablement = ProviderEnablement::Enabled;
     config.cursor_enablement = ProviderEnablement::Enabled;
     config.gemini_enablement = ProviderEnablement::Enabled;
-    config.copilot_enablement = ProviderEnablement::Enabled;
-    config.minimax_enablement = ProviderEnablement::Enabled;
-    config.kimi_enablement = ProviderEnablement::Enabled;
-    config.antigravity_enablement = ProviderEnablement::Enabled;
-    config.opencode_go_enablement = ProviderEnablement::Enabled;
     config.grok_enablement = ProviderEnablement::Enabled;
+    config.kimi_enablement = ProviderEnablement::Enabled;
+    config.minimax_enablement = ProviderEnablement::Enabled;
+    config.opencode_go_enablement = ProviderEnablement::Enabled;
     config.openrouter_enablement = ProviderEnablement::Enabled;
     config.zai_enablement = ProviderEnablement::Enabled;
 
-    config.codex_managed_accounts = demo_codex_accounts();
+    config.antigravity_managed_accounts = demo_antigravity_accounts();
     config.claude_managed_accounts = demo_claude_accounts();
+    config.codex_managed_accounts = demo_codex_accounts();
+    config.copilot_managed_accounts = demo_copilot_accounts();
     config.cursor_managed_accounts = demo_cursor_accounts();
     config.gemini_managed_accounts = demo_gemini_accounts();
-    config.copilot_managed_accounts = demo_copilot_accounts();
-    config.minimax_managed_accounts = demo_minimax_accounts();
-    config.kimi_managed_accounts = demo_kimi_accounts();
-    config.antigravity_managed_accounts = demo_antigravity_accounts();
-    config.opencode_go_managed_accounts = demo_opencode_go_accounts();
     config.grok_managed_accounts = demo_grok_accounts();
+    config.kimi_managed_accounts = demo_kimi_accounts();
+    config.minimax_managed_accounts = demo_minimax_accounts();
+    config.opencode_go_managed_accounts = demo_opencode_go_accounts();
     config.openrouter_managed_accounts = demo_openrouter_accounts();
     config.zai_managed_accounts = demo_zai_accounts();
 
     config.provider_visibility_mode = ProviderVisibilityMode::UserManaged;
 
-    config.selected_codex_account_ids = vec![CODEX_PRO_ID.to_string()];
+    config.selected_antigravity_account_ids = vec![ANTIGRAVITY_PRIMARY_ID.to_string()];
     config.selected_claude_account_ids = vec![CLAUDE_PRIMARY_ID.to_string()];
+    config.selected_codex_account_ids = vec![CODEX_PRO_ID.to_string()];
+    config.selected_copilot_account_ids = vec![COPILOT_FREE_ID.to_string()];
     config.selected_cursor_account_ids = vec![CURSOR_PRIMARY_ID.to_string()];
     config.selected_gemini_account_ids = vec![GEMINI_PRIMARY_ID.to_string()];
-    config.selected_copilot_account_ids = vec![COPILOT_FREE_ID.to_string()];
-    config.selected_minimax_account_ids = vec![MINIMAX_PRIMARY_ID.to_string()];
-    config.selected_kimi_account_ids = vec![KIMI_PRIMARY_ID.to_string()];
-    config.selected_antigravity_account_ids = vec![ANTIGRAVITY_PRIMARY_ID.to_string()];
-    config.selected_opencode_go_account_ids = vec![OPENCODE_GO_ID.to_string()];
     config.selected_grok_account_ids = vec![GROK_PRIMARY_ID.to_string()];
+    config.selected_kimi_account_ids = vec![KIMI_PRIMARY_ID.to_string()];
+    config.selected_minimax_account_ids = vec![MINIMAX_PRIMARY_ID.to_string()];
+    config.selected_opencode_go_account_ids = vec![OPENCODE_GO_ID.to_string()];
     config.selected_openrouter_account_ids = vec![OPENROUTER_PRIMARY_ID.to_string()];
     config.selected_zai_account_ids = vec![ZAI_PRIMARY_ID.to_string()];
 }
 
 pub fn strip_leaked_state(config: &mut Config) -> bool {
-    let mut changed = strip_ids(&mut config.selected_codex_account_ids);
-    changed |= retain_len_changed(&mut config.codex_managed_accounts, |account| &account.id);
-    changed |= strip_ids(&mut config.selected_claude_account_ids);
-    changed |= retain_len_changed(&mut config.claude_managed_accounts, |account| &account.id);
-    changed |= strip_ids(&mut config.selected_cursor_account_ids);
-    changed |= retain_len_changed(&mut config.cursor_managed_accounts, |account| &account.id);
-    changed |= strip_ids(&mut config.selected_gemini_account_ids);
-    changed |= retain_len_changed(&mut config.gemini_managed_accounts, |account| &account.id);
-    changed |= strip_ids(&mut config.selected_copilot_account_ids);
-    changed |= retain_len_changed(&mut config.copilot_managed_accounts, |account| &account.id);
-    changed |= strip_ids(&mut config.selected_minimax_account_ids);
-    changed |= retain_len_changed(&mut config.minimax_managed_accounts, |account| &account.id);
-    changed |= strip_ids(&mut config.selected_kimi_account_ids);
-    changed |= retain_len_changed(&mut config.kimi_managed_accounts, |account| &account.id);
+    let mut changed = false;
     changed |= strip_ids(&mut config.selected_antigravity_account_ids);
     changed |= retain_len_changed(&mut config.antigravity_managed_accounts, |account| {
         &account.id
     });
+    changed |= strip_ids(&mut config.selected_claude_account_ids);
+    changed |= retain_len_changed(&mut config.claude_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_codex_account_ids);
+    changed |= retain_len_changed(&mut config.codex_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_copilot_account_ids);
+    changed |= retain_len_changed(&mut config.copilot_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_cursor_account_ids);
+    changed |= retain_len_changed(&mut config.cursor_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_gemini_account_ids);
+    changed |= retain_len_changed(&mut config.gemini_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_grok_account_ids);
+    changed |= retain_len_changed(&mut config.grok_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_kimi_account_ids);
+    changed |= retain_len_changed(&mut config.kimi_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_minimax_account_ids);
+    changed |= retain_len_changed(&mut config.minimax_managed_accounts, |account| &account.id);
     changed |= strip_ids(&mut config.selected_opencode_go_account_ids);
     changed |= retain_len_changed(&mut config.opencode_go_managed_accounts, |account| {
         &account.id
     });
-    changed |= strip_ids(&mut config.selected_grok_account_ids);
-    changed |= retain_len_changed(&mut config.grok_managed_accounts, |account| &account.id);
     changed |= strip_ids(&mut config.selected_openrouter_account_ids);
     changed |= retain_len_changed(&mut config.openrouter_managed_accounts, |account| {
         &account.id
@@ -206,33 +207,33 @@ pub fn apply(config: &Config, state: &mut AppState) {
 
 fn demo_system_active_account_id(provider: ProviderId) -> Option<String> {
     let id = match provider {
-        ProviderId::Codex => CODEX_PRO_ID,
+        ProviderId::Antigravity => return None,
         ProviderId::Claude => CLAUDE_PRIMARY_ID,
+        ProviderId::Codex => CODEX_PRO_ID,
+        ProviderId::Copilot => return None,
         ProviderId::Cursor => CURSOR_PRIMARY_ID,
         ProviderId::Gemini => GEMINI_PRIMARY_ID,
-        ProviderId::Copilot => return None,
-        ProviderId::Minimax => return None,
-        ProviderId::Kimi => return None,
-        ProviderId::Antigravity => return None,
-        ProviderId::OpenCodeGo => return None,
         ProviderId::Grok => return None,
-        ProviderId::Zai => return None,
+        ProviderId::Kimi => return None,
+        ProviderId::Minimax => return None,
+        ProviderId::OpenCodeGo => return None,
         ProviderId::OpenRouter => return None,
+        ProviderId::Zai => return None,
     };
     Some(id.to_string())
 }
 
 fn demo_source(provider: ProviderId) -> String {
     match provider {
-        ProviderId::Codex
-        | ProviderId::Claude
-        | ProviderId::Gemini
+        ProviderId::Antigravity => "OAuth".to_string(),
+        ProviderId::Claude
+        | ProviderId::Codex
         | ProviderId::Copilot
+        | ProviderId::Gemini
         | ProviderId::Grok => "OAuth".to_string(),
         ProviderId::Cursor => "Managed Account".to_string(),
-        ProviderId::Minimax => "API Key".to_string(),
         ProviderId::Kimi => "API Key".to_string(),
-        ProviderId::Antigravity => "OAuth".to_string(),
+        ProviderId::Minimax => "API Key".to_string(),
         ProviderId::OpenCodeGo => "API Key".to_string(),
         ProviderId::OpenRouter => "API Key".to_string(),
         ProviderId::Zai => "API Key".to_string(),
@@ -242,29 +243,29 @@ fn demo_source(provider: ProviderId) -> String {
 fn demo_runtime_accounts(provider: ProviderId) -> Vec<ProviderAccountRuntimeState> {
     let now = Utc::now();
     match provider {
-        ProviderId::Codex => vec![
+        ProviderId::Antigravity => vec![
             demo_account(
                 provider,
                 DemoAccount {
-                    account_id: CODEX_PRO_ID,
+                    account_id: ANTIGRAVITY_PRIMARY_ID,
                     label: "pro@example.com",
-                    last_success_at: now - Duration::minutes(1),
+                    last_success_at: now - Duration::minutes(2),
                     health: ProviderHealth::Ok,
                     auth_state: AuthState::Ready,
                     error: None,
-                    snapshot: snapshot_codex_pro(),
+                    snapshot: snapshot_antigravity_primary(),
                 },
             ),
             demo_account(
                 provider,
                 DemoAccount {
-                    account_id: CODEX_FREE_ID,
+                    account_id: ANTIGRAVITY_FREE_ID,
                     label: "free@example.com",
-                    last_success_at: now - Duration::minutes(2),
+                    last_success_at: now - Duration::minutes(4),
                     health: ProviderHealth::Ok,
                     auth_state: AuthState::Ready,
                     error: None,
-                    snapshot: snapshot_codex_free(),
+                    snapshot: snapshot_antigravity_free(),
                 },
             ),
         ],
@@ -294,30 +295,32 @@ fn demo_runtime_accounts(provider: ProviderId) -> Vec<ProviderAccountRuntimeStat
                 },
             ),
         ],
-        ProviderId::Gemini => vec![demo_account(
-            provider,
-            DemoAccount {
-                account_id: GEMINI_PRIMARY_ID,
-                label: "pro@example.com",
-                last_success_at: now - Duration::minutes(4),
-                health: ProviderHealth::Ok,
-                auth_state: AuthState::Ready,
-                error: None,
-                snapshot: snapshot_gemini_primary(),
-            },
-        )],
-        ProviderId::Cursor => vec![demo_account(
-            provider,
-            DemoAccount {
-                account_id: CURSOR_PRIMARY_ID,
-                label: "hobby@example.com",
-                last_success_at: now - Duration::minutes(1),
-                health: ProviderHealth::Ok,
-                auth_state: AuthState::Ready,
-                error: None,
-                snapshot: snapshot_cursor_primary(),
-            },
-        )],
+        ProviderId::Codex => vec![
+            demo_account(
+                provider,
+                DemoAccount {
+                    account_id: CODEX_PRO_ID,
+                    label: "pro@example.com",
+                    last_success_at: now - Duration::minutes(1),
+                    health: ProviderHealth::Ok,
+                    auth_state: AuthState::Ready,
+                    error: None,
+                    snapshot: snapshot_codex_pro(),
+                },
+            ),
+            demo_account(
+                provider,
+                DemoAccount {
+                    account_id: CODEX_FREE_ID,
+                    label: "free@example.com",
+                    last_success_at: now - Duration::minutes(2),
+                    health: ProviderHealth::Ok,
+                    auth_state: AuthState::Ready,
+                    error: None,
+                    snapshot: snapshot_codex_free(),
+                },
+            ),
+        ],
         ProviderId::Copilot => vec![
             demo_account(
                 provider,
@@ -344,66 +347,28 @@ fn demo_runtime_accounts(provider: ProviderId) -> Vec<ProviderAccountRuntimeStat
                 },
             ),
         ],
-        ProviderId::Minimax => vec![demo_account(
+        ProviderId::Cursor => vec![demo_account(
             provider,
             DemoAccount {
-                account_id: MINIMAX_PRIMARY_ID,
-                label: "MiniMax M2",
-                last_success_at: now - Duration::minutes(3),
+                account_id: CURSOR_PRIMARY_ID,
+                label: "hobby@example.com",
+                last_success_at: now - Duration::minutes(1),
                 health: ProviderHealth::Ok,
                 auth_state: AuthState::Ready,
                 error: None,
-                snapshot: snapshot_minimax_primary(),
+                snapshot: snapshot_cursor_primary(),
             },
         )],
-        ProviderId::Kimi => vec![demo_account(
+        ProviderId::Gemini => vec![demo_account(
             provider,
             DemoAccount {
-                account_id: KIMI_PRIMARY_ID,
-                label: "Kimi Intermediate",
-                last_success_at: now - Duration::minutes(3),
+                account_id: GEMINI_PRIMARY_ID,
+                label: "pro@example.com",
+                last_success_at: now - Duration::minutes(4),
                 health: ProviderHealth::Ok,
                 auth_state: AuthState::Ready,
                 error: None,
-                snapshot: snapshot_kimi_primary(),
-            },
-        )],
-        ProviderId::Antigravity => vec![
-            demo_account(
-                provider,
-                DemoAccount {
-                    account_id: ANTIGRAVITY_PRIMARY_ID,
-                    label: "pro@example.com",
-                    last_success_at: now - Duration::minutes(2),
-                    health: ProviderHealth::Ok,
-                    auth_state: AuthState::Ready,
-                    error: None,
-                    snapshot: snapshot_antigravity_primary(),
-                },
-            ),
-            demo_account(
-                provider,
-                DemoAccount {
-                    account_id: ANTIGRAVITY_FREE_ID,
-                    label: "free@example.com",
-                    last_success_at: now - Duration::minutes(4),
-                    health: ProviderHealth::Ok,
-                    auth_state: AuthState::Ready,
-                    error: None,
-                    snapshot: snapshot_antigravity_free(),
-                },
-            ),
-        ],
-        ProviderId::OpenCodeGo => vec![demo_account(
-            provider,
-            DemoAccount {
-                account_id: OPENCODE_GO_ID,
-                label: "OpenCode Go",
-                last_success_at: now - Duration::minutes(2),
-                health: ProviderHealth::Ok,
-                auth_state: AuthState::Ready,
-                error: None,
-                snapshot: snapshot_opencode_go(),
+                snapshot: snapshot_gemini_primary(),
             },
         )],
         ProviderId::Grok => vec![demo_account(
@@ -418,16 +383,40 @@ fn demo_runtime_accounts(provider: ProviderId) -> Vec<ProviderAccountRuntimeStat
                 snapshot: snapshot_grok(),
             },
         )],
-        ProviderId::Zai => vec![demo_account(
+        ProviderId::Kimi => vec![demo_account(
             provider,
             DemoAccount {
-                account_id: ZAI_PRIMARY_ID,
-                label: "Z.AI Coding Plan",
+                account_id: KIMI_PRIMARY_ID,
+                label: "Kimi Intermediate",
+                last_success_at: now - Duration::minutes(3),
+                health: ProviderHealth::Ok,
+                auth_state: AuthState::Ready,
+                error: None,
+                snapshot: snapshot_kimi_primary(),
+            },
+        )],
+        ProviderId::Minimax => vec![demo_account(
+            provider,
+            DemoAccount {
+                account_id: MINIMAX_PRIMARY_ID,
+                label: "MiniMax M2",
+                last_success_at: now - Duration::minutes(3),
+                health: ProviderHealth::Ok,
+                auth_state: AuthState::Ready,
+                error: None,
+                snapshot: snapshot_minimax_primary(),
+            },
+        )],
+        ProviderId::OpenCodeGo => vec![demo_account(
+            provider,
+            DemoAccount {
+                account_id: OPENCODE_GO_ID,
+                label: "OpenCode Go",
                 last_success_at: now - Duration::minutes(2),
                 health: ProviderHealth::Ok,
                 auth_state: AuthState::Ready,
                 error: None,
-                snapshot: snapshot_zai_primary(),
+                snapshot: snapshot_opencode_go(),
             },
         )],
         ProviderId::OpenRouter => vec![demo_account(
@@ -440,6 +429,18 @@ fn demo_runtime_accounts(provider: ProviderId) -> Vec<ProviderAccountRuntimeStat
                 auth_state: AuthState::Ready,
                 error: None,
                 snapshot: snapshot_openrouter(),
+            },
+        )],
+        ProviderId::Zai => vec![demo_account(
+            provider,
+            DemoAccount {
+                account_id: ZAI_PRIMARY_ID,
+                label: "Z.AI Coding Plan",
+                last_success_at: now - Duration::minutes(2),
+                health: ProviderHealth::Ok,
+                auth_state: AuthState::Ready,
+                error: None,
+                snapshot: snapshot_zai_primary(),
             },
         )],
     }
@@ -1579,13 +1580,23 @@ mod tests {
                 provider.label()
             );
             let managed_ids: Vec<&String> = match provider {
-                ProviderId::Codex => config
-                    .codex_managed_accounts
+                ProviderId::Antigravity => config
+                    .antigravity_managed_accounts
                     .iter()
                     .map(|a| &a.id)
                     .collect(),
                 ProviderId::Claude => config
                     .claude_managed_accounts
+                    .iter()
+                    .map(|a| &a.id)
+                    .collect(),
+                ProviderId::Codex => config
+                    .codex_managed_accounts
+                    .iter()
+                    .map(|a| &a.id)
+                    .collect(),
+                ProviderId::Copilot => config
+                    .copilot_managed_accounts
                     .iter()
                     .map(|a| &a.id)
                     .collect(),
@@ -1599,19 +1610,10 @@ mod tests {
                     .iter()
                     .map(|a| &a.id)
                     .collect(),
-                ProviderId::Copilot => config
-                    .copilot_managed_accounts
-                    .iter()
-                    .map(|a| &a.id)
-                    .collect(),
+                ProviderId::Grok => config.grok_managed_accounts.iter().map(|a| &a.id).collect(),
+                ProviderId::Kimi => config.kimi_managed_accounts.iter().map(|a| &a.id).collect(),
                 ProviderId::Minimax => config
                     .minimax_managed_accounts
-                    .iter()
-                    .map(|a| &a.id)
-                    .collect(),
-                ProviderId::Kimi => config.kimi_managed_accounts.iter().map(|a| &a.id).collect(),
-                ProviderId::Antigravity => config
-                    .antigravity_managed_accounts
                     .iter()
                     .map(|a| &a.id)
                     .collect(),
@@ -1620,7 +1622,6 @@ mod tests {
                     .iter()
                     .map(|a| &a.id)
                     .collect(),
-                ProviderId::Grok => config.grok_managed_accounts.iter().map(|a| &a.id).collect(),
                 ProviderId::OpenRouter => {
                     config.openrouter_managed_accounts.iter().map(|a| &a.id).collect()
                 }

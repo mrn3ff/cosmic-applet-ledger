@@ -9,18 +9,18 @@ pub const STALE_THRESHOLD: chrono::Duration = chrono::Duration::minutes(10);
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum ProviderId {
-    Codex,
-    Claude,
-    Cursor,
     Antigravity,
-    Gemini,
+    Claude,
+    Codex,
     Copilot,
-    Minimax,
-    Zai,
-    Kimi,
-    OpenCodeGo,
+    Cursor,
+    Gemini,
     Grok,
+    Kimi,
+    Minimax,
+    OpenCodeGo,
     OpenRouter,
+    Zai,
 }
 
 impl ProviderId {
@@ -389,25 +389,20 @@ mod tests {
     }
 
     #[test]
-    fn zai_provider_id_has_serialization_label_and_canonical_order() {
+    fn zai_provider_id_has_serialization_and_label() {
         assert_eq!(serde_json::to_string(&ProviderId::Zai).unwrap(), "\"zai\"");
         assert_eq!(ProviderId::Zai.label(), "Z.AI Coding Plan");
-        assert_eq!(
-            ProviderId::ALL[ProviderId::ALL
-                .iter()
-                .position(|provider| *provider == ProviderId::Minimax)
-                .unwrap()
-                + 1],
-            ProviderId::Zai
-        );
-        assert_eq!(
-            ProviderId::ALL[ProviderId::ALL
-                .iter()
-                .position(|provider| *provider == ProviderId::Zai)
-                .unwrap()
-                + 1],
-            ProviderId::Kimi
-        );
+    }
+
+    #[test]
+    fn providers_are_ordered_alphabetically_by_label() {
+        let labels: Vec<String> = ProviderId::ALL
+            .iter()
+            .map(|provider| provider.label().to_lowercase())
+            .collect();
+        let mut sorted = labels.clone();
+        sorted.sort();
+        assert_eq!(labels, sorted);
     }
 
     fn window(label: &str) -> UsageWindow {
