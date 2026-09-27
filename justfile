@@ -90,8 +90,8 @@ run-empty-discovery *args:
     mkdir -p /tmp/ledger-empty-home /tmp/ledger-empty-config /tmp/ledger-empty-state
     env RUST_BACKTRACE=full HOME=/tmp/ledger-empty-home XDG_CONFIG_HOME=/tmp/ledger-empty-config XDG_STATE_HOME=/tmp/ledger-empty-state CARGO_HOME="${CARGO_HOME:-{{home_directory() / '.cargo'}}}" RUSTUP_HOME="${RUSTUP_HOME:-{{home_directory() / '.rustup'}}}" cargo run --release {{args}}
 
-# Adds Ledger to the COSMIC top panel
-add-to-panel:
+# Adds an applet (Ledger by default) to the start of the COSMIC top panel's right wing
+add-to-panel id=appid:
     #!/usr/bin/env bash
     set -euo pipefail
     panel_config="${XDG_CONFIG_HOME:-$HOME/.config}/cosmic/com.system76.CosmicPanel.Panel/v1/plugins_wings"
@@ -101,22 +101,23 @@ add-to-panel:
     fi
     if [[ -f "$panel_config" ]]; then
         if [[ "$(tr -d '[:space:]' < "$panel_config")" == "None" ]]; then
-            printf 'Some(([], ["{{ appid }}"]))\n' > "$panel_config"
+            printf 'Some(([], ["{{ id }}"]))\n' > "$panel_config"
         else
             sed -i -z \
-                -e 's/"{{ appid }}"[[:space:]]*,\?//g' \
-                -e 's/\(Some(([^]]],[[:space:]]\[[[:space:]]*\)/\1"{{ appid }}", /' \
+                -e 's/"{{ id }}"[[:space:]]*,\?[[:space:]]*//g' \
+                -e 's/\(Some((\[[^]]*\],[[:space:]]*\[[[:space:]]*\)/\1"{{ id }}",\n    /' \
                 "$panel_config"
+            grep -qF '"{{ id }}"' "$panel_config" || { echo "error: could not add {{ id }} to $panel_config" >&2; exit 1; }
         fi
     fi
 
-# Removes Ledger from the COSMIC top panel
-remove-from-panel:
+# Removes an applet (Ledger by default) from the COSMIC top panel
+remove-from-panel id=appid:
     #!/usr/bin/env bash
     set -euo pipefail
     panel_config="${XDG_CONFIG_HOME:-$HOME/.config}/cosmic/com.system76.CosmicPanel.Panel/v1/plugins_wings"
     if [[ -f "$panel_config" ]]; then
-        sed -i -z -e 's/"{{ appid }}"[[:space:]]*,\?//g' "$panel_config"
+        sed -i -z -e 's/"{{ id }}"[[:space:]]*,\?[[:space:]]*//g' "$panel_config"
     fi
 
 # Installs files
@@ -128,16 +129,16 @@ install: build-release add-to-panel
     install -Dm0644 resources/ledger-icon/linux/hicolor/symbolic/apps/ledger-symbolic.svg {{icon-symbolic-dst}}
 
 # Installs debug build as `cosmic-applet-ledger-debug` and a separate desktop entry (LEDGER_DEMO) for screenshots
-install-demo: build-debug add-to-panel
+install-demo: build-debug (add-to-panel 'cosmic-applet-ledger-debug')
     install -Dm0755 {{ cargo-target-dir / 'debug' / name }} {{bin-debug-dst}}
     install -Dm0644 resources/app-debug.desktop {{desktop-debug-dst}}
 
 # Removes only the debug install (`install-demo`)
-uninstall-demo: remove-from-panel
+uninstall-demo: (remove-from-panel 'cosmic-applet-ledger-debug')
     rm -f {{bin-debug-dst}} {{desktop-debug-dst}}
 
 # Uninstalls installed files (and debug demo install if present)
-uninstall: uninstall-demo
+uninstall: uninstall-demo remove-from-panel
     rm -f {{bin-dst}} {{desktop-dst}} {{appdata-dst}} {{icon-dst}} {{icon-symbolic-dst}}
 
 # Builds the Flatpak (recreates build-dir; reuses .flatpak-builder cache)

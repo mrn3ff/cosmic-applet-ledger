@@ -3,7 +3,7 @@ Name=Ledger (debug)
 Comment=Provider usage panel applet for COSMIC (debug build, demo mode)
 Type=Application
 Icon=io.github.mrn3ff.cosmic-applet-ledger
-Exec=env YAPCAP_DEMO=1 cosmic-applet-ledger-debug
+Exec=env LEDGER_DEMO=1 cosmic-applet-ledger-debug
 Terminal=false
 StartupNotify=true
 Categories=Utility;X-COSMIC;
