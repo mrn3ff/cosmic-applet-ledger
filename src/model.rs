@@ -20,37 +20,40 @@ pub enum ProviderId {
     Kimi,
     OpenCodeGo,
     Grok,
+    OpenRouter,
 }
 
 impl ProviderId {
-    pub const ALL: [Self; 11] = [
-        Self::Codex,
-        Self::Claude,
-        Self::Cursor,
+    pub const ALL: [Self; 12] = [
         Self::Antigravity,
-        Self::Gemini,
+        Self::Claude,
+        Self::Codex,
         Self::Copilot,
-        Self::Minimax,
-        Self::Zai,
-        Self::Kimi,
-        Self::OpenCodeGo,
+        Self::Cursor,
+        Self::Gemini,
         Self::Grok,
+        Self::Kimi,
+        Self::Minimax,
+        Self::OpenCodeGo,
+        Self::OpenRouter,
+        Self::Zai,
     ];
 
     #[must_use]
     pub fn label(self) -> &'static str {
         match self {
-            Self::Codex => "Codex",
+            Self::Antigravity => "Antigravity",
             Self::Claude => "Claude",
+            Self::Codex => "Codex",
+            Self::Copilot => "Copilot",
             Self::Cursor => "Cursor",
             Self::Gemini => "Gemini",
-            Self::Antigravity => "Antigravity",
-            Self::Copilot => "Copilot",
-            Self::Minimax => "Minimax",
-            Self::Zai => "Z.AI Coding Plan",
-            Self::Kimi => "Kimi",
-            Self::OpenCodeGo => "OpenCode Go",
             Self::Grok => "Grok",
+            Self::Kimi => "Kimi",
+            Self::Minimax => "Minimax",
+            Self::OpenCodeGo => "OpenCode Go",
+            Self::OpenRouter => "OpenRouter",
+            Self::Zai => "Z.AI Coding Plan",
         }
     }
 }

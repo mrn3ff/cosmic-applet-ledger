@@ -7,6 +7,7 @@ mod copilot_adapter;
 mod cursor_adapter;
 mod gemini_adapter;
 mod grok_adapter;
+mod openrouter_adapter;
 mod kimi_adapter;
 mod minimax_adapter;
 mod opencode_go_adapter;
@@ -33,6 +34,7 @@ pub(super) fn adapter(provider: ProviderId) -> &'static dyn ProviderAdapter {
         ProviderId::Antigravity => &ANTIGRAVITY_ADAPTER,
         ProviderId::OpenCodeGo => &OPENCODE_GO_ADAPTER,
         ProviderId::Grok => &GROK_ADAPTER,
+        ProviderId::OpenRouter => &OPENROUTER_ADAPTER,
     }
 }
 
@@ -49,6 +51,8 @@ static ANTIGRAVITY_ADAPTER: antigravity_adapter::AntigravityAdapter =
 static OPENCODE_GO_ADAPTER: opencode_go_adapter::OpenCodeGoAdapter =
     opencode_go_adapter::OpenCodeGoAdapter;
 static GROK_ADAPTER: grok_adapter::GrokAdapter = grok_adapter::GrokAdapter;
+static OPENROUTER_ADAPTER: openrouter_adapter::OpenRouterAdapter =
+    openrouter_adapter::OpenRouterAdapter;
 
 pub(super) fn opencode_go_system_active_account_id(
     managed_accounts: &[crate::config::ManagedOpenCodeGoAccountConfig],

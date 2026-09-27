@@ -4,7 +4,7 @@ use crate::config::{
     Config, ManagedAntigravityAccountConfig, ManagedClaudeAccountConfig, ManagedCodexAccountConfig,
     ManagedCopilotAccountConfig, ManagedCursorAccountConfig, ManagedGeminiAccountConfig,
     ManagedGrokAccountConfig, ManagedKimiAccountConfig, ManagedMinimaxAccountConfig,
-    ManagedOpenCodeGoAccountConfig, ManagedZaiAccountConfig, ProviderEnablement,
+    ManagedOpenCodeGoAccountConfig, ManagedOpenRouterAccountConfig, ManagedZaiAccountConfig, ProviderEnablement,
     ProviderVisibilityMode, paths,
 };
 use crate::model::{
@@ -33,6 +33,7 @@ const ANTIGRAVITY_PRIMARY_ID: &str = "yapcap-demo:antigravity-primary";
 const ANTIGRAVITY_FREE_ID: &str = "yapcap-demo:antigravity-free";
 const OPENCODE_GO_ID: &str = "yapcap-demo:opencode-go";
 const GROK_PRIMARY_ID: &str = "yapcap-demo:grok-primary";
+const OPENROUTER_PRIMARY_ID: &str = "yapcap-demo:openrouter-primary";
 const ZAI_PRIMARY_ID: &str = "yapcap-demo:zai-coding-plan";
 
 fn is_val_truthy(val: &str) -> bool {
@@ -83,6 +84,7 @@ pub fn apply_config(config: &mut Config) {
     config.antigravity_enablement = ProviderEnablement::Enabled;
     config.opencode_go_enablement = ProviderEnablement::Enabled;
     config.grok_enablement = ProviderEnablement::Enabled;
+    config.openrouter_enablement = ProviderEnablement::Enabled;
     config.zai_enablement = ProviderEnablement::Enabled;
 
     config.codex_managed_accounts = demo_codex_accounts();
@@ -95,6 +97,7 @@ pub fn apply_config(config: &mut Config) {
     config.antigravity_managed_accounts = demo_antigravity_accounts();
     config.opencode_go_managed_accounts = demo_opencode_go_accounts();
     config.grok_managed_accounts = demo_grok_accounts();
+    config.openrouter_managed_accounts = demo_openrouter_accounts();
     config.zai_managed_accounts = demo_zai_accounts();
 
     config.provider_visibility_mode = ProviderVisibilityMode::UserManaged;
@@ -109,6 +112,7 @@ pub fn apply_config(config: &mut Config) {
     config.selected_antigravity_account_ids = vec![ANTIGRAVITY_PRIMARY_ID.to_string()];
     config.selected_opencode_go_account_ids = vec![OPENCODE_GO_ID.to_string()];
     config.selected_grok_account_ids = vec![GROK_PRIMARY_ID.to_string()];
+    config.selected_openrouter_account_ids = vec![OPENROUTER_PRIMARY_ID.to_string()];
     config.selected_zai_account_ids = vec![ZAI_PRIMARY_ID.to_string()];
 }
 
@@ -137,6 +141,10 @@ pub fn strip_leaked_state(config: &mut Config) -> bool {
     });
     changed |= strip_ids(&mut config.selected_grok_account_ids);
     changed |= retain_len_changed(&mut config.grok_managed_accounts, |account| &account.id);
+    changed |= strip_ids(&mut config.selected_openrouter_account_ids);
+    changed |= retain_len_changed(&mut config.openrouter_managed_accounts, |account| {
+        &account.id
+    });
     changed |= strip_ids(&mut config.selected_zai_account_ids);
     changed |= retain_len_changed(&mut config.zai_managed_accounts, |account| &account.id);
     changed
@@ -209,6 +217,7 @@ fn demo_system_active_account_id(provider: ProviderId) -> Option<String> {
         ProviderId::OpenCodeGo => return None,
         ProviderId::Grok => return None,
         ProviderId::Zai => return None,
+        ProviderId::OpenRouter => return None,
     };
     Some(id.to_string())
 }
@@ -225,6 +234,7 @@ fn demo_source(provider: ProviderId) -> String {
         ProviderId::Kimi => "API Key".to_string(),
         ProviderId::Antigravity => "OAuth".to_string(),
         ProviderId::OpenCodeGo => "API Key".to_string(),
+        ProviderId::OpenRouter => "API Key".to_string(),
         ProviderId::Zai => "API Key".to_string(),
     }
 }
@@ -420,6 +430,18 @@ fn demo_runtime_accounts(provider: ProviderId) -> Vec<ProviderAccountRuntimeStat
                 snapshot: snapshot_zai_primary(),
             },
         )],
+        ProviderId::OpenRouter => vec![demo_account(
+            provider,
+            DemoAccount {
+                account_id: OPENROUTER_PRIMARY_ID,
+                label: "OpenRouter",
+                last_success_at: now - Duration::minutes(2),
+                health: ProviderHealth::Ok,
+                auth_state: AuthState::Ready,
+                error: None,
+                snapshot: snapshot_openrouter(),
+            },
+        )],
     }
 }
 
@@ -479,15 +501,27 @@ fn codex_demo_windows(
 }
 
 fn demo_tokens_by_day() -> Vec<crate::model::DayTokenUsage> {
-    vec![
-        crate::model::DayTokenUsage { date: "2026-03-21".into(), day_label: "Sun".into(), token_count: 8_420, is_today: false },
-        crate::model::DayTokenUsage { date: "2026-03-22".into(), day_label: "Mon".into(), token_count: 19_150, is_today: false },
-        crate::model::DayTokenUsage { date: "2026-03-23".into(), day_label: "Tue".into(), token_count: 14_890, is_today: false },
-        crate::model::DayTokenUsage { date: "2026-03-24".into(), day_label: "Wed".into(), token_count: 27_400, is_today: false },
-        crate::model::DayTokenUsage { date: "2026-03-25".into(), day_label: "Thu".into(), token_count: 22_100, is_today: false },
-        crate::model::DayTokenUsage { date: "2026-03-26".into(), day_label: "Fri".into(), token_count: 31_250, is_today: false },
-        crate::model::DayTokenUsage { date: "2026-03-27".into(), day_label: "Today".into(), token_count: 18_600, is_today: true },
-    ]
+    use chrono::{Duration, Local};
+    let today = Local::now().date_naive();
+    let counts = [8_420, 19_150, 14_890, 27_400, 22_100, 31_250, 18_600];
+    let mut result = Vec::with_capacity(7);
+    for i in (0..7).rev() {
+        let date = today - Duration::days(i);
+        let is_today = i == 0;
+        let day_label = if is_today {
+            "Today".to_string()
+        } else {
+            date.format("%a").to_string()
+        };
+        let token_count = counts[(6 - i) as usize];
+        result.push(crate::model::DayTokenUsage {
+            date: date.format("%Y-%m-%d").to_string(),
+            day_label,
+            token_count,
+            is_today,
+        });
+    }
+    result
 }
 
 fn demo_tokens_by_model(provider: ProviderId) -> Vec<crate::model::ModelTokenUsage> {
@@ -897,6 +931,18 @@ fn demo_grok_accounts() -> Vec<ManagedGrokAccountConfig> {
     }]
 }
 
+fn demo_openrouter_accounts() -> Vec<ManagedOpenRouterAccountConfig> {
+    let now = demo_timestamp();
+    vec![ManagedOpenRouterAccountConfig {
+        id: OPENROUTER_PRIMARY_ID.to_string(),
+        label: "OpenRouter".to_string(),
+        api_key_source: "Demo".to_string(),
+        created_at: now,
+        updated_at: now,
+        last_authenticated_at: Some(now),
+    }]
+}
+
 fn demo_zai_accounts() -> Vec<ManagedZaiAccountConfig> {
     let now = demo_timestamp();
     vec![ManagedZaiAccountConfig {
@@ -1113,6 +1159,41 @@ fn snapshot_grok() -> UsageSnapshot {
         },
         tokens_by_day: demo_tokens_by_day(),
         tokens_by_model: demo_tokens_by_model(ProviderId::Grok),
+    }
+}
+
+fn snapshot_openrouter() -> UsageSnapshot {
+    let now = Utc::now();
+    let window = |label: &str, used_percent: f32, seconds: i64, spend: f64| UsageWindow {
+        label: label.to_string(),
+        used_percent,
+        reset_at: None,
+        window_seconds: Some(seconds),
+        reset_description: Some(format!("${spend:.2}")),
+        group: None,
+    };
+    UsageSnapshot {
+        provider: ProviderId::OpenRouter,
+        source: "API Key".to_string(),
+        updated_at: now,
+        headline: UsageHeadline(0),
+        windows: vec![
+            window("Session", 18.0, 24 * 60 * 60, 3.42),
+            window("Weekly", 57.0, 7 * 24 * 60 * 60, 20.61),
+        ],
+        provider_cost: None,
+        extra_usage: None,
+        identity: ProviderIdentity {
+            email: None,
+            account_id: None,
+            plan: Some("$15.58 balance".to_string()),
+            display_name: Some("Demo key".to_string()),
+        },
+        tokens_by_day: demo_tokens_by_day(),
+        tokens_by_model: vec![
+            crate::model::ModelTokenUsage { model_name: "google/gemini-3.8-flash".into(), token_count: 96_300 },
+            crate::model::ModelTokenUsage { model_name: "anthropic/claude-sonnet-5".into(), token_count: 34_900 },
+        ],
     }
 }
 
@@ -1443,6 +1524,7 @@ mod tests {
         assert_eq!(config.antigravity_managed_accounts.len(), 2);
         assert_eq!(config.opencode_go_managed_accounts.len(), 1);
         assert_eq!(config.zai_managed_accounts.len(), 1);
+        assert_eq!(config.openrouter_managed_accounts.len(), 1);
         assert_eq!(config.selected_codex_account_ids.len(), 1);
         assert_eq!(config.selected_claude_account_ids.len(), 1);
         assert_eq!(config.selected_cursor_account_ids.len(), 1);
@@ -1539,6 +1621,9 @@ mod tests {
                     .map(|a| &a.id)
                     .collect(),
                 ProviderId::Grok => config.grok_managed_accounts.iter().map(|a| &a.id).collect(),
+                ProviderId::OpenRouter => {
+                    config.openrouter_managed_accounts.iter().map(|a| &a.id).collect()
+                }
                 ProviderId::Zai => config.zai_managed_accounts.iter().map(|a| &a.id).collect(),
             };
             for id in selected {

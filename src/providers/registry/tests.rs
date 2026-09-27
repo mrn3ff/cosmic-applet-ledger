@@ -85,6 +85,23 @@ fn grok_provider_registered_and_discovers_accounts() {
 }
 
 #[test]
+fn openrouter_provider_registered_as_managed_key_provider() {
+    assert_eq!(
+        login_kind(ProviderId::OpenRouter),
+        ProviderLoginKind::OpenRouter
+    );
+    assert!(!supports_opencode_import(ProviderId::OpenRouter));
+    assert_eq!(
+        selection_required_message(ProviderId::OpenRouter),
+        Some("Select".to_string())
+    );
+    assert_eq!(
+        system_active_account_id(ProviderId::OpenRouter, &Config::default()),
+        None
+    );
+}
+
+#[test]
 fn zai_provider_registered_as_managed_key_provider() {
     assert_eq!(login_kind(ProviderId::Zai), ProviderLoginKind::Zai);
     assert!(!supports_opencode_import(ProviderId::Zai));

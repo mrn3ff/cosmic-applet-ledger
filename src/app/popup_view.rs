@@ -58,6 +58,7 @@ pub struct ProviderLoginStates<'a> {
     pub antigravity: Option<&'a AntigravityLoginState>,
     pub opencode_go: Option<&'a crate::providers::opencode_go::login::OpenCodeGoLoginState>,
     pub grok: Option<&'a crate::providers::grok::GrokLoginState>,
+    pub openrouter: Option<&'a crate::providers::openrouter::login::OpenRouterLoginState>,
     pub zai: Option<&'a ZaiLoginState>,
 }
 

@@ -228,10 +228,11 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
 
     if let Some(session) = session_window {
         let pct = session.used_percent.clamp(0.0, 100.0);
+        let right_label = window_value_label(snapshot.provider, session);
         let header_row = row![
             widget::text("Session").size(14),
             cosmic::iced::widget::Space::new().width(Length::Fill),
-            widget::text(format!("{:.0}%", pct)).size(13),
+            widget::text(right_label.clone()).size(13),
         ]
         .align_y(Alignment::Center)
         .width(Length::Fill);
@@ -239,7 +240,7 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
         let bar = usage_progress_bar(usage_display::UsageMeter {
             fill_percent: pct,
             marker_percent: None,
-            tooltip: format!("Session: {:.0}%", pct),
+            tooltip: format!("Session: {right_label}"),
         });
 
         meters_col = meters_col.push(
@@ -249,10 +250,11 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
 
     if let Some(weekly) = weekly_window {
         let pct = weekly.used_percent.clamp(0.0, 100.0);
+        let right_label = window_value_label(snapshot.provider, weekly);
         let header_row = row![
             widget::text("Weekly").size(14),
             cosmic::iced::widget::Space::new().width(Length::Fill),
-            widget::text(format!("{:.0}%", pct)).size(13),
+            widget::text(right_label.clone()).size(13),
         ]
         .align_y(Alignment::Center)
         .width(Length::Fill);
@@ -260,7 +262,7 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
         let bar = usage_progress_bar(usage_display::UsageMeter {
             fill_percent: pct,
             marker_percent: None,
-            tooltip: format!("Weekly: {:.0}%", pct),
+            tooltip: format!("Weekly: {right_label}"),
         });
 
         let mut weekly_col = column![header_row, bar].spacing(6).width(Length::Fill);
@@ -328,6 +330,18 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
     .into()
 }
 
+/// Right-hand value for a limits row. Spend-based providers put a formatted
+/// amount in `reset_description`; everyone else uses it for reset metadata
+/// (often an RFC3339 timestamp), so they get the percentage.
+fn window_value_label(provider: ProviderId, window: &UsageWindow) -> String {
+    if provider == ProviderId::OpenRouter
+        && let Some(amount) = &window.reset_description
+    {
+        return amount.clone();
+    }
+    format!("{:.0}%", window.used_percent.clamp(0.0, 100.0))
+}
+
 fn find_session_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
     windows.iter().find(|w| {
         let label = w.label.to_lowercase();
@@ -356,22 +370,53 @@ fn find_weekly_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow>
 }
 
 fn ensure_seven_days(days: &[crate::model::DayTokenUsage]) -> Vec<crate::model::DayTokenUsage> {
-    if !days.is_empty() {
-        return days.to_vec();
+    use chrono::{Duration, Local};
+    use std::collections::HashMap;
+
+    let today = Local::now().date_naive();
+    let mut day_map: HashMap<String, u64> = HashMap::new();
+    for d in days {
+        if !d.date.is_empty() {
+            day_map.insert(d.date.clone(), d.token_count);
+        }
     }
-    vec![
-        crate::model::DayTokenUsage { date: String::new(), day_label: "Sun".into(), token_count: 0, is_today: false },
-        crate::model::DayTokenUsage { date: String::new(), day_label: "Mon".into(), token_count: 0, is_today: false },
-        crate::model::DayTokenUsage { date: String::new(), day_label: "Tue".into(), token_count: 0, is_today: false },
-        crate::model::DayTokenUsage { date: String::new(), day_label: "Wed".into(), token_count: 0, is_today: false },
-        crate::model::DayTokenUsage { date: String::new(), day_label: "Thu".into(), token_count: 0, is_today: false },
-        crate::model::DayTokenUsage { date: String::new(), day_label: "Fri".into(), token_count: 0, is_today: false },
-        crate::model::DayTokenUsage { date: String::new(), day_label: "Today".into(), token_count: 0, is_today: true },
-    ]
+
+    let mut result = Vec::with_capacity(7);
+    for i in (0..7).rev() {
+        let date = today - Duration::days(i);
+        let date_str = date.format("%Y-%m-%d").to_string();
+        let is_today = i == 0;
+        let day_label = if is_today {
+            "Today".to_string()
+        } else {
+            date.format("%a").to_string()
+        };
+        let token_count = day_map.get(&date_str).copied().unwrap_or(0);
+        result.push(crate::model::DayTokenUsage {
+            date: date_str,
+            day_label,
+            token_count,
+            is_today,
+        });
+    }
+
+    result
 }
 
 fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'static, Message> {
-    let peak = days.iter().map(|d| d.token_count).max().unwrap_or(1).max(1);
+    let raw_max = days.iter().map(|d| d.token_count).max().unwrap_or(0);
+    let scale_max = if raw_max == 0 {
+        1_000_000
+    } else if raw_max < 1_000_000 {
+        1_000_000
+    } else if raw_max < 100_000_000 {
+        100_000_000
+    } else if raw_max < 500_000_000 {
+        500_000_000
+    } else {
+        1_000_000_000
+    };
+
     let section_label = container(widget::text("TOKENS BY DAY").size(11))
         .style(|_| widget::container::Style {
             text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
@@ -381,7 +426,7 @@ fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'stati
     let mut day_items = column![].spacing(8).width(Length::Fill);
 
     for day in days {
-        let pct = (day.token_count as f32 / peak as f32) * 100.0;
+        let pct = (day.token_count as f64 / scale_max as f64 * 100.0).clamp(0.0, 100.0) as f32;
         let is_today = day.is_today;
 
         let label_color = if is_today {
@@ -440,7 +485,19 @@ fn tokens_by_day_section(days: &[crate::model::DayTokenUsage]) -> Element<'stati
 }
 
 fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<'static, Message> {
-    let peak = models.iter().map(|m| m.token_count).max().unwrap_or(1).max(1);
+    let raw_max = models.iter().map(|m| m.token_count).max().unwrap_or(0);
+    let scale_max = if raw_max == 0 {
+        1_000_000
+    } else if raw_max < 1_000_000 {
+        1_000_000
+    } else if raw_max < 100_000_000 {
+        100_000_000
+    } else if raw_max < 500_000_000 {
+        500_000_000
+    } else {
+        1_000_000_000
+    };
+
     let section_label = container(widget::text("TOKENS BY MODEL").size(11))
         .style(|_| widget::container::Style {
             text_color: Some(Color::from_rgba(1.0, 1.0, 1.0, 0.45)),
@@ -450,7 +507,7 @@ fn tokens_by_model_section(models: &[crate::model::ModelTokenUsage]) -> Element<
     let mut model_items = column![].spacing(8).width(Length::Fill);
 
     for model in models {
-        let pct = (model.token_count as f32 / peak as f32).clamp(0.0, 100.0);
+        let pct = (model.token_count as f64 / scale_max as f64 * 100.0).clamp(0.0, 100.0) as f32;
         let fill = (pct * 10.0).round() as u16;
         let empty = 1000 - fill;
 

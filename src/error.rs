@@ -79,6 +79,12 @@ impl From<OpenCodeGoError> for AppError {
     }
 }
 
+impl From<OpenRouterError> for AppError {
+    fn from(value: OpenRouterError) -> Self {
+        Self::Provider(ProviderError::OpenRouter(value))
+    }
+}
+
 impl From<GrokError> for AppError {
     fn from(value: GrokError) -> Self {
         Self::Provider(ProviderError::Grok(value))
@@ -174,6 +180,8 @@ pub enum ProviderError {
     OpenCodeGo(#[from] OpenCodeGoError),
     #[error(transparent)]
     Grok(#[from] GrokError),
+    #[error(transparent)]
+    OpenRouter(#[from] OpenRouterError),
 }
 
 impl ProviderError {
@@ -191,6 +199,7 @@ impl ProviderError {
             Self::Antigravity(error) => error.is_network_unavailable(),
             Self::OpenCodeGo(error) => error.is_network_unavailable(),
             Self::Grok(error) => error.is_network_unavailable(),
+            Self::OpenRouter(error) => error.is_network_unavailable(),
         }
     }
 
@@ -208,6 +217,7 @@ impl ProviderError {
             Self::Antigravity(error) => error.requires_user_action(),
             Self::OpenCodeGo(error) => error.requires_user_action(),
             Self::Grok(error) => error.requires_user_action(),
+            Self::OpenRouter(error) => error.requires_user_action(),
         }
     }
 
@@ -225,6 +235,7 @@ impl ProviderError {
             Self::Antigravity(error) => error.is_transient(),
             Self::OpenCodeGo(error) => error.is_transient(),
             Self::Grok(error) => error.is_transient(),
+            Self::OpenRouter(error) => error.is_transient(),
         }
     }
 }
@@ -882,6 +893,46 @@ impl OpenCodeGoError {
             Self::UsageRequest(source) => request_could_not_reach_network(source),
             Self::UsageHttp { status } => *status >= 500,
             _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum OpenRouterError {
+    #[error("OpenRouter login required")]
+    LoginRequired,
+    #[error("OpenRouter API key is invalid")]
+    InvalidApiKey,
+    #[error("OpenRouter request failed")]
+    UsageRequest(#[source] reqwest::Error),
+    #[error("OpenRouter endpoint returned HTTP {status}")]
+    UsageHttp { status: u16 },
+    #[error("failed to decode OpenRouter response")]
+    DecodeUsage(#[source] serde_json::Error),
+    #[error("OpenRouter response envelope is invalid")]
+    InvalidEnvelope,
+    #[error("Rate limited by OpenRouter — will retry automatically")]
+    RateLimited { retry_after_secs: Option<u64> },
+}
+
+impl OpenRouterError {
+    #[must_use]
+    pub fn is_network_unavailable(&self) -> bool {
+        matches!(self, Self::UsageRequest(source) if request_could_not_reach_network(source))
+    }
+
+    #[must_use]
+    pub fn requires_user_action(&self) -> bool {
+        matches!(self, Self::LoginRequired | Self::InvalidApiKey)
+    }
+
+    #[must_use]
+    pub fn is_transient(&self) -> bool {
+        match self {
+            Self::RateLimited { .. } => true,
+            Self::UsageRequest(source) => request_could_not_reach_network(source),
+            Self::UsageHttp { status } => matches!(*status, 500 | 502 | 503 | 504),
+            Self::LoginRequired | Self::InvalidApiKey | Self::DecodeUsage(_) | Self::InvalidEnvelope => false,
         }
     }
 }

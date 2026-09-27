@@ -581,6 +581,7 @@ pub(super) fn popup_route_label(route: PopupRoute) -> &'static str {
             ProviderId::Antigravity => "manage_accounts_antigravity",
             ProviderId::OpenCodeGo => "manage_accounts_opencode_go",
             ProviderId::Grok => "manage_accounts_grok",
+            ProviderId::OpenRouter => "manage_accounts_openrouter",
         },
         PopupRoute::About => "about",
     }

@@ -51,6 +51,8 @@ pub(super) fn test_app() -> AppModel {
         opencode_go_login_handle: None,
         grok_login: None,
         grok_login_handle: None,
+        openrouter_login: None,
+        openrouter_login_handle: None,
         zai_login: None,
         zai_login_handle: None,
     }

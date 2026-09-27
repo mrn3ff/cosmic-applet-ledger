@@ -5,13 +5,17 @@ use super::super::super::{
     account_import_button, fl, row, widget,
 };
 use crate::app::login::{
-    KimiLoginFlow, LoginFlow, MinimaxLoginFlow, OpenCodeGoLoginFlow, ZaiLoginFlow,
+    KimiLoginFlow, LoginFlow, MinimaxLoginFlow, OpenCodeGoLoginFlow, OpenRouterLoginFlow,
+    ZaiLoginFlow,
 };
 use crate::providers::grok::{GrokLoginState, GrokLoginStatus};
 use crate::providers::kimi::login::{KimiLoginEvent, KimiLoginState, KimiLoginStatus};
 use crate::providers::minimax::{MinimaxLoginEvent, MinimaxLoginState, MinimaxLoginStatus};
 use crate::providers::opencode_go::login::{
     OpenCodeGoLoginEvent, OpenCodeGoLoginState, OpenCodeGoLoginStatus,
+};
+use crate::providers::openrouter::{
+    OpenRouterLoginEvent, OpenRouterLoginState, OpenRouterLoginStatus,
 };
 use crate::providers::zai::{ZaiLoginEvent, ZaiLoginState, ZaiLoginStatus};
 
@@ -21,6 +25,10 @@ fn minimax_login_message(event: MinimaxLoginEvent) -> Message {
 
 fn zai_login_message(event: ZaiLoginEvent) -> Message {
     ZaiLoginFlow::wrap_event(event)
+}
+
+fn openrouter_login_message(event: OpenRouterLoginEvent) -> Message {
+    OpenRouterLoginFlow::wrap_event(event)
 }
 
 fn kimi_login_message(event: KimiLoginEvent) -> Message {
@@ -568,6 +576,75 @@ fn minimax_login_status(login: &MinimaxLoginState) -> String {
             .clone()
             .unwrap_or_else(|| fl!("minimax-login-failed")),
     }
+}
+
+pub(super) fn openrouter_login_controls(
+    login: Option<&OpenRouterLoginState>,
+    enabled: bool,
+) -> Element<'_, Message> {
+    let Some(login) = login else {
+        return account_add_button(
+            fl!("account-add"),
+            enabled.then_some(Message::StartLogin(crate::model::ProviderId::OpenRouter)),
+        );
+    };
+    let status = match login.status {
+        OpenRouterLoginStatus::Editing => "Configure OpenRouter Account",
+        OpenRouterLoginStatus::Failed => "OpenRouter Account Configuration Failed",
+    };
+    let mut content = cosmic::iced::widget::column![widget::text(status).size(13)]
+        .spacing(10)
+        .width(Length::Fill);
+    if let Some(error) = &login.error {
+        content = content.push(widget::text(error).size(13));
+    }
+    if login.status == OpenRouterLoginStatus::Editing {
+        content = content.push(openrouter_login_fields(login)).push(
+            row![
+                widget::button::standard(fl!("account-add"))
+                    .on_press_maybe(enabled.then_some(openrouter_login_message(OpenRouterLoginEvent::Saved))),
+                widget::button::text(fl!("account-cancel")).on_press_maybe(
+                    enabled.then_some(Message::CancelLogin(crate::model::ProviderId::OpenRouter))
+                ),
+            ]
+            .spacing(8),
+        );
+    } else {
+        content = content.push(
+            row![
+                widget::button::text(fl!("account-add-another")).on_press_maybe(
+                    enabled.then_some(Message::StartLogin(crate::model::ProviderId::OpenRouter))
+                ),
+                widget::button::text(fl!("account-dismiss")).on_press_maybe(
+                    enabled.then_some(Message::CancelLogin(crate::model::ProviderId::OpenRouter))
+                ),
+            ]
+            .spacing(8),
+        );
+    }
+    content.into()
+}
+
+fn openrouter_login_fields(login: &OpenRouterLoginState) -> Element<'_, Message> {
+    cosmic::iced::widget::column![
+        widget::text("OpenRouter API Key").size(12),
+        widget::text_input::secure_input(
+            "sk-or-v1-...",
+            &login.api_key,
+            Some(openrouter_login_message(OpenRouterLoginEvent::ApiKeyVisibilityToggled)),
+            !login.api_key_visible,
+        )
+        .on_input(|api_key| openrouter_login_message(OpenRouterLoginEvent::ApiKeyChanged(api_key)))
+        .on_submit(|_| openrouter_login_message(OpenRouterLoginEvent::Saved))
+        .width(Length::Fill),
+        widget::text(fl!("account-label")).size(12),
+        widget::text_input(fl!("account-label"), &login.label)
+            .on_input(|label| openrouter_login_message(OpenRouterLoginEvent::LabelChanged(label)))
+            .width(Length::Fill),
+    ]
+    .spacing(10)
+    .width(Length::Fill)
+    .into()
 }
 
 pub(super) fn zai_login_controls(
