@@ -5,10 +5,44 @@ All notable changes to Ledger are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-27
+
+### Added
+- OpenRouter provider (API key). Shows today's and this week's spend,
+  remaining credit balance, tokens by day (including today) and tokens by
+  model. Management keys report account-wide spend across all keys.
+- TOKENS BY DAY (last seven days) and TOKENS BY MODEL sections in the
+  provider detail view. Populated for Claude and OpenRouter.
+- Claude token stats read from Claude Code's local session transcripts
+  (`~/.claude/projects`, or `$CLAUDE_CONFIG_DIR`).
+- "Icon only" panel icon style.
+- Ledger icon set: app, symbolic, lockup and web icons.
+- OpenRouter account in demo mode (`LEDGER_DEMO=1`).
+
+### Changed
+- Redesigned the popup, settings, preferences and account screens with a
+  flat, minimalist look.
+- Providers are listed alphabetically in the applet and demo mode, and in
+  the code.
+- Default refresh interval lowered from 5 minutes to 10 seconds.
+- Token chart bars scale against fixed token tiers instead of the busiest
+  day, so bars are comparable between refreshes.
+
+### Fixed
+- Providers that report a single limit window (e.g. Grok) no longer show
+  it as both Session and Weekly.
+- TOKENS BY DAY is hidden for providers that report no token data instead
+  of showing seven empty bars.
+- The detail view explains when a provider is detected but has no
+  account, or needs a login, instead of showing nothing.
+- The test suite compiles again after the token usage fields were added.
+
 ## [0.1.0] - 2026-09-26
 
 ### Added
-- Forked from [YapCap](https://github.com/TopiCsarno/yapcap) v0.6.0.
+- Forked from [YapCap](https://github.com/TopiCsarno/yapcap) `main` after
+  v0.6.0, including upstream work not yet released there: the Grok and
+  Z.AI Coding Plan providers and a Polish translation.
 - Rebranded applet as Ledger (`cosmic-applet-ledger`).
 - Cleaned metadata, D-Bus IDs, and app registration for COSMIC.
 

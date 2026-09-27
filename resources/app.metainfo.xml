@@ -58,6 +58,18 @@
     <keyword>Applet</keyword>
   </keywords>
   <releases>
+    <release type="stable" version="0.2.0" date="2026-09-27">
+      <description>
+        <p>Adds the OpenRouter provider and token usage charts, and redesigns the applet.</p>
+        <ul>
+          <li>New OpenRouter provider: daily and weekly spend, credit balance, and tokens by day and model</li>
+          <li>Tokens by day and by model for Claude and OpenRouter</li>
+          <li>Flat, minimalist redesign of the popup and settings</li>
+          <li>Providers are listed alphabetically</li>
+          <li>Grok's weekly limit is no longer shown twice</li>
+        </ul>
+      </description>
+    </release>
     <release type="stable" version="0.1.0" date="2026-09-26">
       <description>
         <p>Initial release of Ledger for the COSMIC desktop.</p>
