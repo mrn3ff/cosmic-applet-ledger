@@ -8,74 +8,134 @@
 <br>
 <br>
 
-**A flat, minimalist Pop!_OS COSMIC panel applet for tracking AI usage, rate limits, and tokens across coding agents and providers.**
+**A flat, minimalist COSMIC panel applet for tracking AI usage, rate limits, and tokens across coding agents and providers.**
 
-*Forked from YapCap by Topi Csarno, redesigned with a minimalist aesthetic inspired by Omarchy.*
+[![CI](https://github.com/mrn3ff/cosmic-applet-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/mrn3ff/cosmic-applet-ledger/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/mrn3ff/cosmic-applet-ledger)](https://github.com/mrn3ff/cosmic-applet-ledger/releases/latest)
+[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSE)
+
+*Forked from [YapCap](https://github.com/TopiCsarno/yapcap) by Topi Csarno, redesigned with a minimalist aesthetic inspired by Omarchy.*
 
 </div>
 
 ---
 
+Ledger sits in the COSMIC panel and shows how much of your AI quota you've used — session and weekly limits, spend, and token usage — for every provider you connect. It talks to provider APIs directly with accounts you add in Ledger. No telemetry, no cloud sync, no third-party servers.
+
 ## Features
 
-- **Native COSMIC Integration:** Docks directly into the Pop!_OS COSMIC top panel or dock.
-- **Top-Down Dashboard:**
-  - **Hero:** Current provider, active plan tier, inline provider switcher (`...`), settings, and manual sync.
-  - **LIMITS:** Session and Weekly usage percentages, full-width status bars, and weekly reset countdowns.
-  - **TOKENS BY DAY:** 7-day token burn breakdown (`Sun` through `Today`) with stark white highlight for today.
-  - **TOKENS BY MODEL:** Proportional horizontal sliders displaying model names and token volumes directly inside the bars.
-- **Unified Across Providers:** Consistent layout across all providers.
-- **Local & Private:** Communicates directly with local transcripts and provider APIs using secure OS keychain credentials. No third-party servers, telemetry, or external sync.
-- **Minimalist Settings:** Streamlined provider enablement toggles and account configuration with zero UI fluff.
+- **One layout for every provider.** Each provider's page shows a **LIMITS** card with its session and weekly windows and a reset countdown.
+- **Token charts.** **TOKENS BY DAY** covers the last seven days (with today highlighted) and **TOKENS BY MODEL** ranks your most-used models. Available for Claude and OpenRouter.
+- **Twelve providers** — see [Providers](#providers).
+- **Multiple accounts per provider**, with an in-app sign-in flow for each.
+- **Automatic detection.** Providers found on your machine are enabled for you; the rest can be switched on in Settings.
+- **Update notices.** Ledger checks GitHub for a new release on startup and shows it on the About page. It never downloads or installs anything itself.
 
----
+## Providers
 
-## Prerequisites
+| Provider | Sign in with | Shows |
+| --- | --- | --- |
+| Antigravity | Google (browser) | Model-group quota (5-hour and weekly) |
+| Claude | Claude (browser, paste the code back) | Session and weekly limits; tokens by day and model from Claude Code |
+| Codex | OpenAI (browser), or import from OpenCode | 5-hour and weekly limits |
+| Copilot | GitHub device login, or import from OpenCode | Chat/completions (Free) or premium requests (paid) |
+| Cursor | Scans the Cursor IDE's local sign-in | Total and API usage |
+| Gemini | Google (browser) — enable manually | Pro, Flash and Lite quota |
+| Grok | xAI (browser), or import from the Grok CLI | Weekly credit usage |
+| Kimi | API key | Weekly and rate-limit windows |
+| Minimax | API key | 5-hour and weekly windows |
+| OpenCode Go | API key | 5-hour and weekly windows |
+| OpenRouter | API key | Daily and weekly spend, credit balance, tokens by day and model |
+| Z.AI Coding Plan | API key | 5-hour and weekly windows |
 
-Ensure you have Rust (1.85+) and the required system development libraries installed:
+API-key forms for Kimi, Minimax, OpenCode Go and Z.AI can be prefilled from OpenCode's `~/.local/share/opencode/auth.json`. Ledger only reads that file when you add an account, and never writes to it.
+
+**OpenRouter:** use a management key to see spend across all of your keys and today's token usage. A regular API key only reports its own spend, and token history stops at yesterday.
+
+## Install
+
+### From a release
+
+Download a package from the [latest release](https://github.com/mrn3ff/cosmic-applet-ledger/releases/latest).
 
 ```bash
-# Install Rust toolchain
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source "$HOME/.cargo/env"
+# Debian, Ubuntu, Pop!_OS
+sudo apt install ./cosmic-applet-ledger_*_amd64.deb
 
-# Install COSMIC build dependencies
-sudo apt update
-sudo apt install -y build-essential pkg-config libxkbcommon-dev libwayland-dev libfontconfig1-dev libssl-dev just
+# Fedora, openSUSE
+sudo rpm -i ./cosmic-applet-ledger-*.x86_64.rpm
 ```
 
----
+A `.tar.gz` with the prebuilt binary and resources is also attached to each release.
 
-## Build & Install
+### From source
 
-The build and installation are managed via `just`:
+You need Rust 1.88 or newer, `just`, and the COSMIC build dependencies:
 
 ```bash
-# Build the release binary
-just build-release
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# Install binary, desktop files, and dock directly into your COSMIC panel
+sudo apt install -y build-essential pkg-config just libssl-dev \
+  libxkbcommon-dev libwayland-dev libfontconfig1-dev libfreetype6-dev libexpat1-dev
+```
+
+Then build and install. `just install` installs under `~/.local` and adds Ledger to your panel:
+
+```bash
+git clone https://github.com/mrn3ff/cosmic-applet-ledger
+cd cosmic-applet-ledger
 just install
 ```
 
-**Run in a standalone test window with demo data:**
+Remove it again with `just uninstall`.
+
+## Getting started
+
+1. If you installed a package, add Ledger to the panel: **COSMIC Settings → Desktop → Panel → Configure panel applets**, then add **Ledger**.
+2. Click the panel icon to open Ledger. Providers detected on your machine already have a tab.
+3. Open **Settings** (the gear icon). Under **PROVIDERS**, switch on any provider you want that wasn't detected.
+4. Click a provider's name to open its account page and add an account.
+
+Once an account is connected, the provider's tab shows its limits and usage. Use the `…` button to switch providers and the refresh button to update right away.
+
+### Settings
+
+- **Panel Status Bars** — show usage bars in the panel, or just the Ledger icon.
+- **Refresh Interval** — how often Ledger polls provider APIs: 1, 5 (default), 15 or 30 minutes.
+- **Providers** — turn providers on or off and manage their accounts.
+
+## Where your data lives
+
+| Path | Contents |
+| --- | --- |
+| `~/.config/cosmic/io.github.mrn3ff.cosmic-applet-ledger/` | Settings, enabled providers and account list |
+| `~/.local/state/cosmic-applet-ledger/<provider>-accounts/` | Ledger's copy of each account's credentials |
+| `~/.local/state/cosmic-applet-ledger/logs/ledger.log.YYYY-MM-DD` | Daily logs |
+
+Credentials are stored as files readable only by you (`0600`, in `0700` folders), not in a system keyring. Removing an account in Ledger deletes only Ledger's copy; your provider account and other tools' sign-ins are untouched.
+
+Ledger also reads, but never changes:
+
+- `~/.claude/projects/` — Claude Code session logs, for Claude's token charts
+- `~/.grok/auth.json` — only when you choose to import from the Grok CLI
+- `~/.local/share/opencode/auth.json` — only to prefill account forms
+- The Cursor IDE's local sign-in, when you scan for Cursor accounts
+
+Logs never contain credentials or tokens. If you find one that does, please [open an issue](https://github.com/mrn3ff/cosmic-applet-ledger/issues).
+
+## Development
 
 ```bash
-just run-demo
-# or
-env LEDGER_DEMO=1 cargo run
+just run-demo         # standalone window with demo accounts for every provider
+cargo test            # unit tests
 ```
 
-**Uninstall and remove from the panel:**
+CI runs `cargo fmt --check`, `cargo clippy -- -D warnings` and `cargo test` on every push; run them before opening a pull request. Pushing a `v*` tag builds the `.deb`, `.rpm` and tarball and publishes a GitHub release.
 
-```bash
-just uninstall
-```
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
----
+## License
 
-## License & Attribution
-
-This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](LICENSE) for details.
+Licensed under the Mozilla Public License 2.0 — see [LICENSE](LICENSE).
 
 *Original codebase and provider engine: YapCap © Topi Csarno.*
