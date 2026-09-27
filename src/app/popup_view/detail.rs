@@ -173,9 +173,11 @@ fn account_body_items<'a>(
         // 1. Session & Weekly Limits ONLY
         items.push(limits_section(snapshot));
 
-        // 2. TOKENS BY DAY
-        let days = ensure_seven_days(&snapshot.tokens_by_day);
-        items.push(tokens_by_day_section(&days));
+        // 2. TOKENS BY DAY (only for providers that report daily token data)
+        if !snapshot.tokens_by_day.is_empty() {
+            let days = ensure_seven_days(&snapshot.tokens_by_day);
+            items.push(tokens_by_day_section(&days));
+        }
 
         // 3. TOKENS BY MODEL
         if !snapshot.tokens_by_model.is_empty() {
@@ -223,8 +225,7 @@ fn limits_section(snapshot: &UsageSnapshot) -> Element<'static, Message> {
 
     let mut meters_col = column![].spacing(16).width(Length::Fill);
 
-    let session_window = find_session_window(&snapshot.windows);
-    let weekly_window = find_weekly_window(&snapshot.windows);
+    let (session_window, weekly_window) = limit_windows(&snapshot.windows);
 
     if let Some(session) = session_window {
         let pct = session.used_percent.clamp(0.0, 100.0);
@@ -342,11 +343,31 @@ fn window_value_label(provider: ProviderId, window: &UsageWindow) -> String {
     format!("{:.0}%", window.used_percent.clamp(0.0, 100.0))
 }
 
+/// Picks the Session and Weekly rows. The finders fall back loosely, so with a
+/// single window (e.g. Grok's weekly credit) both can land on the same one;
+/// it is then shown only in the row it actually describes.
+fn limit_windows(windows: &[UsageWindow]) -> (Option<&UsageWindow>, Option<&UsageWindow>) {
+    let session = find_session_window(windows);
+    let weekly = find_weekly_window(windows);
+    match (session, weekly) {
+        (Some(s), Some(w)) if std::ptr::eq(s, w) => {
+            if is_session_like(s) {
+                (Some(s), None)
+            } else {
+                (None, Some(w))
+            }
+        }
+        _ => (session, weekly),
+    }
+}
+
+fn is_session_like(w: &UsageWindow) -> bool {
+    let label = w.label.to_lowercase();
+    label.contains("session") || label.contains("5h") || label.contains("5 hour") || label.contains("five hour") || label == "chat" || w.window_seconds == Some(5 * 3600)
+}
+
 fn find_session_window<'a>(windows: &'a [UsageWindow]) -> Option<&'a UsageWindow> {
-    windows.iter().find(|w| {
-        let label = w.label.to_lowercase();
-        label.contains("session") || label.contains("5h") || label.contains("5 hour") || label.contains("five hour") || label == "chat" || w.window_seconds == Some(5 * 3600)
-    }).or_else(|| {
+    windows.iter().find(|w| is_session_like(w)).or_else(|| {
         windows.iter().find(|w| w.window_seconds.is_some_and(|s| s < 24 * 3600))
     }).or_else(|| windows.first())
 }
@@ -1533,6 +1554,44 @@ fn format_updated_label(last_success_at: chrono::DateTime<chrono::Utc>) -> Strin
 mod tests {
     use super::*;
     use crate::model::{AccountSelectionStatus, AuthState, ProviderHealth};
+
+    fn limit_window(label: &str, window_seconds: Option<i64>) -> UsageWindow {
+        UsageWindow {
+            label: label.to_string(),
+            used_percent: 40.0,
+            reset_at: None,
+            window_seconds,
+            reset_description: None,
+            group: None,
+        }
+    }
+
+    #[test]
+    fn single_weekly_window_is_not_repeated_as_session() {
+        let windows = vec![limit_window("Weekly", Some(7 * 24 * 3600))];
+        let (session, weekly) = limit_windows(&windows);
+        assert!(session.is_none());
+        assert_eq!(weekly.map(|w| w.label.as_str()), Some("Weekly"));
+    }
+
+    #[test]
+    fn single_session_window_is_not_repeated_as_weekly() {
+        let windows = vec![limit_window("Session", Some(5 * 3600))];
+        let (session, weekly) = limit_windows(&windows);
+        assert_eq!(session.map(|w| w.label.as_str()), Some("Session"));
+        assert!(weekly.is_none());
+    }
+
+    #[test]
+    fn session_and_weekly_windows_both_shown() {
+        let windows = vec![
+            limit_window("Session", Some(5 * 3600)),
+            limit_window("Weekly", Some(7 * 24 * 3600)),
+        ];
+        let (session, weekly) = limit_windows(&windows);
+        assert_eq!(session.map(|w| w.label.as_str()), Some("Session"));
+        assert_eq!(weekly.map(|w| w.label.as_str()), Some("Weekly"));
+    }
 
     #[test]
     fn zai_coding_plan_notice_only_for_mcp_only_usage() {
